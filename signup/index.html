@@ -19,7 +19,7 @@
 <body>
 
 ```
-<main class="auth-page">
+<main class="auth-container">
 
     <div class="auth-card">
 
@@ -121,7 +121,6 @@
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        // Prevent multiple signup requests.
         if (signingUp) {
             return;
         }
@@ -217,5 +216,7 @@
         }
     });
 </script>
+```
+
 </body>
 </html>
