@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Rip_Dead</title>
+    <link rel="stylesheet" href="../../css/auth.css">
+</head>
+<body>
+    <main class="auth-container">
+        <section class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-mark">RD</div>
+                <h1>Rip_Dead</h1>
+            </div>
+
+            <div class="auth-header">
+                <h2>Settings</h2>
+                <p>Manage your account.</p>
+            </div>
+
+            <div class="settings-section">
+                <h3>Account</h3>
+
+                <p id="email">
+                    Loading...
+                </p>
+
+                <a
+                    class="button-link"
+                    href="../account/"
+                >
+                    Edit Profile
+                </a>
+            </div>
+
+            <div class="settings-section danger-section">
+                <h3>Danger Zone</h3>
+
+                <p>
+                    Deleting your account permanently removes
+                    your profile and account data.
+                </p>
+
+                <button
+                    class="danger-button"
+                    id="delete-button"
+                    disabled
+                >
+                    Delete Account
+                </button>
+
+                <p class="setting-note">
+                    Account deletion will be enabled after
+                    the secure server-side deletion function
+                    is configured.
+                </p>
+            </div>
+
+            <button
+                class="secondary-button"
+                id="logout-button"
+            >
+                Log Out
+            </button>
+
+            <div class="account-links">
+                <a href="../account/">My Account</a>
+                <a href="../search/">Search</a>
+                <a href="../friends/">Friends</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/auth.js"></script>
+
+    <script>
+        async function init() {
+            const session =
+                await requireAuth();
+
+            if (!session) {
+                return;
+            }
+
+            document.getElementById("email").textContent =
+                session.user.email;
+        }
+
+        document
+            .getElementById("logout-button")
+            .addEventListener("click", signOut);
+
+        init();
+    </script>
+</body>
+</html>

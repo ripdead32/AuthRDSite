@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Rip_Dead</title>
+    <link rel="stylesheet" href="../../css/auth.css">
+</head>
+<body>
+    <main class="auth-container">
+        <section class="auth-card account-card">
+            <div class="auth-logo">
+                <div class="logo-mark">RD</div>
+                <h1>Rip_Dead</h1>
+            </div>
+
+            <div id="loading">
+                <p>Loading profile...</p>
+            </div>
+
+            <div id="profile-content" hidden>
+                <div class="account-avatar" id="avatar">
+                    ?
+                </div>
+
+                <h2 id="display-name">
+                    User
+                </h2>
+
+                <p class="username" id="username">
+                    @username
+                </p>
+
+                <span
+                    class="verified-badge"
+                    id="verified-badge"
+                    hidden
+                >
+                    ✓ Verified
+                </span>
+
+                <p
+                    class="profile-bio"
+                    id="bio"
+                ></p>
+
+                <div class="profile-stats">
+                    <span>
+                        <strong id="followers-count">0</strong>
+                        Followers
+                    </span>
+
+                    <span>
+                        <strong id="following-count">0</strong>
+                        Following
+                    </span>
+                </div>
+
+                <div id="actions">
+                    <button id="follow-button">
+                        Follow
+                    </button>
+
+                    <button
+                        class="secondary-button"
+                        id="friend-button"
+                    >
+                        Add Friend
+                    </button>
+                </div>
+
+                <p
+                    class="auth-message"
+                    id="message"
+                ></p>
+
+                <div class="account-links">
+                    <a href="../account/">My Account</a>
+                    <a href="../search/">Search</a>
+                    <a href="../friends/">Friends</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/auth.js"></script>
+
+    <script>
+        let session;
+        let profile;
+
+        async function loadProfile() {
+            session = await requireAuth();
+
+            if (!session) {
+                return;
+            }
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const username =
+                params.get("username");
+
+            if (username) {
+                const { data, error } =
+                    await window.supabaseClient
+                        .from("profiles")
+                        .select("*")
+                        .eq("username", username)
+                        .single();
+
+                if (error || !data) {
+                    document.getElementById("loading").textContent =
+                        "User not found.";
+                    return;
+                }
+
+                profile = data;
+            } else {
+                profile =
+                    await getProfile(session.user.id);
+            }
+
+            if (!profile) {
+                document.getElementById("loading").textContent =
+                    "Unable to load profile.";
+                return;
+            }
+
+            document.getElementById("loading").hidden = true;
+            document.getElementById("profile-content").hidden = false;
+
+            const avatar =
+                document.getElementById("avatar");
+
+            if (profile.avatar_url) {
+                avatar.innerHTML =
+                    `<img src="${profile.avatar_url}" alt="Profile picture">`;
+            } else {
+                avatar.textContent =
+                    getAvatarLetter(profile);
+            }
+
+            document.getElementById("display-name").textContent =
+                profile.display_name ||
+                profile.username ||
+                "Unnamed User";
+
+            document.getElementById("username").textContent =
+                profile.username
+                    ? "@" + profile.username
+                    : "";
+
+            document.getElementById("bio").textContent =
+                profile.bio || "";
+
+            document.getElementById("verified-badge").hidden =
+                !profile.is_verified;
+
+            if (profile.id === session.user.id) {
+                document.getElementById("actions").hidden = true;
+            } else {
+                await loadRelationshipState();
+                await loadCounts();
+            }
+        }
+
+        async function loadCounts() {
+            const { count: followers } =
+                await window.supabaseClient
+                    .from("follows")
+                    .select("*", {
+                        count: "exact",
+                        head: true
+                    })
+                    .eq("following_id", profile.id);
+
+            const { count: following } =
+                await window.supabaseClient
+                    .from("follows")
+                    .select("*", {
+                        count: "exact",
+                        head: true
+                    })
+                    .eq("follower_id", profile.id);
+
+            document.getElementById("followers-count").textContent =
+                followers || 0;
+
+            document.getElementById("following-count").textContent =
+                following || 0;
+        }
+
+        async function loadRelationshipState() {
+            const { data: follow } =
+                await window.supabaseClient
+                    .from("follows")
+                    .select("*")
+                    .eq("follower_id", session.user.id)
+                    .eq("following_id", profile.id)
+                    .maybeSingle();
+
+            document.getElementById("follow-button").textContent =
+                follow ? "Unfollow" : "Follow";
+
+            const { data: friendship } =
+                await window.supabaseClient
+                    .from("friendships")
+                    .select("*")
+                    .or(
+                        `and(requester_id.eq.${session.user.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${session.user.id})`
+                    )
+                    .maybeSingle();
+
+            const friendButton =
+                document.getElementById("friend-button");
+
+            if (!friendship) {
+                friendButton.textContent =
+                    "Add Friend";
+            } else if (
+                friendship.status === "accepted"
+            ) {
+                friendButton.textContent =
+                    "Friends";
+                friendButton.disabled = true;
+            } else if (
+                friendship.requester_id === session.user.id
+            ) {
+                friendButton.textContent =
+                    "Request Sent";
+                friendButton.disabled = true;
+            } else {
+                friendButton.textContent =
+                    "Accept Friend Request";
+            }
+        }
+
+        document
+            .getElementById("follow-button")
+            .addEventListener("click", async () => {
+                const button =
+                    document.getElementById("follow-button");
+
+                if (button.textContent === "Follow") {
+                    const { error } =
+                        await window.supabaseClient
+                            .from("follows")
+                            .insert({
+                                follower_id: session.user.id,
+                                following_id: profile.id
+                            });
+
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                } else {
+                    const { error } =
+                        await window.supabaseClient
+                            .from("follows")
+                            .delete()
+                            .eq(
+                                "follower_id",
+                                session.user.id
+                            )
+                            .eq(
+                                "following_id",
+                                profile.id
+                            );
+
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                }
+
+                await loadRelationshipState();
+                await loadCounts();
+            });
+
+        document
+            .getElementById("friend-button")
+            .addEventListener("click", async () => {
+                const button =
+                    document.getElementById("friend-button");
+
+                if (
+                    button.textContent === "Accept Friend Request"
+                ) {
+                    const { error } =
+                        await window.supabaseClient
+                            .from("friendships")
+                            .update({
+                                status: "accepted"
+                            })
+                            .eq(
+                                "requester_id",
+                                profile.id
+                            )
+                            .eq(
+                                "addressee_id",
+                                session.user.id
+                            );
+
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                } else {
+                    const { error } =
+                        await window.supabaseClient
+                            .from("friendships")
+                            .insert({
+                                requester_id: session.user.id,
+                                addressee_id: profile.id
+                            });
+
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                }
+
+                await loadRelationshipState();
+            });
+
+        loadProfile();
+    </script>
+</body>
+</html>
