@@ -10,6 +10,11 @@ window.supabaseClient = window.supabase.createClient(
     SUPABASE_KEY
 );
 
+
+/* =========================
+   AUTH
+========================= */
+
 async function getSession() {
     const { data, error } =
         await window.supabaseClient.auth.getSession();
@@ -21,6 +26,7 @@ async function getSession() {
 
     return data.session;
 }
+
 
 async function requireAuth() {
     const session = await getSession();
@@ -39,6 +45,25 @@ async function requireAuth() {
 
     return session;
 }
+
+
+async function signOut() {
+    const { error } =
+        await window.supabaseClient.auth.signOut();
+
+    if (error) {
+        console.error("Logout error:", error);
+        return false;
+    }
+
+    window.location.href = "../login/";
+    return true;
+}
+
+
+/* =========================
+   PROFILES
+========================= */
 
 async function getProfile(userId = null) {
     const session = await getSession();
@@ -64,6 +89,7 @@ async function getProfile(userId = null) {
     return data;
 }
 
+
 async function updateProfile(updates) {
     const session = await getSession();
 
@@ -86,21 +112,16 @@ async function updateProfile(updates) {
         console.error("Profile update error:", error);
     }
 
-    return { data, error };
+    return {
+        data,
+        error
+    };
 }
 
-async function signOut() {
-    const { error } =
-        await window.supabaseClient.auth.signOut();
 
-    if (error) {
-        console.error("Logout error:", error);
-        return false;
-    }
-
-    window.location.href = "../login/";
-    return true;
-}
+/* =========================
+   AVATARS
+========================= */
 
 function getAvatarLetter(profile) {
     const name =
@@ -111,21 +132,11 @@ function getAvatarLetter(profile) {
     return name.charAt(0).toUpperCase();
 }
 
+
 function getAvatarUrl(profile) {
     return profile?.avatar_url || null;
 }
 
-function setMessage(element, text, type = "") {
-    if (!element) {
-        return;
-    }
-
-    element.textContent = text;
-    element.className =
-        type
-            ? "auth-message " + type
-            : "auth-message";
-}
 
 function createAvatar(profile, className = "avatar") {
     const wrapper =
@@ -152,6 +163,29 @@ function createAvatar(profile, className = "avatar") {
     return wrapper;
 }
 
+
+/* =========================
+   MESSAGES
+========================= */
+
+function setMessage(element, text, type = "") {
+    if (!element) {
+        return;
+    }
+
+    element.textContent = text;
+
+    element.className =
+        type
+            ? "auth-message " + type
+            : "auth-message";
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
 async function initNavbar() {
     const session = await getSession();
 
@@ -169,61 +203,77 @@ async function initNavbar() {
         element.hidden = !session;
     });
 
+
+    /* Navbar account */
+
     const navbarUser =
         document.getElementById("navbar-user");
 
-    if (navbarUser && session) {
-        const profile =
-            await getProfile(session.user.id);
+    if (navbarUser) {
+        navbarUser.innerHTML = "";
 
-        if (profile) {
-            navbarUser.innerHTML = "";
+        if (session) {
+            const profile =
+                await getProfile(session.user.id);
 
-            const avatar =
-                createAvatar(
-                    profile,
-                    "navbar-avatar"
-                );
+            if (profile) {
+                const avatar =
+                    createAvatar(
+                        profile,
+                        "navbar-avatar"
+                    );
 
-            const name =
-                document.createElement("span");
+                const name =
+                    document.createElement("span");
 
-            name.textContent =
-                profile.display_name ||
-                profile.username ||
-                "Account";
+                name.textContent =
+                    profile.display_name ||
+                    profile.username ||
+                    "Account";
 
-            navbarUser.appendChild(avatar);
-            navbarUser.appendChild(name);
+                navbarUser.appendChild(avatar);
+                navbarUser.appendChild(name);
+            } else {
+                navbarUser.textContent =
+                    session.user.email;
+            }
         }
     }
+
+
+    /* Navbar logout */
 
     const logoutButton =
         document.getElementById("navbar-logout");
 
     if (logoutButton) {
-        logoutButton.addEventListener(
-            "click",
-            async () => {
-
-                logoutButton.disabled = true;
-                logoutButton.textContent =
-                    "Logging out...";
-
-                const success =
-                    await signOut();
-
-                if (!success) {
-                    logoutButton.disabled = false;
-                    logoutButton.textContent =
-                        "Log Out";
-                }
+        logoutButton.onclick = async () => {
+            if (logoutButton.disabled) {
+                return;
             }
-        );
+
+            logoutButton.disabled = true;
+            logoutButton.textContent =
+                "Logging out...";
+
+            const success =
+                await signOut();
+
+            if (!success) {
+                logoutButton.disabled = false;
+                logoutButton.textContent =
+                    "Log Out";
+            }
+        };
     }
 
     return session;
 }
+
+
+/* =========================
+   AUTH STATE
+========================= */
 
 window.supabaseClient.auth.onAuthStateChange(
     (event, session) => {
@@ -231,16 +281,33 @@ window.supabaseClient.auth.onAuthStateChange(
             "Auth event:",
             event
         );
+
+        if (session) {
+            console.log(
+                "Logged in as:",
+                session.user.email
+            );
+        }
     }
 );
 
+
+/* =========================
+   GLOBAL FUNCTIONS
+========================= */
+
 window.getSession = getSession;
 window.requireAuth = requireAuth;
+
 window.getProfile = getProfile;
 window.updateProfile = updateProfile;
+
 window.signOut = signOut;
+
 window.getAvatarLetter = getAvatarLetter;
 window.getAvatarUrl = getAvatarUrl;
-window.setMessage = setMessage;
 window.createAvatar = createAvatar;
+
+window.setMessage = setMessage;
+
 window.initNavbar = initNavbar;
