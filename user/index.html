@@ -1,37 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>User Profile - Rip_Dead ID</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="/css/auth.css">
+    <title>User Profile — Rip_Dead ID</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/auth.js"></script>
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
+
 </head>
 
 <body>
 
 <nav class="site-navbar">
+
     <div class="navbar-inner">
 
-        <a href="/" class="navbar-brand">
+        <a
+            href="/"
+            class="navbar-brand"
+        >
             Rip_Dead ID
         </a>
 
+
         <div class="navbar-links">
 
-            <a href="/">Home</a>
-            <a href="/search/" class="auth-only" hidden>Search</a>
-            <a href="/friends/" class="auth-only" hidden>Friends</a>
-            <a href="/settings/" class="auth-only" hidden>Settings</a>
-            <a href="/account/" class="auth-only" hidden>Account</a>
+            <a href="/">
+                Home
+            </a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden
+            >
+                Search
+            </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden
+            >
+                Friends
+            </a>
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden
+            >
+                Settings
+            </a>
+
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden
+            >
+                Account
+            </a>
+
+            <a
+                href="/login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
@@ -39,367 +88,678 @@
                 type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
 
         </div>
 
     </div>
+
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card">
+<main class="page page-small">
 
-        <div
-            id="profile-loading"
-            class="auth-message">
-            Loading profile...
-        </div>
+    <div
+        id="profile-loading"
+        class="message"
+    >
+        Loading profile...
+    </div>
 
-        <div
-            id="profile-error"
-            class="auth-message error"
-            hidden>
-        </div>
 
-        <div
-            id="profile-content"
-            hidden>
+    <div
+        id="profile-error"
+        class="message error"
+        hidden
+    ></div>
 
-            <div id="public-avatar"></div>
 
-            <div id="public-verification"></div>
+    <section
+        id="profile-card"
+        class="card"
+        hidden
+    >
 
-            <h1 id="public-display-name"></h1>
-
-            <p
-                id="public-username"
-                class="auth-subtitle">
-            </p>
-
-            <p id="public-bio"></p>
+        <div class="account-profile">
 
             <div
-                id="profile-actions"
-                class="auth-actions">
+                id="profile-avatar"
+                class="account-avatar empty"
+            ></div>
+
+
+            <div class="account-profile-info">
+
+                <div
+                    id="profile-name"
+                    class="account-name"
+                ></div>
+
+                <div
+                    id="profile-username"
+                    class="account-username"
+                ></div>
+
             </div>
 
         </div>
+
+
+        <div
+            id="profile-bio"
+            class="profile-bio"
+        ></div>
+
+
+        <div
+            id="profile-actions"
+            class="button-row"
+        ></div>
 
     </section>
 
 </main>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
+
+
 <script>
-let viewerSession = null;
-let viewedProfile = null;
-let friendship = null;
-let following = false;
 
-const loading =
-    document.getElementById(
-        "profile-loading"
-    );
+document.addEventListener("DOMContentLoaded", async () => {
 
-const errorElement =
-    document.getElementById(
-        "profile-error"
-    );
+    const loading =
+        document.getElementById("profile-loading");
 
-const content =
-    document.getElementById(
-        "profile-content"
-    );
+    const errorBox =
+        document.getElementById("profile-error");
 
-const avatar =
-    document.getElementById(
-        "public-avatar"
-    );
+    const card =
+        document.getElementById("profile-card");
 
-const displayName =
-    document.getElementById(
-        "public-display-name"
-    );
+    const avatar =
+        document.getElementById("profile-avatar");
 
-const username =
-    document.getElementById(
-        "public-username"
-    );
+    const name =
+        document.getElementById("profile-name");
 
-const verification =
-    document.getElementById(
-        "public-verification"
-    );
+    const username =
+        document.getElementById("profile-username");
 
-const bio =
-    document.getElementById(
-        "public-bio"
-    );
+    const bio =
+        document.getElementById("profile-bio");
 
-const actions =
-    document.getElementById(
-        "profile-actions"
-    );
+    const actions =
+        document.getElementById("profile-actions");
 
-function showError(text) {
 
-    loading.hidden = true;
-    content.hidden = true;
+    function showError(text) {
 
-    errorElement.textContent =
-        text;
+        loading.hidden = true;
+        card.hidden = true;
 
-    errorElement.hidden = false;
-}
+        errorBox.textContent = text;
+        errorBox.hidden = false;
 
-function getViewedUserId() {
-
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-    return params.get("id");
-}
-
-async function loadFriendship() {
-
-    if (!viewerSession) {
-        return null;
     }
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("friendships")
-            .select("*")
-            .or(
-                `and(requester_id.eq.${viewerSession.user.id},addressee_id.eq.${viewedProfile.id}),and(requester_id.eq.${viewedProfile.id},addressee_id.eq.${viewerSession.user.id})`
-            )
-            .limit(1);
 
-    if (error) {
+    function getViewedUserId() {
 
-        console.error(
-            "Friendship lookup error:",
-            error
-        );
-
-        return null;
-    }
-
-    return data &&
-        data.length > 0
-        ? data[0]
-        : null;
-}
-
-async function loadFollowing() {
-
-    if (!viewerSession) {
-        return false;
-    }
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("follows")
-            .select(
-                "follower_id, following_id"
-            )
-            .eq(
-                "follower_id",
-                viewerSession.user.id
-            )
-            .eq(
-                "following_id",
-                viewedProfile.id
-            )
-            .maybeSingle();
-
-    if (error) {
-
-        console.error(
-            "Follow lookup error:",
-            error
-        );
-
-        return false;
-    }
-
-    return !!data;
-}
-
-function renderActions() {
-
-    actions.innerHTML = "";
-
-    if (
-        viewerSession &&
-        viewerSession.user.id ===
-            viewedProfile.id
-    ) {
-
-        const edit =
-            document.createElement("a");
-
-        edit.href =
-            "/profile/";
-
-        edit.className =
-            "button-link";
-
-        edit.textContent =
-            "Edit Profile";
-
-        actions.appendChild(
-            edit
-        );
-
-        return;
-    }
-
-    if (!viewerSession) {
-
-        const login =
-            document.createElement("a");
-
-        login.href =
-            "/login/?redirect=" +
-            encodeURIComponent(
-                window.location.pathname +
+        const params =
+            new URLSearchParams(
                 window.location.search
             );
 
-        login.className =
-            "button-link";
+        return params.get("id");
 
-        login.textContent =
-            "Log In to Connect";
+    }
 
-        actions.appendChild(
-            login
+
+    const viewedUserId =
+        getViewedUserId();
+
+
+    if (!viewedUserId) {
+
+        showError(
+            "No user profile was specified."
         );
 
         return;
     }
 
-    const friendButton =
-        document.createElement("button");
 
-    if (!friendship) {
+    try {
 
-        friendButton.textContent =
-            "Add Friend";
+        const session =
+            await initNavbar();
 
-        friendButton.onclick =
-            sendFriendRequest;
 
-    } else if (
-        friendship.status ===
-        "accepted"
-    ) {
+        const viewedProfile =
+            await getProfile(
+                viewedUserId
+            );
 
-        friendButton.textContent =
-            "Friends";
 
-        friendButton.disabled =
-            true;
+        if (!viewedProfile) {
 
-    } else if (
-        friendship.requester_id ===
-            viewerSession.user.id &&
-        friendship.status ===
-            "pending"
-    ) {
+            showError(
+                "That user could not be found."
+            );
 
-        friendButton.textContent =
-            "Request Sent";
+            return;
+        }
 
-        friendButton.disabled =
-            true;
 
-    } else {
+        const displayName =
+            viewedProfile.display_name ||
+            viewedProfile.username ||
+            "Rip_Dead User";
 
-        friendButton.textContent =
-            "Accept Request";
 
-        friendButton.onclick =
-            acceptFriendRequest;
+        const viewedUsername =
+            viewedProfile.username ||
+            "unknown";
+
+
+        name.textContent =
+            displayName;
+
+
+        username.textContent =
+            "@" + viewedUsername;
+
+
+        if (viewedProfile.is_verified) {
+
+            const verified =
+                document.createElement("span");
+
+            verified.className =
+                "verified-text";
+
+            verified.textContent =
+                "✓ Verified";
+
+            name.appendChild(verified);
+
+        }
+
+
+        if (viewedProfile.bio) {
+
+            bio.textContent =
+                viewedProfile.bio;
+
+            bio.style.display =
+                "block";
+
+        } else {
+
+            bio.textContent =
+                "No bio yet.";
+
+            bio.style.opacity =
+                "0.65";
+
+        }
+
+
+        const avatarElement =
+            createAvatar(
+                viewedProfile,
+                "account-avatar"
+            );
+
+
+        avatar.innerHTML = "";
+
+        avatar.classList.remove(
+            "empty"
+        );
+
+        avatar.appendChild(
+            avatarElement
+        );
+
+
+        if (session) {
+
+            await loadActions(
+                session,
+                viewedProfile
+            );
+
+        } else {
+
+            const loginButton =
+                document.createElement("a");
+
+            loginButton.href =
+                "/login/";
+
+            loginButton.className =
+                "button";
+
+            loginButton.textContent =
+                "Log In to Connect";
+
+            actions.appendChild(
+                loginButton
+            );
+
+        }
+
+
+        document.title =
+            `${displayName} — Rip_Dead ID`;
+
+
+        loading.hidden = true;
+        card.hidden = false;
+
+
+    } catch (err) {
+
+        console.error(err);
+
+        showError(
+            "Something went wrong while loading this profile."
+        );
+
     }
 
-    actions.appendChild(
-        friendButton
-    );
 
-    const followButton =
-        document.createElement("button");
+    async function loadActions(
+        session,
+        viewedProfile
+    ) {
 
-    followButton.textContent =
-        following
-            ? "Unfollow"
-            : "Follow";
+        actions.innerHTML = "";
 
-    followButton.onclick =
-        following
-            ? unfollowUser
-            : followUser;
 
-    actions.appendChild(
-        followButton
-    );
-}
+        if (
+            session.user.id ===
+            viewedProfile.id
+        ) {
 
-async function sendFriendRequest() {
+            const accountButton =
+                document.createElement("a");
 
-    const {
-        error
-    } =
-        await supabaseClient
+            accountButton.href =
+                "/account/";
+
+            accountButton.className =
+                "button";
+
+            accountButton.textContent =
+                "Edit Account";
+
+            actions.appendChild(
+                accountButton
+            );
+
+            return;
+        }
+
+
+        const friendship =
+            await loadFriendship(
+                session.user.id,
+                viewedProfile.id
+            );
+
+
+        const following =
+            await loadFollowing(
+                session.user.id,
+                viewedProfile.id
+            );
+
+
+        if (
+            friendship &&
+            friendship.status === "accepted"
+        ) {
+
+            const friendsLabel =
+                document.createElement("span");
+
+            friendsLabel.className =
+                "button secondary";
+
+            friendsLabel.textContent =
+                "Friends";
+
+            actions.appendChild(
+                friendsLabel
+            );
+
+        } else if (
+            friendship &&
+            friendship.requester_id ===
+            session.user.id &&
+            friendship.status === "pending"
+        ) {
+
+            const pending =
+                document.createElement("span");
+
+            pending.className =
+                "button secondary";
+
+            pending.textContent =
+                "Request Sent";
+
+            actions.appendChild(
+                pending
+            );
+
+        } else if (
+            friendship &&
+            friendship.addressee_id ===
+            session.user.id &&
+            friendship.status === "pending"
+        ) {
+
+            const acceptButton =
+                document.createElement("button");
+
+            acceptButton.type =
+                "button";
+
+            acceptButton.className =
+                "button";
+
+            acceptButton.textContent =
+                "Accept Friend Request";
+
+            acceptButton.addEventListener(
+                "click",
+                async () => {
+
+                    acceptButton.disabled =
+                        true;
+
+                    try {
+
+                        await acceptFriendRequest(
+                            friendship.id,
+                            session.user.id
+                        );
+
+                        await loadActions(
+                            session,
+                            viewedProfile
+                        );
+
+                    } catch (err) {
+
+                        console.error(err);
+
+                        acceptButton.disabled =
+                            false;
+
+                    }
+
+                }
+            );
+
+            actions.appendChild(
+                acceptButton
+            );
+
+        } else {
+
+            const friendButton =
+                document.createElement("button");
+
+            friendButton.type =
+                "button";
+
+            friendButton.className =
+                "button";
+
+            friendButton.textContent =
+                "Add Friend";
+
+            friendButton.addEventListener(
+                "click",
+                async () => {
+
+                    friendButton.disabled =
+                        true;
+
+                    try {
+
+                        await sendFriendRequest(
+                            session.user.id,
+                            viewedProfile.id
+                        );
+
+                        await loadActions(
+                            session,
+                            viewedProfile
+                        );
+
+                    } catch (err) {
+
+                        console.error(err);
+
+                        friendButton.disabled =
+                            false;
+
+                    }
+
+                }
+            );
+
+            actions.appendChild(
+                friendButton
+            );
+
+        }
+
+
+        const followButton =
+            document.createElement("button");
+
+        followButton.type =
+            "button";
+
+        followButton.className =
+            "button secondary";
+
+
+        if (following) {
+
+            followButton.textContent =
+                "Unfollow";
+
+            followButton.addEventListener(
+                "click",
+                async () => {
+
+                    followButton.disabled =
+                        true;
+
+                    try {
+
+                        await unfollowUser(
+                            session.user.id,
+                            viewedProfile.id
+                        );
+
+                        await loadActions(
+                            session,
+                            viewedProfile
+                        );
+
+                    } catch (err) {
+
+                        console.error(err);
+
+                        followButton.disabled =
+                            false;
+
+                    }
+
+                }
+            );
+
+        } else {
+
+            followButton.textContent =
+                "Follow";
+
+            followButton.addEventListener(
+                "click",
+                async () => {
+
+                    followButton.disabled =
+                        true;
+
+                    try {
+
+                        await followUser(
+                            session.user.id,
+                            viewedProfile.id
+                        );
+
+                        await loadActions(
+                            session,
+                            viewedProfile
+                        );
+
+                    } catch (err) {
+
+                        console.error(err);
+
+                        followButton.disabled =
+                            false;
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        actions.appendChild(
+            followButton
+        );
+
+    }
+
+
+    async function loadFriendship(
+        currentUserId,
+        otherUserId
+    ) {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("friendships")
+            .select("*")
+            .or(
+                `and(requester_id.eq.${currentUserId},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${currentUserId})`
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(1)
+            .maybeSingle();
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        return data;
+
+    }
+
+
+    async function loadFollowing(
+        currentUserId,
+        otherUserId
+    ) {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("follows")
+            .select("follower_id")
+            .eq(
+                "follower_id",
+                currentUserId
+            )
+            .eq(
+                "following_id",
+                otherUserId
+            )
+            .maybeSingle();
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        return !!data;
+
+    }
+
+
+    async function sendFriendRequest(
+        currentUserId,
+        otherUserId
+    ) {
+
+        const {
+            error
+        } = await supabaseClient
             .from("friendships")
             .insert({
-
                 requester_id:
-                    viewerSession.user.id,
+                    currentUserId,
 
                 addressee_id:
-                    viewedProfile.id,
+                    otherUserId,
 
                 status:
                     "pending"
             });
 
-    if (error) {
 
-        alert(
-            error.message
-        );
+        if (error) {
+            throw error;
+        }
 
-        return;
     }
 
-    friendship =
-        await loadFriendship();
 
-    renderActions();
-}
+    async function acceptFriendRequest(
+        friendshipId,
+        currentUserId
+    ) {
 
-async function acceptFriendRequest() {
-
-    if (!friendship) {
-        return;
-    }
-
-    const {
-        error
-    } =
-        await supabaseClient
+        const {
+            error
+        } = await supabaseClient
             .from("friendships")
             .update({
                 status:
@@ -407,190 +767,74 @@ async function acceptFriendRequest() {
             })
             .eq(
                 "id",
-                friendship.id
+                friendshipId
+            )
+            .eq(
+                "addressee_id",
+                currentUserId
             );
 
-    if (error) {
 
-        alert(
-            error.message
-        );
+        if (error) {
+            throw error;
+        }
 
-        return;
     }
 
-    friendship =
-        await loadFriendship();
 
-    renderActions();
-}
+    async function followUser(
+        currentUserId,
+        otherUserId
+    ) {
 
-async function followUser() {
-
-    const {
-        error
-    } =
-        await supabaseClient
+        const {
+            error
+        } = await supabaseClient
             .from("follows")
             .insert({
-
                 follower_id:
-                    viewerSession.user.id,
+                    currentUserId,
 
                 following_id:
-                    viewedProfile.id
+                    otherUserId
             });
 
-    if (error) {
 
-        alert(
-            error.message
-        );
+        if (error) {
+            throw error;
+        }
 
-        return;
     }
 
-    following = true;
 
-    renderActions();
-}
+    async function unfollowUser(
+        currentUserId,
+        otherUserId
+    ) {
 
-async function unfollowUser() {
-
-    const {
-        error
-    } =
-        await supabaseClient
+        const {
+            error
+        } = await supabaseClient
             .from("follows")
             .delete()
             .eq(
                 "follower_id",
-                viewerSession.user.id
+                currentUserId
             )
             .eq(
                 "following_id",
-                viewedProfile.id
+                otherUserId
             );
 
-    if (error) {
 
-        alert(
-            error.message
-        );
+        if (error) {
+            throw error;
+        }
 
-        return;
     }
 
-    following = false;
+});
 
-    renderActions();
-}
-
-async function initializePublicProfile() {
-
-    await initNavbar();
-
-    viewerSession =
-        await getSession();
-
-    const userId =
-        getViewedUserId();
-
-    if (!userId) {
-
-        showError(
-            "No user was specified."
-        );
-
-        return;
-    }
-
-    viewedProfile =
-        await getProfile(
-            userId
-        );
-
-    if (!viewedProfile) {
-
-        showError(
-            "This user could not be found."
-        );
-
-        return;
-    }
-
-    document.title =
-        (
-            viewedProfile.display_name ||
-            viewedProfile.username ||
-            "User"
-        ) +
-        " - Rip_Dead";
-
-    displayName.textContent =
-        viewedProfile.display_name ||
-        viewedProfile.username ||
-        "Unknown User";
-
-    username.textContent =
-        viewedProfile.username
-            ? "@" +
-              viewedProfile.username
-            : "";
-
-    bio.textContent =
-        viewedProfile.bio ||
-        "No bio yet.";
-
-    verification.innerHTML = "";
-
-    if (viewedProfile.is_verified) {
-
-        const badge =
-            document.createElement(
-                "span"
-            );
-
-        badge.className =
-            "verified-badge";
-
-        badge.textContent =
-            "✓ Verified";
-
-        verification.appendChild(
-            badge
-        );
-    }
-
-    avatar.innerHTML = "";
-
-    avatar.appendChild(
-        createAvatar(
-            viewedProfile,
-            "profile-avatar"
-        )
-    );
-
-    if (
-        viewerSession &&
-        viewerSession.user.id !==
-            viewedProfile.id
-    ) {
-
-        friendship =
-            await loadFriendship();
-
-        following =
-            await loadFollowing();
-    }
-
-    renderActions();
-
-    loading.hidden = true;
-    content.hidden = false;
-}
-
-initializePublicProfile();
 </script>
 
 </body>

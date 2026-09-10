@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Search - Rip_Dead ID</title>
+    <title>Search — Rip_Dead ID</title>
 
     <link rel="stylesheet" href="/css/auth.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
+
     <div class="navbar-inner">
 
         <a href="/" class="navbar-brand">
@@ -30,40 +31,46 @@
             <a
                 href="/search/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Search
             </a>
 
             <a
                 href="/friends/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Friends
             </a>
 
             <a
                 href="/settings/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Settings
             </a>
 
             <a
                 href="/account/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Account
             </a>
 
             <a
                 href="/login/"
-                class="guest-only">
+                class="guest-only"
+            >
                 Log In
             </a>
 
             <a
                 href="/signup/"
-                class="guest-only button-link">
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
@@ -71,312 +78,309 @@
                 type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
 
         </div>
 
     </div>
+
 </nav>
 
 
 <main class="page page-small">
 
-    <div class="page-header">
-
-        <span style="
-            display: block;
-            margin-bottom: 10px;
-            color: var(--purple-hover);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-        ">
-            RIP_DEAD SOCIAL
-        </span>
-
-        <h1>
-            Search Users
-        </h1>
-
-        <p>
-            Find people on Rip_Dead.
-        </p>
-
-    </div>
-
-
     <section class="card">
 
-        <form id="search-form">
+        <div class="page-header">
 
-            <div class="form-group">
+            <div>
 
-                <label for="search-input">
-                    Username or display name
-                </label>
+                <h1>Find Users</h1>
 
-                <input
-                    type="search"
-                    id="search-input"
-                    maxlength="64"
-                    placeholder="Search for someone..."
-                    autocomplete="off"
-                    required>
+                <p>
+                    Search for Rip_Dead ID users.
+                </p>
 
             </div>
 
-            <button type="submit">
+        </div>
+
+
+        <div class="search-row">
+
+            <input
+                id="user-search"
+                type="search"
+                placeholder="Search username or display name..."
+                autocomplete="off"
+            >
+
+            <button
+                id="search-button"
+                class="button"
+                type="button"
+            >
                 Search
             </button>
 
-        </form>
+        </div>
 
 
         <div
             id="search-message"
             class="message"
-            aria-live="polite">
-        </div>
+            hidden
+        ></div>
 
 
         <div
             id="search-results"
-            style="margin-top: 18px;">
-        </div>
+            class="user-list"
+        ></div>
 
     </section>
 
 </main>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
+
 <script>
 
-let searchSession = null;
+document.addEventListener("DOMContentLoaded", async () => {
 
-const searchForm =
-    document.getElementById("search-form");
+    const input =
+        document.getElementById("user-search");
 
-const searchInput =
-    document.getElementById("search-input");
+    const button =
+        document.getElementById("search-button");
 
-const searchResults =
-    document.getElementById("search-results");
+    const results =
+        document.getElementById("search-results");
 
-const searchMessage =
-    document.getElementById("search-message");
+    const message =
+        document.getElementById("search-message");
 
 
-async function initializeSearch() {
+    const session =
+        await initNavbar();
 
-    searchSession =
-        await requireAuth();
 
-    if (!searchSession) {
+    if (!session) {
+        window.location.href = "/login/";
         return;
     }
 
-    await initNavbar();
-}
 
-
-function createSearchResult(profile) {
-
-    const card =
-        document.createElement("div");
-
-    card.className = "user-card";
-
-
-    const avatar =
-        createAvatar(
-            profile,
-            "user-avatar"
-        );
-
-
-    const information =
-        document.createElement("div");
-
-    information.className = "user-info";
-
-
-    const name =
-        document.createElement("div");
-
-    name.className = "user-name";
-
-    name.textContent =
-        profile.display_name ||
-        profile.username ||
-        "Unknown User";
-
-
-    const username =
-        document.createElement("div");
-
-    username.className = "user-username";
-
-    username.textContent =
-        profile.username
-            ? "@" + profile.username
-            : "";
-
-
-    information.appendChild(name);
-    information.appendChild(username);
-
-
-    if (profile.is_verified) {
-
-        const badge =
-            document.createElement("span");
-
-        badge.className = "verified-badge";
-
-        badge.textContent =
-            "✓ Verified";
-
-        badge.style.display = "inline-block";
-        badge.style.marginTop = "5px";
-        badge.style.color = "var(--purple-hover)";
-        badge.style.fontSize = "12px";
-        badge.style.fontWeight = "700";
-
-        information.appendChild(badge);
-    }
-
-
-    const viewButton =
-        document.createElement("a");
-
-    viewButton.href =
-        "/user/?id=" +
-        encodeURIComponent(profile.id);
-
-    viewButton.className =
-        "button secondary";
-
-    viewButton.textContent =
-        "View Profile";
-
-
-    card.appendChild(avatar);
-    card.appendChild(information);
-    card.appendChild(viewButton);
-
-
-    return card;
-}
-
-
-searchForm.addEventListener(
-    "submit",
-    async (event) => {
-
-        event.preventDefault();
-
+    async function performSearch() {
 
         const query =
-            searchInput.value.trim();
+            input.value.trim();
+
+
+        results.innerHTML = "";
+        message.hidden = true;
 
 
         if (!query) {
+
+            message.textContent =
+                "Enter a username or display name to search.";
+
+            message.hidden = false;
+
             return;
         }
 
 
-        searchResults.innerHTML = "";
+        button.disabled = true;
+        button.textContent = "Searching...";
 
 
-        setMessage(
-            searchMessage,
-            "Searching...",
-            ""
-        );
+        try {
+
+            const escapedQuery =
+                query
+                    .replace(/\\/g, "\\\\")
+                    .replace(/%/g, "\\%")
+                    .replace(/_/g, "\\_");
 
 
-        /*
-         * ilike provides case-insensitive
-         * partial matching.
-         */
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
+            const {
+                data,
+                error
+            } = await supabaseClient
                 .from("profiles")
                 .select(
                     "id, username, display_name, avatar_url, bio, is_verified"
                 )
                 .or(
-                    `username.ilike.%${query}%,display_name.ilike.%${query}%`
+                    `username.ilike.%${escapedQuery}%,display_name.ilike.%${escapedQuery}%`
                 )
                 .neq(
                     "id",
-                    searchSession.user.id
+                    session.user.id
                 )
                 .limit(25);
 
 
-        if (error) {
-
-            console.error(
-                "Search error:",
-                error
-            );
-
-            setMessage(
-                searchMessage,
-                error.message,
-                "error"
-            );
-
-            return;
-        }
-
-
-        if (
-            !data ||
-            data.length === 0
-        ) {
-
-            setMessage(
-                searchMessage,
-                "No users found.",
-                ""
-            );
-
-            return;
-        }
-
-
-        setMessage(
-            searchMessage,
-            `${data.length} user${data.length === 1 ? "" : "s"} found.`,
-            "success"
-        );
-
-
-        data.forEach(
-            (profile) => {
-
-                searchResults.appendChild(
-                    createSearchResult(
-                        profile
-                    )
-                );
-
+            if (error) {
+                throw error;
             }
-        );
+
+
+            if (!data || data.length === 0) {
+
+                message.textContent =
+                    "No users found.";
+
+                message.hidden = false;
+
+                return;
+            }
+
+
+            data.forEach(profile => {
+
+                const userCard =
+                    document.createElement("div");
+
+                userCard.className =
+                    "user-card";
+
+
+                const avatar =
+                    createAvatar(
+                        profile,
+                        "user-avatar"
+                    );
+
+
+                const userInfo =
+                    document.createElement("div");
+
+                userInfo.className =
+                    "user-info";
+
+
+                const name =
+                    document.createElement("div");
+
+                name.className =
+                    "user-name";
+
+                name.textContent =
+                    profile.display_name ||
+                    profile.username ||
+                    "Rip_Dead User";
+
+
+                if (profile.is_verified) {
+
+                    const verified =
+                        document.createElement("span");
+
+                    verified.className =
+                        "verified-text";
+
+                    verified.textContent =
+                        "✓ Verified";
+
+                    name.appendChild(verified);
+                }
+
+
+                const username =
+                    document.createElement("div");
+
+                username.className =
+                    "user-username";
+
+                username.textContent =
+                    "@" +
+                    (
+                        profile.username ||
+                        "unknown"
+                    );
+
+
+                const actions =
+                    document.createElement("div");
+
+                actions.className =
+                    "user-actions";
+
+
+                const viewButton =
+                    document.createElement("a");
+
+                viewButton.className =
+                    "button secondary";
+
+                viewButton.textContent =
+                    "View Profile";
+
+                viewButton.href =
+                    `/user/?id=${encodeURIComponent(profile.id)}`;
+
+
+                actions.appendChild(viewButton);
+
+
+                userInfo.appendChild(name);
+                userInfo.appendChild(username);
+
+
+                userCard.appendChild(avatar);
+                userCard.appendChild(userInfo);
+                userCard.appendChild(actions);
+
+
+                results.appendChild(userCard);
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            message.textContent =
+                "Something went wrong while searching.";
+
+            message.hidden = false;
+
+        } finally {
+
+            button.disabled = false;
+            button.textContent = "Search";
+
+        }
 
     }
-);
 
 
-initializeSearch();
+    button.addEventListener(
+        "click",
+        performSearch
+    );
+
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Enter") {
+                performSearch();
+            }
+
+        }
+    );
+
+});
 
 </script>
 

@@ -1,296 +1,218 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<meta charset="UTF-8">
+    <title>Account — Rip_Dead ID</title>
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Account — Rip_Dead ID</title>
-
-<link
-    rel="stylesheet"
-    href="/css/auth.css"
->
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/auth.js"></script>
-```
-
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
 
 <nav class="site-navbar">
+    <div class="navbar-inner">
 
-```
-<div class="navbar-inner">
-
-    <a
-        href="/"
-        class="navbar-brand"
-    >
-        Rip_Dead ID
-    </a>
-
-
-    <div class="navbar-links">
-
-        <a href="/">
-            Home
+        <a href="/" class="navbar-brand">
+            Rip_Dead ID
         </a>
 
-        <a
-            href="/search/"
-            class="auth-only"
-            hidden
-        >
-            Search
-        </a>
+        <div class="navbar-links">
+            <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-        <a
-            href="/friends/"
-            class="auth-only"
-            hidden
-        >
-            Friends
-        </a>
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
 
-        <a
-            href="/settings/"
-            class="auth-only"
-            hidden
-        >
-            Settings
-        </a>
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
+            </a>
 
-        <a
-            href="/account/"
-            class="auth-only"
-            hidden
-        >
-            Account
-        </a>
-
-        <a
-            href="/login/"
-            class="guest-only"
-        >
-            Log In
-        </a>
-
-        <a
-            href="/signup/"
-            class="guest-only button-link"
-        >
-            Create Account
-        </a>
-
-        <button
-            type="button"
-            id="navbar-logout"
-            class="auth-only navbar-logout"
-            hidden
-        >
-            Log Out
-        </button>
-
-    </div>
-
-</div>
-```
-
-</nav>
-
-<main class="page page-small">
-
-```
-<div class="account-header">
-
-
-    <div
-        id="account-avatar"
-        class="account-avatar empty"
-    ></div>
-
-
-    <div>
-
-        <h1
-            id="account-name"
-            class="account-name"
-        >
-            Loading...
-        </h1>
-
-
-        <div
-            id="account-username"
-            class="account-username"
-        >
-            Loading...
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden
+            >
+                Log Out
+            </button>
         </div>
 
     </div>
-
-</div>
-
+</nav>
 
 
-<section class="card">
+<main class="page page-small">
+
+    <section class="card">
+
+        <div class="page-header">
+            <div>
+                <h1>Your Account</h1>
+                <p>Manage your Rip_Dead ID profile.</p>
+            </div>
+        </div>
 
 
-    <h2 class="section-title">
-        Account Information
-    </h2>
+        <div
+            id="account-message"
+            class="message"
+            hidden
+        ></div>
 
 
-    <div class="form-group">
+        <div class="account-profile">
 
-        <label class="form-label">
-            Email
-        </label>
+            <div
+                id="account-avatar"
+                class="account-avatar empty"
+            ></div>
 
+            <div class="account-profile-info">
 
-        <input
-            id="account-email"
-            type="email"
-            class="account-field"
-            readonly
-        >
+                <div
+                    id="account-name"
+                    class="account-name"
+                >
+                    Loading...
+                </div>
 
-    </div>
+                <div
+                    id="account-username"
+                    class="account-username"
+                >
+                    @loading
+                </div>
 
+            </div>
 
-    <div class="form-group">
-
-        <label class="form-label">
-            Username
-        </label>
-
-
-        <input
-            id="account-username-field"
-            type="text"
-            class="account-field"
-            readonly
-        >
-
-    </div>
+        </div>
 
 
-    <div class="form-group">
+        <div class="form-group">
 
-        <label class="form-label">
-            Display Name
-        </label>
+            <label for="account-email">
+                Email
+            </label>
 
+            <input
+                id="account-email"
+                class="account-field"
+                type="email"
+                readonly
+            >
 
-        <input
-            id="account-display-name"
-            type="text"
-            class="account-field"
-            readonly
-        >
-
-    </div>
-
-
-</section>
+        </div>
 
 
+        <div class="form-group">
 
-<section class="card">
+            <label for="account-username-field">
+                Username
+            </label>
 
+            <input
+                id="account-username-field"
+                class="account-field"
+                type="text"
+                readonly
+            >
 
-    <h2 class="section-title">
-        Profile
-    </h2>
-
-
-    <div
-        id="account-bio"
-        style="
-            color: #c7c7d0;
-            white-space: pre-wrap;
-        "
-    >
-        No bio yet.
-    </div>
+        </div>
 
 
-    <div
-        class="button-row"
-        style="margin-top: 18px;"
-    >
+        <div class="form-group">
 
-        <a
-            href="/profile/"
-            class="button"
-        >
-            Edit Profile
-        </a>
+            <label for="account-display-name">
+                Display Name
+            </label>
 
-    </div>
+            <input
+                id="account-display-name"
+                class="account-field"
+                type="text"
+                readonly
+            >
+
+        </div>
 
 
-</section>
-```
+        <div class="form-group">
+
+            <label for="account-bio">
+                Bio
+            </label>
+
+            <textarea
+                id="account-bio"
+                class="account-field"
+                rows="4"
+                readonly
+            ></textarea>
+
+        </div>
+
+
+        <div class="button-row">
+
+            <a
+                href="/settings/"
+                class="button"
+            >
+                Edit Profile
+            </a>
+
+            <a
+                href="/user/"
+                id="view-profile-button"
+                class="button secondary"
+            >
+                Public Profile
+            </a>
+
+        </div>
+
+    </section>
 
 </main>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
+
 <script>
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
+    const message = document.getElementById("account-message");
+    const accountAvatar = document.getElementById("account-avatar");
+    const accountName = document.getElementById("account-name");
+    const accountUsername = document.getElementById("account-username");
 
-        const session =
-            await initNavbar();
+    const emailField = document.getElementById("account-email");
+    const usernameField = document.getElementById("account-username-field");
+    const displayNameField = document.getElementById("account-display-name");
+    const bioField = document.getElementById("account-bio");
 
+    try {
+
+        const session = await initNavbar();
 
         if (!session) {
-
-            window.location.href =
-                "/login/";
-
+            window.location.href = "/login/";
             return;
         }
 
-
-        const profile =
-            await getProfile(
-                session.user.id
-            );
-
+        const profile = await getProfile(session.user.id);
 
         if (!profile) {
-
-            document.getElementById(
-                "account-name"
-            ).textContent =
-                "Account";
-
-
-            document.getElementById(
-                "account-username"
-            ).textContent =
-                "Profile unavailable";
-
-
-            document.getElementById(
-                "account-email"
-            ).value =
-                session.user.email || "";
-
-
+            message.textContent = "Could not load your profile.";
+            message.hidden = false;
             return;
         }
 
@@ -298,204 +220,100 @@ document.addEventListener(
         const displayName =
             profile.display_name ||
             profile.username ||
-            "Account";
-
+            "Rip_Dead User";
 
         const username =
             profile.username ||
-            "No username";
+            "unknown";
 
 
-        /*
-         * Display name
-         */
+        accountName.textContent = displayName;
 
-        const accountName =
-            document.getElementById(
-                "account-name"
-            );
+        accountUsername.textContent = "@" + username;
 
-
-        accountName.textContent =
-            displayName;
-
-
-        /*
-         * Verification badge
-         */
 
         if (profile.is_verified) {
 
-            const badge =
-                document.createElement(
-                    "span"
-                );
+            const badge = document.createElement("span");
 
-
-            badge.className =
-                "verified-badge";
-
-
-            badge.textContent =
-                "✓";
-
-
-            badge.title =
-                "Verified account";
-
-
+            badge.className = "verified-badge";
+            badge.textContent = "✓";
+            badge.title = "Verified account";
             badge.setAttribute(
                 "aria-label",
                 "Verified account"
             );
 
+            badge.style.display = "inline-flex";
+            badge.style.alignItems = "center";
+            badge.style.justifyContent = "center";
+            badge.style.marginLeft = "8px";
+            badge.style.width = "20px";
+            badge.style.height = "20px";
+            badge.style.borderRadius = "50%";
+            badge.style.background = "var(--purple-hover)";
+            badge.style.color = "#ffffff";
+            badge.style.fontSize = "13px";
+            badge.style.fontWeight = "900";
 
-            badge.style.display =
-                "inline-flex";
-
-
-            badge.style.alignItems =
-                "center";
-
-
-            badge.style.justifyContent =
-                "center";
-
-
-            badge.style.marginLeft =
-                "8px";
-
-
-            badge.style.width =
-                "20px";
-
-
-            badge.style.height =
-                "20px";
-
-
-            badge.style.borderRadius =
-                "50%";
-
-
-            badge.style.background =
-                "var(--purple-hover)";
-
-
-            badge.style.color =
-                "#ffffff";
-
-
-            badge.style.fontSize =
-                "13px";
-
-
-            badge.style.fontWeight =
-                "900";
-
-
-            accountName.appendChild(
-                badge
-            );
-
+            accountName.appendChild(badge);
         }
 
 
-        /*
-         * Username
-         */
-
-        document.getElementById(
-            "account-username"
-        ).textContent =
-            `@${username}`;
-
-
-        /*
-         * Account information
-         */
-
-        document.getElementById(
-            "account-email"
-        ).value =
+        emailField.value =
             session.user.email || "";
 
-
-        document.getElementById(
-            "account-username-field"
-        ).value =
+        usernameField.value =
             profile.username || "";
 
-
-        document.getElementById(
-            "account-display-name"
-        ).value =
+        displayNameField.value =
             profile.display_name || "";
 
-
-        /*
-         * Bio
-         */
-
-        document.getElementById(
-            "account-bio"
-        ).textContent =
-            profile.bio ||
-            "No bio yet.";
-
-
-        /*
-         * Avatar
-         */
-
-        const avatarContainer =
-            document.getElementById(
-                "account-avatar"
-            );
-
-
-        avatarContainer.innerHTML =
-            "";
+        bioField.value =
+            profile.bio || "";
 
 
         const avatarUrl =
             getAvatarUrl(profile);
 
-
         if (avatarUrl) {
 
+            accountAvatar.classList.remove("empty");
+
             const image =
-                document.createElement(
-                    "img"
-                );
+                document.createElement("img");
 
+            image.src = avatarUrl;
+            image.alt = "Profile avatar";
 
-            image.src =
-                avatarUrl;
-
-
-            image.alt =
-                "";
-
-
-            image.onerror =
-                () => {
-                    image.remove();
-                };
-
-
-            avatarContainer.appendChild(
-                image
-            );
-
+            accountAvatar.innerHTML = "";
+            accountAvatar.appendChild(image);
         }
 
+
+        document.title =
+            `${displayName} — Rip_Dead ID`;
+
+
+        const publicProfileButton =
+            document.getElementById("view-profile-button");
+
+        publicProfileButton.href =
+            `/user/?id=${encodeURIComponent(session.user.id)}`;
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+            "Something went wrong while loading your account.";
+
+        message.hidden = false;
     }
 
-);
+});
 
 </script>
 
 </body>
-
 </html>
