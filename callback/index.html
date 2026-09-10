@@ -2,42 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <title>Authentication - Rip_Dead</title>
 
-    <title>Signing In - Rip_Dead Authentication</title>
-
-    <link
-        rel="stylesheet"
-        href="../css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
-<main class="auth-container">
+<nav class="site-navbar">
+    <div class="navbar-inner">
 
-    <div class="auth-card">
+        <a href="/" class="navbar-brand">
+            Rip_Dead Authentication
+        </a>
 
-        <div class="auth-header">
+        <div class="navbar-links">
 
-            <h1 id="callback-title">
-                Signing you in...
-            </h1>
+            <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <p id="callback-message">
-                Please wait.
-            </p>
+            <a href="/login/" class="guest-only">Log In</a>
+
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
+            </a>
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden>
+                Log Out
+            </button>
 
         </div>
 
     </div>
+</nav>
+
+<main class="auth-container">
+
+    <section class="auth-card">
+
+        <span class="auth-eyebrow">
+            AUTHENTICATION
+        </span>
+
+        <h1 id="callback-title">
+            Completing authentication...
+        </h1>
+
+        <p
+            id="callback-message"
+            class="auth-message"
+            aria-live="polite">
+            Please wait.
+        </p>
+
+    </section>
 
 </main>
 
@@ -54,90 +84,93 @@ async function handleCallback() {
             "callback-message"
         );
 
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
+    try {
 
-    const error =
-        params.get("error");
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .getSession();
 
-    const errorDescription =
-        params.get("error_description");
+        if (error) {
+            throw error;
+        }
 
-    if (error) {
-
-        title.textContent =
-            "Authentication failed";
-
-        message.textContent =
-            errorDescription ||
-            error;
-
-        return;
-    }
-
-    const code =
-        params.get("code");
-
-    if (code) {
-
-        const { error: exchangeError } =
-            await window.supabaseClient.auth
-                .exchangeCodeForSession(code);
-
-        if (exchangeError) {
-
-            console.error(
-                "Code exchange error:",
-                exchangeError
-            );
+        if (data.session) {
 
             title.textContent =
-                "Authentication failed";
+                "Authentication successful!";
 
-            message.textContent =
-                exchangeError.message;
+            setMessage(
+                message,
+                "Redirecting to your account...",
+                "success"
+            );
+
+            setTimeout(() => {
+                window.location.href =
+                    "/account/";
+            }, 700);
 
             return;
         }
-    }
 
-    const { data, error: sessionError } =
-        await window.supabaseClient.auth.getSession();
+        const hash =
+            window.location.hash;
 
-    if (sessionError || !data.session) {
+        const params =
+            new URLSearchParams(
+                hash.startsWith("#")
+                    ? hash.substring(1)
+                    : hash
+            );
+
+        const errorDescription =
+            params.get(
+                "error_description"
+            );
+
+        if (errorDescription) {
+            throw new Error(
+                errorDescription
+            );
+        }
+
+        title.textContent =
+            "Authentication complete";
+
+        setMessage(
+            message,
+            "Please log in to continue.",
+            ""
+        );
+
+        setTimeout(() => {
+            window.location.href =
+                "/login/";
+        }, 1200);
+
+    } catch (error) {
+
+        console.error(
+            "Callback error:",
+            error
+        );
 
         title.textContent =
             "Authentication failed";
 
-        message.textContent =
-            sessionError?.message ||
-            "No active session was found.";
-
-        return;
+        setMessage(
+            message,
+            error.message ||
+            "Something went wrong.",
+            "error"
+        );
     }
-
-    window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-    );
-
-    title.textContent =
-        "Authentication successful";
-
-    message.textContent =
-        "Redirecting to your account...";
-
-    setTimeout(
-        () => {
-            window.location.href =
-                "../account/";
-        },
-        300
-    );
 }
+
+initNavbar();
 
 handleCallback();
 </script>

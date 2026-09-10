@@ -22,6 +22,7 @@
         </a>
 
         <div class="navbar-links">
+
             <a href="/">Home</a>
             <a href="/search/" class="auth-only" hidden>Search</a>
             <a href="/friends/" class="auth-only" hidden>Friends</a>
@@ -41,6 +42,7 @@
                 hidden>
                 Log Out
             </button>
+
         </div>
 
     </div>
@@ -50,11 +52,19 @@
 
     <section class="auth-card">
 
-        <h1>Search Users</h1>
+        <div class="auth-card-header">
 
-        <p class="auth-subtitle">
-            Find people on Rip_Dead.
-        </p>
+            <span class="auth-eyebrow">
+                RIP_DEAD SOCIAL
+            </span>
+
+            <h1>Search Users</h1>
+
+            <p class="auth-subtitle">
+                Find people on Rip_Dead.
+            </p>
+
+        </div>
 
         <form id="search-form">
 
@@ -65,9 +75,9 @@
             <input
                 type="search"
                 id="search-input"
-                placeholder="Search users..."
-                autocomplete="off"
                 maxlength="64"
+                placeholder="Search for someone..."
+                autocomplete="off"
                 required>
 
             <button type="submit">
@@ -92,16 +102,24 @@
 let searchSession = null;
 
 const searchForm =
-    document.getElementById("search-form");
+    document.getElementById(
+        "search-form"
+    );
 
 const searchInput =
-    document.getElementById("search-input");
+    document.getElementById(
+        "search-input"
+    );
 
 const searchResults =
-    document.getElementById("search-results");
+    document.getElementById(
+        "search-results"
+    );
 
 const searchMessage =
-    document.getElementById("search-message");
+    document.getElementById(
+        "search-message"
+    );
 
 async function initializeSearch() {
 
@@ -115,14 +133,14 @@ async function initializeSearch() {
     await initNavbar();
 }
 
-function clearResults() {
-    searchResults.innerHTML = "";
-}
-
-function createSearchResult(profile) {
+function createSearchResult(
+    profile
+) {
 
     const card =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     card.className =
         "search-result";
@@ -134,13 +152,17 @@ function createSearchResult(profile) {
         );
 
     const information =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     information.className =
         "search-result-info";
 
     const name =
-        document.createElement("h3");
+        document.createElement(
+            "h3"
+        );
 
     name.textContent =
         profile.display_name ||
@@ -148,20 +170,30 @@ function createSearchResult(profile) {
         "Unknown User";
 
     const username =
-        document.createElement("p");
+        document.createElement(
+            "p"
+        );
 
     username.textContent =
         profile.username
-            ? "@" + profile.username
+            ? "@" +
+              profile.username
             : "";
 
-    information.appendChild(name);
-    information.appendChild(username);
+    information.appendChild(
+        name
+    );
+
+    information.appendChild(
+        username
+    );
 
     if (profile.is_verified) {
 
         const badge =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         badge.className =
             "verified-badge";
@@ -175,21 +207,33 @@ function createSearchResult(profile) {
     }
 
     const viewButton =
-        document.createElement("a");
+        document.createElement(
+            "a"
+        );
+
+    viewButton.href =
+        "/user/?id=" +
+        encodeURIComponent(
+            profile.id
+        );
 
     viewButton.className =
         "button-link";
 
-    viewButton.href =
-        "/user/?id=" +
-        encodeURIComponent(profile.id);
-
     viewButton.textContent =
         "View Profile";
 
-    card.appendChild(avatar);
-    card.appendChild(information);
-    card.appendChild(viewButton);
+    card.appendChild(
+        avatar
+    );
+
+    card.appendChild(
+        information
+    );
+
+    card.appendChild(
+        viewButton
+    );
 
     return card;
 }
@@ -200,10 +244,6 @@ searchForm.addEventListener(
 
         event.preventDefault();
 
-        if (!searchSession) {
-            return;
-        }
-
         const query =
             searchInput.value.trim();
 
@@ -211,7 +251,7 @@ searchForm.addEventListener(
             return;
         }
 
-        clearResults();
+        searchResults.innerHTML = "";
 
         setMessage(
             searchMessage,
@@ -220,17 +260,9 @@ searchForm.addEventListener(
         );
 
         /*
-         * Search username and display name.
-         *
-         * The profiles SELECT policy allows
-         * authenticated users to view profiles.
+         * ilike provides case-insensitive
+         * partial matching.
          */
-        const escapedQuery =
-            query
-                .replace(/\\/g, "\\\\")
-                .replace(/%/g, "\\%")
-                .replace(/_/g, "\\_");
-
         const {
             data,
             error
@@ -241,7 +273,7 @@ searchForm.addEventListener(
                     "id, username, display_name, avatar_url, bio, is_verified"
                 )
                 .or(
-                    `username.ilike.%${escapedQuery}%,display_name.ilike.%${escapedQuery}%`
+                    `username.ilike.%${query}%,display_name.ilike.%${query}%`
                 )
                 .neq(
                     "id",
@@ -258,7 +290,6 @@ searchForm.addEventListener(
 
             setMessage(
                 searchMessage,
-                "Search failed: " +
                 error.message,
                 "error"
             );
@@ -266,7 +297,10 @@ searchForm.addEventListener(
             return;
         }
 
-        if (!data || data.length === 0) {
+        if (
+            !data ||
+            data.length === 0
+        ) {
 
             setMessage(
                 searchMessage,
@@ -283,13 +317,16 @@ searchForm.addEventListener(
             "success"
         );
 
-        data.forEach(profile => {
+        data.forEach(
+            profile => {
 
-            searchResults.appendChild(
-                createSearchResult(profile)
-            );
-
-        });
+                searchResults.appendChild(
+                    createSearchResult(
+                        profile
+                    )
+                );
+            }
+        );
     }
 );
 

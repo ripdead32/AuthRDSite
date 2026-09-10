@@ -24,26 +24,12 @@
         <div class="navbar-links">
 
             <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="/search/" class="auth-only" hidden>
-                Search
-            </a>
-
-            <a href="/friends/" class="auth-only" hidden>
-                Friends
-            </a>
-
-            <a href="/settings/" class="auth-only" hidden>
-                Settings
-            </a>
-
-            <a href="/account/" class="auth-only" hidden>
-                Account
-            </a>
-
-            <a href="/login/" class="guest-only">
-                Log In
-            </a>
+            <a href="/login/" class="guest-only">Log In</a>
 
             <a href="/signup/" class="guest-only button-link">
                 Create Account
@@ -84,16 +70,16 @@
 
             <div id="public-avatar"></div>
 
-            <h1 id="public-display-name">
-            </h1>
-
-            <p id="public-username">
-            </p>
-
             <div id="public-verification"></div>
 
-            <p id="public-bio">
+            <h1 id="public-display-name"></h1>
+
+            <p
+                id="public-username"
+                class="auth-subtitle">
             </p>
+
+            <p id="public-bio"></p>
 
             <div
                 id="profile-actions"
@@ -157,13 +143,13 @@ const actions =
         "profile-actions"
     );
 
-function showError(message) {
+function showError(text) {
 
     loading.hidden = true;
     content.hidden = true;
 
     errorElement.textContent =
-        message;
+        text;
 
     errorElement.hidden = false;
 }
@@ -206,7 +192,8 @@ async function loadFriendship() {
         return null;
     }
 
-    return data && data.length
+    return data &&
+        data.length > 0
         ? data[0]
         : null;
 }
@@ -223,7 +210,9 @@ async function loadFollowing() {
     } =
         await supabaseClient
             .from("follows")
-            .select("follower_id, following_id")
+            .select(
+                "follower_id, following_id"
+            )
             .eq(
                 "follower_id",
                 viewerSession.user.id
@@ -251,10 +240,6 @@ function renderActions() {
 
     actions.innerHTML = "";
 
-    /*
-     * If the viewer is looking at their own
-     * profile, show the edit button instead.
-     */
     if (
         viewerSession &&
         viewerSession.user.id ===
@@ -273,15 +258,13 @@ function renderActions() {
         edit.textContent =
             "Edit Profile";
 
-        actions.appendChild(edit);
+        actions.appendChild(
+            edit
+        );
 
         return;
     }
 
-    /*
-     * Logged-out users cannot interact with
-     * profiles.
-     */
     if (!viewerSession) {
 
         const login =
@@ -300,14 +283,13 @@ function renderActions() {
         login.textContent =
             "Log In to Connect";
 
-        actions.appendChild(login);
+        actions.appendChild(
+            login
+        );
 
         return;
     }
 
-    /*
-     * Friend button.
-     */
     const friendButton =
         document.createElement("button");
 
@@ -316,13 +298,12 @@ function renderActions() {
         friendButton.textContent =
             "Add Friend";
 
-        friendButton.addEventListener(
-            "click",
-            sendFriendRequest
-        );
+        friendButton.onclick =
+            sendFriendRequest;
 
     } else if (
-        friendship.status === "accepted"
+        friendship.status ===
+        "accepted"
     ) {
 
         friendButton.textContent =
@@ -333,8 +314,9 @@ function renderActions() {
 
     } else if (
         friendship.requester_id ===
-        viewerSession.user.id &&
-        friendship.status === "pending"
+            viewerSession.user.id &&
+        friendship.status ===
+            "pending"
     ) {
 
         friendButton.textContent =
@@ -343,51 +325,31 @@ function renderActions() {
         friendButton.disabled =
             true;
 
-    } else if (
-        friendship.addressee_id ===
-        viewerSession.user.id &&
-        friendship.status === "pending"
-    ) {
+    } else {
 
         friendButton.textContent =
             "Accept Request";
 
-        friendButton.addEventListener(
-            "click",
-            acceptFriendRequest
-        );
+        friendButton.onclick =
+            acceptFriendRequest;
     }
 
     actions.appendChild(
         friendButton
     );
 
-    /*
-     * Follow button.
-     */
     const followButton =
         document.createElement("button");
 
-    if (following) {
+    followButton.textContent =
+        following
+            ? "Unfollow"
+            : "Follow";
 
-        followButton.textContent =
-            "Unfollow";
-
-        followButton.addEventListener(
-            "click",
-            unfollowUser
-        );
-
-    } else {
-
-        followButton.textContent =
-            "Follow";
-
-        followButton.addEventListener(
-            "click",
-            followUser
-        );
-    }
+    followButton.onclick =
+        following
+            ? unfollowUser
+            : followUser;
 
     actions.appendChild(
         followButton
@@ -402,6 +364,7 @@ async function sendFriendRequest() {
         await supabaseClient
             .from("friendships")
             .insert({
+
                 requester_id:
                     viewerSession.user.id,
 
@@ -413,11 +376,6 @@ async function sendFriendRequest() {
             });
 
     if (error) {
-
-        console.error(
-            "Friend request error:",
-            error
-        );
 
         alert(
             error.message
@@ -454,11 +412,6 @@ async function acceptFriendRequest() {
 
     if (error) {
 
-        console.error(
-            "Accept friend request error:",
-            error
-        );
-
         alert(
             error.message
         );
@@ -480,6 +433,7 @@ async function followUser() {
         await supabaseClient
             .from("follows")
             .insert({
+
                 follower_id:
                     viewerSession.user.id,
 
@@ -488,11 +442,6 @@ async function followUser() {
             });
 
     if (error) {
-
-        console.error(
-            "Follow error:",
-            error
-        );
 
         alert(
             error.message
@@ -524,11 +473,6 @@ async function unfollowUser() {
             );
 
     if (error) {
-
-        console.error(
-            "Unfollow error:",
-            error
-        );
 
         alert(
             error.message
@@ -562,7 +506,9 @@ async function initializePublicProfile() {
     }
 
     viewedProfile =
-        await getProfile(userId);
+        await getProfile(
+            userId
+        );
 
     if (!viewedProfile) {
 
@@ -573,9 +519,14 @@ async function initializePublicProfile() {
         return;
     }
 
-    /*
-     * Profile information.
-     */
+    document.title =
+        (
+            viewedProfile.display_name ||
+            viewedProfile.username ||
+            "User"
+        ) +
+        " - Rip_Dead";
+
     displayName.textContent =
         viewedProfile.display_name ||
         viewedProfile.username ||
@@ -583,22 +534,22 @@ async function initializePublicProfile() {
 
     username.textContent =
         viewedProfile.username
-            ? "@" + viewedProfile.username
+            ? "@" +
+              viewedProfile.username
             : "";
 
     bio.textContent =
         viewedProfile.bio ||
         "No bio yet.";
 
-    /*
-     * Verified badge.
-     */
     verification.innerHTML = "";
 
     if (viewedProfile.is_verified) {
 
         const badge =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         badge.className =
             "verified-badge";
@@ -611,9 +562,6 @@ async function initializePublicProfile() {
         );
     }
 
-    /*
-     * Avatar.
-     */
     avatar.innerHTML = "";
 
     avatar.appendChild(
@@ -623,9 +571,6 @@ async function initializePublicProfile() {
         )
     );
 
-    /*
-     * Social information.
-     */
     if (
         viewerSession &&
         viewerSession.user.id !==
@@ -637,13 +582,11 @@ async function initializePublicProfile() {
 
         following =
             await loadFollowing();
-
     }
 
     renderActions();
 
     loading.hidden = true;
-    errorElement.hidden = true;
     content.hidden = false;
 }
 

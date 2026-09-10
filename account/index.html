@@ -22,6 +22,7 @@
         </a>
 
         <div class="navbar-links">
+
             <a href="/">Home</a>
             <a href="/search/" class="auth-only" hidden>Search</a>
             <a href="/friends/" class="auth-only" hidden>Friends</a>
@@ -29,6 +30,7 @@
             <a href="/account/" class="auth-only" hidden>Account</a>
 
             <a href="/login/" class="guest-only">Log In</a>
+
             <a href="/signup/" class="guest-only button-link">
                 Create Account
             </a>
@@ -40,6 +42,7 @@
                 hidden>
                 Log Out
             </button>
+
         </div>
 
     </div>
@@ -49,25 +52,30 @@
 
     <section class="auth-card">
 
-        <h1 id="welcome">
-            Loading account...
-        </h1>
+        <div id="account-loading">
+            <span class="auth-eyebrow">
+                RIP_DEAD ACCOUNT
+            </span>
 
-        <p class="auth-subtitle" id="email">
-            Loading...
-        </p>
+            <h1>Loading account...</h1>
+        </div>
 
-        <div id="account-content">
+        <div id="account-content" hidden>
 
             <div id="avatar-container"></div>
 
-            <h2 id="display-name"></h2>
+            <span
+                id="verification"
+                class="verified-badge">
+            </span>
 
-            <p id="username"></p>
+            <h1 id="display-name"></h1>
+
+            <p id="username" class="auth-subtitle"></p>
+
+            <p id="email"></p>
 
             <p id="bio"></p>
-
-            <p id="verification"></p>
 
             <div class="auth-actions">
 
@@ -78,9 +86,15 @@
                 </a>
 
                 <a
-                    href="/settings/"
+                    href="/search/"
                     class="button-link">
-                    Settings
+                    Find Users
+                </a>
+
+                <a
+                    href="/friends/"
+                    class="button-link">
+                    Friends
                 </a>
 
             </div>
@@ -88,7 +102,7 @@
         </div>
 
         <div
-            id="message"
+            id="account-message"
             class="auth-message"
             aria-live="polite">
         </div>
@@ -109,94 +123,90 @@ async function initializeAccount() {
 
     await initNavbar();
 
+    const loading =
+        document.getElementById(
+            "account-loading"
+        );
+
+    const content =
+        document.getElementById(
+            "account-content"
+        );
+
     const message =
-        document.getElementById("message");
-
-    const welcome =
-        document.getElementById("welcome");
-
-    const email =
-        document.getElementById("email");
-
-    const displayName =
-        document.getElementById("display-name");
-
-    const username =
-        document.getElementById("username");
-
-    const bio =
-        document.getElementById("bio");
-
-    const verification =
-        document.getElementById("verification");
-
-    const avatarContainer =
-        document.getElementById("avatar-container");
-
-    email.textContent =
-        session.user.email || "";
+        document.getElementById(
+            "account-message"
+        );
 
     const profile =
-        await getProfile(session.user.id);
+        await getProfile(
+            session.user.id
+        );
 
     if (!profile) {
 
-        welcome.textContent =
-            "Account";
+        loading.hidden = true;
 
         setMessage(
             message,
-            "Your account profile could not be loaded.",
+            "Could not load your profile.",
             "error"
         );
 
         return;
     }
 
-    const name =
+    document.getElementById(
+        "display-name"
+    ).textContent =
         profile.display_name ||
         profile.username ||
         "Account";
 
-    welcome.textContent =
-        "Welcome, " + name;
-
-    displayName.textContent =
-        profile.display_name || "";
-
-    username.textContent =
+    document.getElementById(
+        "username"
+    ).textContent =
         profile.username
             ? "@" + profile.username
             : "";
 
-    bio.textContent =
-        profile.bio || "No bio yet.";
+    document.getElementById(
+        "email"
+    ).textContent =
+        session.user.email || "";
 
-    if (profile.is_verified) {
+    document.getElementById(
+        "bio"
+    ).textContent =
+        profile.bio ||
+        "No bio yet.";
 
-        verification.textContent =
-            "✓ Verified";
+    const verification =
+        document.getElementById(
+            "verification"
+        );
 
-        verification.className =
-            "verified-badge";
+    verification.textContent =
+        profile.is_verified
+            ? "✓ Verified"
+            : "";
 
-    } else {
-
-        verification.textContent =
-            "";
-    }
+    const avatarContainer =
+        document.getElementById(
+            "avatar-container"
+        );
 
     avatarContainer.innerHTML = "";
 
-    const avatar =
+    avatarContainer.appendChild(
         createAvatar(
             profile,
             "profile-avatar"
-        );
-
-    avatarContainer.appendChild(
-        avatar
+        )
     );
+
+    loading.hidden = true;
+    content.hidden = false;
 }
 
 initializeAccount();

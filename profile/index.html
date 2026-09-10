@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Edit Profile - Rip_Dead Authentication</title>
+    <title>Authentication - Rip_Dead</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 
@@ -24,26 +24,12 @@
         <div class="navbar-links">
 
             <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="/search/" class="auth-only" hidden>
-                Search
-            </a>
-
-            <a href="/friends/" class="auth-only" hidden>
-                Friends
-            </a>
-
-            <a href="/settings/" class="auth-only" hidden>
-                Settings
-            </a>
-
-            <a href="/account/" class="auth-only" hidden>
-                Account
-            </a>
-
-            <a href="/login/" class="guest-only">
-                Log In
-            </a>
+            <a href="/login/" class="guest-only">Log In</a>
 
             <a href="/signup/" class="guest-only button-link">
                 Create Account
@@ -66,424 +52,127 @@
 
     <section class="auth-card">
 
-        <h1>Edit Profile</h1>
+        <span class="auth-eyebrow">
+            AUTHENTICATION
+        </span>
 
-        <p class="auth-subtitle">
-            Customize your Rip_Dead profile.
+        <h1 id="callback-title">
+            Completing authentication...
+        </h1>
+
+        <p
+            id="callback-message"
+            class="auth-message"
+            aria-live="polite">
+            Please wait.
         </p>
-
-        <div id="avatar-preview-container">
-            <div id="avatar-preview"></div>
-        </div>
-
-        <form id="profile-form">
-
-            <label for="avatar">
-                Profile Picture
-            </label>
-
-            <input
-                type="file"
-                id="avatar"
-                name="avatar"
-                accept="image/png,image/jpeg,image/webp">
-
-            <small>
-                PNG, JPG, or WebP. Maximum 5 MB.
-            </small>
-
-            <label for="username">
-                Username
-            </label>
-
-            <input
-                type="text"
-                id="username"
-                name="username"
-                minlength="3"
-                maxlength="32"
-                required>
-
-            <label for="display-name">
-                Display Name
-            </label>
-
-            <input
-                type="text"
-                id="display-name"
-                name="display-name"
-                maxlength="64"
-                required>
-
-            <label for="bio">
-                Bio
-            </label>
-
-            <textarea
-                id="bio"
-                name="bio"
-                maxlength="500"
-                rows="5"
-                placeholder="Tell people about yourself..."></textarea>
-
-            <button type="submit">
-                Save Profile
-            </button>
-
-            <div
-                id="message"
-                class="auth-message"
-                aria-live="polite">
-            </div>
-
-        </form>
 
     </section>
 
 </main>
 
 <script>
-let currentSession = null;
-let currentProfile = null;
+async function handleCallback() {
 
-const profileForm =
-    document.getElementById("profile-form");
-
-const avatarInput =
-    document.getElementById("avatar");
-
-const avatarPreview =
-    document.getElementById("avatar-preview");
-
-const usernameInput =
-    document.getElementById("username");
-
-const displayNameInput =
-    document.getElementById("display-name");
-
-const bioInput =
-    document.getElementById("bio");
-
-const message =
-    document.getElementById("message");
-
-async function loadProfile() {
-
-    currentSession =
-        await requireAuth();
-
-    if (!currentSession) {
-        return;
-    }
-
-    await initNavbar();
-
-    currentProfile =
-        await getProfile(
-            currentSession.user.id
+    const title =
+        document.getElementById(
+            "callback-title"
         );
 
-    if (!currentProfile) {
-
-        setMessage(
-            message,
-            "Could not load your profile.",
-            "error"
+    const message =
+        document.getElementById(
+            "callback-message"
         );
 
-        return;
-    }
+    try {
 
-    usernameInput.value =
-        currentProfile.username || "";
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .getSession();
 
-    displayNameInput.value =
-        currentProfile.display_name || "";
-
-    bioInput.value =
-        currentProfile.bio || "";
-
-    showAvatar(
-        currentProfile
-    );
-}
-
-function showAvatar(profile) {
-
-    avatarPreview.innerHTML = "";
-
-    const avatar =
-        createAvatar(
-            profile,
-            "profile-avatar"
-        );
-
-    avatarPreview.appendChild(
-        avatar
-    );
-}
-
-avatarInput.addEventListener(
-    "change",
-    () => {
-
-        const file =
-            avatarInput.files[0];
-
-        if (!file) {
-            return;
+        if (error) {
+            throw error;
         }
 
-        if (
-            ![
-                "image/png",
-                "image/jpeg",
-                "image/webp"
-            ].includes(file.type)
-        ) {
+        if (data.session) {
+
+            title.textContent =
+                "Authentication successful!";
 
             setMessage(
                 message,
-                "Please select a PNG, JPG, or WebP image.",
-                "error"
-            );
-
-            avatarInput.value = "";
-
-            return;
-        }
-
-        if (
-            file.size >
-            5 * 1024 * 1024
-        ) {
-
-            setMessage(
-                message,
-                "The image must be 5 MB or smaller.",
-                "error"
-            );
-
-            avatarInput.value = "";
-
-            return;
-        }
-
-        const reader =
-            new FileReader();
-
-        reader.onload = event => {
-
-            avatarPreview.innerHTML = "";
-
-            const image =
-                document.createElement("img");
-
-            image.src =
-                event.target.result;
-
-            image.alt =
-                "Avatar preview";
-
-            image.className =
-                "profile-avatar";
-
-            avatarPreview.appendChild(
-                image
-            );
-        };
-
-        reader.readAsDataURL(file);
-    }
-);
-
-profileForm.addEventListener(
-    "submit",
-    async event => {
-
-        event.preventDefault();
-
-        if (!currentSession) {
-            return;
-        }
-
-        const button =
-            profileForm.querySelector(
-                "button[type='submit']"
-            );
-
-        button.disabled = true;
-        button.textContent =
-            "Saving...";
-
-        setMessage(
-            message,
-            "Saving profile...",
-            ""
-        );
-
-        try {
-
-            const username =
-                usernameInput.value.trim();
-
-            const displayName =
-                displayNameInput.value.trim();
-
-            const bio =
-                bioInput.value.trim();
-
-            if (username.length < 3) {
-
-                throw new Error(
-                    "Username must be at least 3 characters."
-                );
-            }
-
-            /*
-             * Upload avatar if a new file was selected.
-             */
-            const file =
-                avatarInput.files[0];
-
-            let avatarUrl =
-                currentProfile.avatar_url || null;
-
-            if (file) {
-
-                const extension =
-                    file.type === "image/png"
-                        ? "png"
-                        : file.type === "image/webp"
-                            ? "webp"
-                            : "jpg";
-
-                /*
-                 * IMPORTANT:
-                 * This path matches the Storage RLS policy:
-                 *
-                 * avatars/<user-id>/profile.<extension>
-                 */
-                const filePath =
-                    `${currentSession.user.id}/profile.${extension}`;
-
-                const {
-                    error: uploadError
-                } =
-                    await supabaseClient
-                        .storage
-                        .from("avatars")
-                        .upload(
-                            filePath,
-                            file,
-                            {
-                                upsert: true,
-                                contentType: file.type
-                            }
-                        );
-
-                if (uploadError) {
-
-                    console.error(
-                        "Avatar upload error:",
-                        uploadError
-                    );
-
-                    throw uploadError;
-                }
-
-                const {
-                    data: publicUrlData
-                } =
-                    supabaseClient
-                        .storage
-                        .from("avatars")
-                        .getPublicUrl(
-                            filePath
-                        );
-
-                avatarUrl =
-                    publicUrlData.publicUrl;
-
-                /*
-                 * Add a cache-busting query so the
-                 * browser doesn't keep showing the
-                 * old avatar.
-                 */
-                avatarUrl +=
-                    "?v=" +
-                    Date.now();
-            }
-
-            const {
-                data,
-                error
-            } =
-                await updateProfile({
-
-                    username,
-
-                    display_name:
-                        displayName,
-
-                    bio,
-
-                    avatar_url:
-                        avatarUrl
-                });
-
-            if (error) {
-
-                throw error;
-            }
-
-            currentProfile =
-                data;
-
-            /*
-             * Keep the cache-busting URL if one exists.
-             */
-            showAvatar(
-                currentProfile
-            );
-
-            setMessage(
-                message,
-                "Profile saved successfully!",
+                "Redirecting to your account...",
                 "success"
             );
 
             setTimeout(() => {
-
                 window.location.href =
                     "/account/";
+            }, 700);
 
-            }, 800);
-
-        } catch (error) {
-
-            console.error(
-                "Profile save error:",
-                error
-            );
-
-            setMessage(
-                message,
-                error.message ||
-                "Could not save your profile.",
-                "error"
-            );
-
-        } finally {
-
-            button.disabled = false;
-            button.textContent =
-                "Save Profile";
+            return;
         }
-    }
-);
 
-loadProfile();
+        const hash =
+            window.location.hash;
+
+        const params =
+            new URLSearchParams(
+                hash.startsWith("#")
+                    ? hash.substring(1)
+                    : hash
+            );
+
+        const errorDescription =
+            params.get(
+                "error_description"
+            );
+
+        if (errorDescription) {
+            throw new Error(
+                errorDescription
+            );
+        }
+
+        title.textContent =
+            "Authentication complete";
+
+        setMessage(
+            message,
+            "Please log in to continue.",
+            ""
+        );
+
+        setTimeout(() => {
+            window.location.href =
+                "/login/";
+        }, 1200);
+
+    } catch (error) {
+
+        console.error(
+            "Callback error:",
+            error
+        );
+
+        title.textContent =
+            "Authentication failed";
+
+        setMessage(
+            message,
+            error.message ||
+            "Something went wrong.",
+            "error"
+        );
+    }
+}
+
+initNavbar();
+
+handleCallback();
 </script>
 
 </body>

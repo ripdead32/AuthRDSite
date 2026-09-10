@@ -22,13 +22,28 @@
         </a>
 
         <div class="navbar-links">
-            <a href="/">Home</a>
-            <a href="/search/" class="auth-only" hidden>Search</a>
-            <a href="/friends/" class="auth-only" hidden>Friends</a>
-            <a href="/settings/" class="auth-only" hidden>Settings</a>
-            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a href="/">Home</a>
+
+            <a href="/search/" class="auth-only" hidden>
+                Search
+            </a>
+
+            <a href="/friends/" class="auth-only" hidden>
+                Friends
+            </a>
+
+            <a href="/settings/" class="auth-only" hidden>
+                Settings
+            </a>
+
+            <a href="/account/" class="auth-only" hidden>
+                Account
+            </a>
+
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
 
             <a href="/signup/" class="guest-only button-link">
                 Create Account
@@ -41,6 +56,7 @@
                 hidden>
                 Log Out
             </button>
+
         </div>
 
     </div>
@@ -48,13 +64,19 @@
 
 <main class="auth-container">
 
-    <section class="auth-card">
+    <section class="auth-card auth-form-card">
 
-        <h1>Log In</h1>
+        <div class="auth-card-header">
+            <span class="auth-eyebrow">
+                WELCOME BACK
+            </span>
 
-        <p class="auth-subtitle">
-            Sign in to your Rip_Dead account.
-        </p>
+            <h1>Log In</h1>
+
+            <p class="auth-subtitle">
+                Sign in to your Rip_Dead account.
+            </p>
+        </div>
 
         <form id="login-form">
 
@@ -67,6 +89,7 @@
                 id="email"
                 name="email"
                 autocomplete="email"
+                placeholder="you@example.com"
                 required>
 
             <label for="password">
@@ -78,9 +101,12 @@
                 id="password"
                 name="password"
                 autocomplete="current-password"
+                placeholder="Your password"
                 required>
 
-            <button type="submit">
+            <button
+                type="submit"
+                id="login-button">
                 Log In
             </button>
 
@@ -92,7 +118,7 @@
 
         </form>
 
-        <p>
+        <p class="auth-footer-text">
             Don't have an account?
             <a href="/signup/">Create one</a>.
         </p>
@@ -108,65 +134,80 @@ const loginForm =
 const message =
     document.getElementById("message");
 
-loginForm.addEventListener("submit", async event => {
+loginForm.addEventListener(
+    "submit",
+    async event => {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    const email =
-        document.getElementById("email").value.trim();
+        const email =
+            document.getElementById("email")
+                .value
+                .trim();
 
-    const password =
-        document.getElementById("password").value;
+        const password =
+            document.getElementById("password")
+                .value;
 
-    const button =
-        loginForm.querySelector("button");
+        const button =
+            document.getElementById("login-button");
 
-    button.disabled = true;
-    button.textContent = "Logging in...";
-
-    setMessage(
-        message,
-        "Logging in...",
-        ""
-    );
-
-    const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-        });
-
-    if (error) {
-
-        console.error("Login error:", error);
+        button.disabled = true;
+        button.textContent = "Logging in...";
 
         setMessage(
             message,
-            error.message,
-            "error"
+            "Logging in...",
+            ""
         );
 
-        button.disabled = false;
-        button.textContent = "Log In";
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth
+                .signInWithPassword({
+                    email,
+                    password
+                });
 
-        return;
+        if (error) {
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+            setMessage(
+                message,
+                error.message,
+                "error"
+            );
+
+            button.disabled = false;
+            button.textContent = "Log In";
+
+            return;
+        }
+
+        setMessage(
+            message,
+            "Login successful!",
+            "success"
+        );
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const redirect =
+            params.get("redirect");
+
+        window.location.href =
+            redirect || "/account/";
     }
-
-    setMessage(
-        message,
-        "Logged in successfully!",
-        "success"
-    );
-
-    const params =
-        new URLSearchParams(window.location.search);
-
-    const redirect =
-        params.get("redirect");
-
-    window.location.href =
-        redirect || "/account/";
-});
+);
 
 initNavbar();
 </script>

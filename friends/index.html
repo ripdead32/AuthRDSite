@@ -22,6 +22,7 @@
         </a>
 
         <div class="navbar-links">
+
             <a href="/">Home</a>
             <a href="/search/" class="auth-only" hidden>Search</a>
             <a href="/friends/" class="auth-only" hidden>Friends</a>
@@ -41,6 +42,7 @@
                 hidden>
                 Log Out
             </button>
+
         </div>
 
     </div>
@@ -50,28 +52,45 @@
 
     <section class="auth-card">
 
-        <h1>Friends</h1>
+        <div class="auth-card-header">
 
-        <p class="auth-subtitle">
-            Manage your Rip_Dead friends.
-        </p>
+            <span class="auth-eyebrow">
+                RIP_DEAD SOCIAL
+            </span>
 
-        <div id="friends-message"
-             class="auth-message"
-             aria-live="polite">
+            <h1>Friends</h1>
+
+            <p class="auth-subtitle">
+                Manage your Rip_Dead connections.
+            </p>
+
         </div>
 
-        <h2>Friend Requests</h2>
-
-        <div id="requests">
-            Loading...
+        <div
+            id="friends-message"
+            class="auth-message"
+            aria-live="polite">
         </div>
 
-        <h2>Your Friends</h2>
+        <section>
 
-        <div id="friends-list">
-            Loading...
-        </div>
+            <h2>Friend Requests</h2>
+
+            <div id="requests">
+                Loading...
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>Your Friends</h2>
+
+            <div id="friends-list">
+                Loading...
+            </div>
+
+        </section>
 
     </section>
 
@@ -81,13 +100,19 @@
 let friendsSession = null;
 
 const requestsContainer =
-    document.getElementById("requests");
+    document.getElementById(
+        "requests"
+    );
 
 const friendsContainer =
-    document.getElementById("friends-list");
+    document.getElementById(
+        "friends-list"
+    );
 
 const friendsMessage =
-    document.getElementById("friends-message");
+    document.getElementById(
+        "friends-message"
+    );
 
 async function initializeFriends() {
 
@@ -147,26 +172,32 @@ async function loadFriendships() {
     requestsContainer.innerHTML = "";
     friendsContainer.innerHTML = "";
 
-    const receivedRequests =
-        data.filter(friendship =>
-            friendship.addressee_id ===
-            friendsSession.user.id &&
-            friendship.status === "pending"
+    const requests =
+        data.filter(
+            friendship =>
+                friendship.addressee_id ===
+                    friendsSession.user.id &&
+                friendship.status ===
+                    "pending"
         );
 
     const accepted =
-        data.filter(friendship =>
-            friendship.status === "accepted"
+        data.filter(
+            friendship =>
+                friendship.status ===
+                    "accepted"
         );
 
-    if (receivedRequests.length === 0) {
+    if (requests.length === 0) {
 
         requestsContainer.textContent =
             "No pending friend requests.";
 
     } else {
 
-        for (const friendship of receivedRequests) {
+        for (
+            const friendship of requests
+        ) {
 
             const profile =
                 await getProfile(
@@ -182,36 +213,54 @@ async function loadFriendships() {
                     profile
                 );
 
+            const view =
+                document.createElement(
+                    "a"
+                );
+
+            view.href =
+                "/user/?id=" +
+                encodeURIComponent(
+                    profile.id
+                );
+
+            view.className =
+                "button-link";
+
+            view.textContent =
+                "View";
+
             const accept =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             accept.textContent =
                 "Accept";
 
-            accept.addEventListener(
-                "click",
+            accept.onclick =
                 () =>
                     updateFriendRequest(
                         friendship.id,
                         "accepted"
-                    )
-            );
+                    );
 
             const decline =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             decline.textContent =
                 "Decline";
 
-            decline.addEventListener(
-                "click",
+            decline.onclick =
                 () =>
                     updateFriendRequest(
                         friendship.id,
                         "declined"
-                    )
-            );
+                    );
 
+            card.appendChild(view);
             card.appendChild(accept);
             card.appendChild(decline);
 
@@ -228,11 +277,13 @@ async function loadFriendships() {
 
     } else {
 
-        for (const friendship of accepted) {
+        for (
+            const friendship of accepted
+        ) {
 
             const friendId =
                 friendship.requester_id ===
-                friendsSession.user.id
+                    friendsSession.user.id
                     ? friendship.addressee_id
                     : friendship.requester_id;
 
@@ -245,17 +296,47 @@ async function loadFriendships() {
                 continue;
             }
 
+            const card =
+                createFriendCard(
+                    profile
+                );
+
+            const view =
+                document.createElement(
+                    "a"
+                );
+
+            view.href =
+                "/user/?id=" +
+                encodeURIComponent(
+                    profile.id
+                );
+
+            view.className =
+                "button-link";
+
+            view.textContent =
+                "View Profile";
+
+            card.appendChild(
+                view
+            );
+
             friendsContainer.appendChild(
-                createFriendCard(profile)
+                card
             );
         }
     }
 }
 
-function createFriendCard(profile) {
+function createFriendCard(
+    profile
+) {
 
     const card =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     card.className =
         "friend-card";
@@ -267,13 +348,17 @@ function createFriendCard(profile) {
         );
 
     const information =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     information.className =
         "friend-info";
 
     const name =
-        document.createElement("strong");
+        document.createElement(
+            "strong"
+        );
 
     name.textContent =
         profile.display_name ||
@@ -281,18 +366,31 @@ function createFriendCard(profile) {
         "Unknown User";
 
     const username =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
 
     username.textContent =
         profile.username
-            ? "@" + profile.username
+            ? "@" +
+              profile.username
             : "";
 
-    information.appendChild(name);
-    information.appendChild(username);
+    information.appendChild(
+        name
+    );
 
-    card.appendChild(avatar);
-    card.appendChild(information);
+    information.appendChild(
+        username
+    );
+
+    card.appendChild(
+        avatar
+    );
+
+    card.appendChild(
+        information
+    );
 
     return card;
 }
@@ -316,11 +414,6 @@ async function updateFriendRequest(
             );
 
     if (error) {
-
-        console.error(
-            "Friend request update error:",
-            error
-        );
 
         setMessage(
             friendsMessage,

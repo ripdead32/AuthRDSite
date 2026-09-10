@@ -22,6 +22,7 @@
         </a>
 
         <div class="navbar-links">
+
             <a href="/">Home</a>
             <a href="/search/" class="auth-only" hidden>Search</a>
             <a href="/friends/" class="auth-only" hidden>Friends</a>
@@ -41,6 +42,7 @@
                 hidden>
                 Log Out
             </button>
+
         </div>
 
     </div>
@@ -50,11 +52,19 @@
 
     <section class="auth-card">
 
-        <h1>Settings</h1>
+        <div class="auth-card-header">
 
-        <p class="auth-subtitle">
-            Manage your Rip_Dead account.
-        </p>
+            <span class="auth-eyebrow">
+                RIP_DEAD ACCOUNT
+            </span>
+
+            <h1>Settings</h1>
+
+            <p class="auth-subtitle">
+                Manage your account and profile.
+            </p>
+
+        </div>
 
         <div
             id="settings-message"
@@ -64,21 +74,11 @@
 
         <section>
 
-            <h2>Account</h2>
-
-            <p id="account-email">
-                Loading...
-            </p>
-
-        </section>
-
-        <section>
-
             <h2>Profile</h2>
 
             <p>
-                Change your profile information,
-                profile picture and bio.
+                Change your username, display name,
+                biography and profile picture.
             </p>
 
             <a
@@ -91,13 +91,11 @@
 
         <section>
 
-            <h2>Security</h2>
+            <h2>Account</h2>
 
-            <button
-                type="button"
-                id="password-reset">
-                Send Password Reset Email
-            </button>
+            <p id="account-email">
+                Loading...
+            </p>
 
         </section>
 
@@ -144,72 +142,21 @@ async function initializeSettings() {
 }
 
 document.getElementById(
-    "password-reset"
-).addEventListener(
-    "click",
-    async () => {
-
-        if (!settingsSession) {
-            return;
-        }
-
-        const button =
-            document.getElementById(
-                "password-reset"
-            );
-
-        button.disabled = true;
-        button.textContent =
-            "Sending...";
-
-        const {
-            error
-        } =
-            await supabaseClient.auth
-                .resetPasswordForEmail(
-                    settingsSession.user.email,
-                    {
-                        redirectTo:
-                            "https://auth.ripdead.de5.net/callback/"
-                    }
-                );
-
-        if (error) {
-
-            console.error(
-                "Password reset error:",
-                error
-            );
-
-            setMessage(
-                settingsMessage,
-                error.message,
-                "error"
-            );
-
-        } else {
-
-            setMessage(
-                settingsMessage,
-                "Password reset email sent.",
-                "success"
-            );
-        }
-
-        button.disabled = false;
-        button.textContent =
-            "Send Password Reset Email";
-    }
-);
-
-document.getElementById(
     "settings-logout"
 ).addEventListener(
     "click",
     async () => {
 
-        await signOut();
+        const button =
+            document.getElementById(
+                "settings-logout"
+            );
 
+        button.disabled = true;
+        button.textContent =
+            "Logging out...";
+
+        await signOut();
     }
 );
 
