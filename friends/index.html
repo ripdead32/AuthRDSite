@@ -23,15 +23,47 @@
 
         <div class="navbar-links">
 
-            <a href="/">Home</a>
-            <a href="/search/" class="auth-only" hidden>Search</a>
-            <a href="/friends/" class="auth-only" hidden>Friends</a>
-            <a href="/settings/" class="auth-only" hidden>Settings</a>
-            <a href="/account/" class="auth-only" hidden>Account</a>
+            <a href="/">
+                Home
+            </a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden>
+                Search
+            </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden>
+                Friends
+            </a>
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden>
+                Settings
+            </a>
+
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden>
+                Account
+            </a>
+
+            <a
+                href="/login/"
+                class="guest-only">
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only button-link">
                 Create Account
             </a>
 
@@ -48,71 +80,92 @@
     </div>
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card">
+<main class="page">
 
-        <div class="auth-card-header">
+    <div class="page-header">
 
-            <span class="auth-eyebrow">
-                RIP_DEAD SOCIAL
-            </span>
+        <span style="
+            display: block;
+            margin-bottom: 10px;
+            color: var(--purple-hover);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+        ">
+            RIP_DEAD SOCIAL
+        </span>
 
-            <h1>Friends</h1>
+        <h1>
+            Friends
+        </h1>
 
-            <p class="auth-subtitle">
-                Manage your Rip_Dead connections.
-            </p>
+        <p>
+            Manage your Rip_Dead connections.
+        </p>
 
+    </div>
+
+
+    <div
+        id="friends-message"
+        class="message"
+        aria-live="polite">
+    </div>
+
+
+    <section class="card">
+
+        <h2 class="card-title">
+            Friend Requests
+        </h2>
+
+        <p class="card-description">
+            People who want to connect with you.
+        </p>
+
+        <div id="requests">
+            Loading...
         </div>
 
-        <div
-            id="friends-message"
-            class="auth-message"
-            aria-live="polite">
+    </section>
+
+
+    <section class="card">
+
+        <h2 class="card-title">
+            Your Friends
+        </h2>
+
+        <p class="card-description">
+            Your current Rip_Dead connections.
+        </p>
+
+        <div id="friends-list">
+            Loading...
         </div>
-
-        <section>
-
-            <h2>Friend Requests</h2>
-
-            <div id="requests">
-                Loading...
-            </div>
-
-        </section>
-
-        <section>
-
-            <h2>Your Friends</h2>
-
-            <div id="friends-list">
-                Loading...
-            </div>
-
-        </section>
 
     </section>
 
 </main>
 
+
 <script>
+
 let friendsSession = null;
 
+
 const requestsContainer =
-    document.getElementById(
-        "requests"
-    );
+    document.getElementById("requests");
+
 
 const friendsContainer =
-    document.getElementById(
-        "friends-list"
-    );
+    document.getElementById("friends-list");
+
 
 const friendsMessage =
-    document.getElementById(
-        "friends-message"
-    );
+    document.getElementById("friends-message");
+
 
 async function initializeFriends() {
 
@@ -128,6 +181,7 @@ async function initializeFriends() {
     await loadFriendships();
 }
 
+
 async function loadFriendships() {
 
     requestsContainer.innerHTML =
@@ -135,6 +189,7 @@ async function loadFriendships() {
 
     friendsContainer.innerHTML =
         "Loading...";
+
 
     const {
         data,
@@ -153,6 +208,7 @@ async function loadFriendships() {
                 }
             );
 
+
     if (error) {
 
         console.error(
@@ -169,8 +225,10 @@ async function loadFriendships() {
         return;
     }
 
+
     requestsContainer.innerHTML = "";
     friendsContainer.innerHTML = "";
+
 
     const requests =
         data.filter(
@@ -181,6 +239,7 @@ async function loadFriendships() {
                     "pending"
         );
 
+
     const accepted =
         data.filter(
             friendship =>
@@ -188,10 +247,18 @@ async function loadFriendships() {
                     "accepted"
         );
 
+
+    /*
+     * Friend Requests
+     */
+
     if (requests.length === 0) {
 
-        requestsContainer.textContent =
-            "No pending friend requests.";
+        requestsContainer.innerHTML = `
+            <div class="empty-state">
+                No pending friend requests.
+            </div>
+        `;
 
     } else {
 
@@ -204,19 +271,27 @@ async function loadFriendships() {
                     friendship.requester_id
                 );
 
+
             if (!profile) {
                 continue;
             }
 
+
             const card =
-                createFriendCard(
-                    profile
-                );
+                createFriendCard(profile);
+
+
+            const actions =
+                document.createElement("div");
+
+            actions.style.display = "flex";
+            actions.style.flexWrap = "wrap";
+            actions.style.gap = "7px";
+            actions.style.marginLeft = "auto";
+
 
             const view =
-                document.createElement(
-                    "a"
-                );
+                document.createElement("a");
 
             view.href =
                 "/user/?id=" +
@@ -225,15 +300,16 @@ async function loadFriendships() {
                 );
 
             view.className =
-                "button-link";
+                "button secondary";
 
             view.textContent =
                 "View";
 
+
             const accept =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
+
+            accept.type = "button";
 
             accept.textContent =
                 "Accept";
@@ -245,10 +321,14 @@ async function loadFriendships() {
                         "accepted"
                     );
 
+
             const decline =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
+
+            decline.type = "button";
+
+            decline.className =
+                "danger";
 
             decline.textContent =
                 "Decline";
@@ -260,20 +340,30 @@ async function loadFriendships() {
                         "declined"
                     );
 
-            card.appendChild(view);
-            card.appendChild(accept);
-            card.appendChild(decline);
 
-            requestsContainer.appendChild(
-                card
-            );
+            actions.appendChild(view);
+            actions.appendChild(accept);
+            actions.appendChild(decline);
+
+
+            card.appendChild(actions);
+
+            requestsContainer.appendChild(card);
         }
     }
 
+
+    /*
+     * Accepted Friends
+     */
+
     if (accepted.length === 0) {
 
-        friendsContainer.textContent =
-            "You don't have any friends yet.";
+        friendsContainer.innerHTML = `
+            <div class="empty-state">
+                You don't have any friends yet.
+            </div>
+        `;
 
     } else {
 
@@ -287,24 +377,22 @@ async function loadFriendships() {
                     ? friendship.addressee_id
                     : friendship.requester_id;
 
+
             const profile =
-                await getProfile(
-                    friendId
-                );
+                await getProfile(friendId);
+
 
             if (!profile) {
                 continue;
             }
 
+
             const card =
-                createFriendCard(
-                    profile
-                );
+                createFriendCard(profile);
+
 
             const view =
-                document.createElement(
-                    "a"
-                );
+                document.createElement("a");
 
             view.href =
                 "/user/?id=" +
@@ -313,87 +401,108 @@ async function loadFriendships() {
                 );
 
             view.className =
-                "button-link";
+                "button secondary";
 
             view.textContent =
                 "View Profile";
 
-            card.appendChild(
-                view
-            );
 
-            friendsContainer.appendChild(
-                card
-            );
+            card.appendChild(view);
+
+            friendsContainer.appendChild(card);
         }
     }
 }
 
-function createFriendCard(
-    profile
-) {
+
+function createFriendCard(profile) {
 
     const card =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
     card.className =
-        "friend-card";
+        "user-card";
+
 
     const avatar =
         createAvatar(
             profile,
-            "friend-avatar"
+            "user-avatar"
         );
+
 
     const information =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
     information.className =
-        "friend-info";
+        "user-info";
+
 
     const name =
-        document.createElement(
-            "strong"
-        );
+        document.createElement("div");
+
+    name.className =
+        "user-name";
 
     name.textContent =
         profile.display_name ||
         profile.username ||
         "Unknown User";
 
+
     const username =
-        document.createElement(
-            "span"
-        );
+        document.createElement("div");
+
+    username.className =
+        "user-username";
 
     username.textContent =
         profile.username
-            ? "@" +
-              profile.username
+            ? "@" + profile.username
             : "";
 
-    information.appendChild(
-        name
-    );
 
-    information.appendChild(
-        username
-    );
+    information.appendChild(name);
+    information.appendChild(username);
 
-    card.appendChild(
-        avatar
-    );
 
-    card.appendChild(
-        information
-    );
+    if (profile.is_verified) {
+
+        const badge =
+            document.createElement("span");
+
+        badge.className =
+            "verified-badge";
+
+        badge.textContent =
+            "✓ Verified";
+
+        badge.style.display =
+            "inline-block";
+
+        badge.style.marginTop =
+            "5px";
+
+        badge.style.color =
+            "var(--purple-hover)";
+
+        badge.style.fontSize =
+            "12px";
+
+        badge.style.fontWeight =
+            "700";
+
+        information.appendChild(badge);
+    }
+
+
+    card.appendChild(avatar);
+    card.appendChild(information);
+
 
     return card;
 }
+
 
 async function updateFriendRequest(
     friendshipId,
@@ -413,6 +522,7 @@ async function updateFriendRequest(
                 friendshipId
             );
 
+
     if (error) {
 
         setMessage(
@@ -424,10 +534,13 @@ async function updateFriendRequest(
         return;
     }
 
+
     await loadFriendships();
 }
 
+
 initializeFriends();
+
 </script>
 
 </body>

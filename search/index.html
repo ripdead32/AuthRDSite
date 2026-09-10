@@ -23,15 +23,47 @@
 
         <div class="navbar-links">
 
-            <a href="/">Home</a>
-            <a href="/search/" class="auth-only" hidden>Search</a>
-            <a href="/friends/" class="auth-only" hidden>Friends</a>
-            <a href="/settings/" class="auth-only" hidden>Settings</a>
-            <a href="/account/" class="auth-only" hidden>Account</a>
+            <a href="/">
+                Home
+            </a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden>
+                Search
+            </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden>
+                Friends
+            </a>
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden>
+                Settings
+            </a>
+
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden>
+                Account
+            </a>
+
+            <a
+                href="/login/"
+                class="guest-only">
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only button-link">
                 Create Account
             </a>
 
@@ -48,37 +80,52 @@
     </div>
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card">
+<main class="page page-small">
 
-        <div class="auth-card-header">
+    <div class="page-header">
 
-            <span class="auth-eyebrow">
-                RIP_DEAD SOCIAL
-            </span>
+        <span style="
+            display: block;
+            margin-bottom: 10px;
+            color: var(--purple-hover);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+        ">
+            RIP_DEAD SOCIAL
+        </span>
 
-            <h1>Search Users</h1>
+        <h1>
+            Search Users
+        </h1>
 
-            <p class="auth-subtitle">
-                Find people on Rip_Dead.
-            </p>
+        <p>
+            Find people on Rip_Dead.
+        </p>
 
-        </div>
+    </div>
+
+
+    <section class="card">
 
         <form id="search-form">
 
-            <label for="search-input">
-                Username or display name
-            </label>
+            <div class="form-group">
 
-            <input
-                type="search"
-                id="search-input"
-                maxlength="64"
-                placeholder="Search for someone..."
-                autocomplete="off"
-                required>
+                <label for="search-input">
+                    Username or display name
+                </label>
+
+                <input
+                    type="search"
+                    id="search-input"
+                    maxlength="64"
+                    placeholder="Search for someone..."
+                    autocomplete="off"
+                    required>
+
+            </div>
 
             <button type="submit">
                 Search
@@ -86,40 +133,40 @@
 
         </form>
 
+
         <div
             id="search-message"
-            class="auth-message"
+            class="message"
             aria-live="polite">
         </div>
 
-        <div id="search-results"></div>
+
+        <div
+            id="search-results"
+            style="margin-top: 18px;">
+        </div>
 
     </section>
 
 </main>
 
+
 <script>
+
 let searchSession = null;
 
 const searchForm =
-    document.getElementById(
-        "search-form"
-    );
+    document.getElementById("search-form");
 
 const searchInput =
-    document.getElementById(
-        "search-input"
-    );
+    document.getElementById("search-input");
 
 const searchResults =
-    document.getElementById(
-        "search-results"
-    );
+    document.getElementById("search-results");
 
 const searchMessage =
-    document.getElementById(
-        "search-message"
-    );
+    document.getElementById("search-message");
+
 
 async function initializeSearch() {
 
@@ -133,125 +180,115 @@ async function initializeSearch() {
     await initNavbar();
 }
 
-function createSearchResult(
-    profile
-) {
+
+function createSearchResult(profile) {
 
     const card =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
-    card.className =
-        "search-result";
+    card.className = "user-card";
+
 
     const avatar =
         createAvatar(
             profile,
-            "search-result-avatar"
+            "user-avatar"
         );
+
 
     const information =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
-    information.className =
-        "search-result-info";
+    information.className = "user-info";
+
 
     const name =
-        document.createElement(
-            "h3"
-        );
+        document.createElement("div");
+
+    name.className = "user-name";
 
     name.textContent =
         profile.display_name ||
         profile.username ||
         "Unknown User";
 
+
     const username =
-        document.createElement(
-            "p"
-        );
+        document.createElement("div");
+
+    username.className = "user-username";
 
     username.textContent =
         profile.username
-            ? "@" +
-              profile.username
+            ? "@" + profile.username
             : "";
 
-    information.appendChild(
-        name
-    );
 
-    information.appendChild(
-        username
-    );
+    information.appendChild(name);
+    information.appendChild(username);
+
 
     if (profile.is_verified) {
 
         const badge =
-            document.createElement(
-                "span"
-            );
+            document.createElement("span");
 
-        badge.className =
-            "verified-badge";
+        badge.className = "verified-badge";
 
         badge.textContent =
             "✓ Verified";
 
-        information.appendChild(
-            badge
-        );
+        badge.style.display = "inline-block";
+        badge.style.marginTop = "5px";
+        badge.style.color = "var(--purple-hover)";
+        badge.style.fontSize = "12px";
+        badge.style.fontWeight = "700";
+
+        information.appendChild(badge);
     }
 
+
     const viewButton =
-        document.createElement(
-            "a"
-        );
+        document.createElement("a");
 
     viewButton.href =
         "/user/?id=" +
-        encodeURIComponent(
-            profile.id
-        );
+        encodeURIComponent(profile.id);
 
     viewButton.className =
-        "button-link";
+        "button secondary";
 
     viewButton.textContent =
         "View Profile";
 
-    card.appendChild(
-        avatar
-    );
 
-    card.appendChild(
-        information
-    );
+    card.appendChild(avatar);
+    card.appendChild(information);
+    card.appendChild(viewButton);
 
-    card.appendChild(
-        viewButton
-    );
 
     return card;
 }
 
+
 searchForm.addEventListener(
     "submit",
-    async event => {
+    async (event) => {
 
         event.preventDefault();
 
+
         const query =
             searchInput.value.trim();
+
 
         if (!query) {
             return;
         }
 
+
         searchResults.innerHTML = "";
+
 
         setMessage(
             searchMessage,
@@ -259,10 +296,12 @@ searchForm.addEventListener(
             ""
         );
 
+
         /*
          * ilike provides case-insensitive
          * partial matching.
          */
+
         const {
             data,
             error
@@ -281,6 +320,7 @@ searchForm.addEventListener(
                 )
                 .limit(25);
 
+
         if (error) {
 
             console.error(
@@ -297,6 +337,7 @@ searchForm.addEventListener(
             return;
         }
 
+
         if (
             !data ||
             data.length === 0
@@ -311,26 +352,32 @@ searchForm.addEventListener(
             return;
         }
 
+
         setMessage(
             searchMessage,
             `${data.length} user${data.length === 1 ? "" : "s"} found.`,
             "success"
         );
 
+
         data.forEach(
-            profile => {
+            (profile) => {
 
                 searchResults.appendChild(
                     createSearchResult(
                         profile
                     )
                 );
+
             }
         );
+
     }
 );
 
+
 initializeSearch();
+
 </script>
 
 </body>

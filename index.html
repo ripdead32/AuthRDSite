@@ -22,29 +22,48 @@
         </a>
 
         <div class="navbar-links">
-            <a href="/">Home</a>
 
-            <a href="/search/" class="auth-only" hidden>
+            <a href="/">
+                Home
+            </a>
+
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden>
                 Search
             </a>
 
-            <a href="/friends/" class="auth-only" hidden>
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden>
                 Friends
             </a>
 
-            <a href="/settings/" class="auth-only" hidden>
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden>
                 Settings
             </a>
 
-            <a href="/account/" class="auth-only" hidden>
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden>
                 Account
             </a>
 
-            <a href="/login/" class="guest-only">
+            <a
+                href="/login/"
+                class="guest-only">
                 Log In
             </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/signup/"
+                class="guest-only button-link">
                 Create Account
             </a>
 
@@ -55,17 +74,27 @@
                 hidden>
                 Log Out
             </button>
+
         </div>
 
     </div>
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card">
+<main class="page page-small">
 
-        <div class="auth-card-header">
-            <span class="auth-eyebrow">
+    <section class="card">
+
+        <div class="page-header">
+
+            <span style="
+                display: block;
+                margin-bottom: 10px;
+                color: var(--purple-hover);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+            ">
                 RIP_DEAD ACCOUNT SYSTEM
             </span>
 
@@ -75,36 +104,42 @@
                 Every Rip_Dead service.
             </h1>
 
-            <p class="auth-subtitle">
+            <p>
                 Your central identity for Rip_Dead applications,
                 websites, mods and social features.
             </p>
+
         </div>
 
-        <div class="auth-actions">
+
+        <div style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        ">
 
             <a
                 href="/login/"
-                class="button-link guest-only">
+                class="button guest-only">
                 Log In
             </a>
 
             <a
                 href="/signup/"
-                class="button-link guest-only">
+                class="button guest-only">
                 Create Account
             </a>
 
             <a
                 href="/account/"
-                class="button-link auth-only"
+                class="button auth-only"
                 hidden>
                 Open Account
             </a>
 
             <a
                 href="/search/"
-                class="button-link auth-only"
+                class="button auth-only"
                 hidden>
                 Find Users
             </a>
@@ -114,6 +149,7 @@
     </section>
 
 </main>
+
 
 <script>
 initNavbar();
