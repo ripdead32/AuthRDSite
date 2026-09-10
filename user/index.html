@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>User Profile - Rip_Dead Authentication</title>
+
+    <link rel="stylesheet" href="/css/auth.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+</head>
+
+<body>
+
+<nav class="site-navbar">
+    <div class="navbar-inner">
+
+        <a href="/" class="navbar-brand">
+            Rip_Dead Authentication
+        </a>
+
+        <div class="navbar-links">
+
+            <a href="/">Home</a>
+
+            <a href="/search/" class="auth-only" hidden>
+                Search
+            </a>
+
+            <a href="/friends/" class="auth-only" hidden>
+                Friends
+            </a>
+
+            <a href="/settings/" class="auth-only" hidden>
+                Settings
+            </a>
+
+            <a href="/account/" class="auth-only" hidden>
+                Account
+            </a>
+
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
+
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
+            </a>
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden>
+                Log Out
+            </button>
+
+        </div>
+
+    </div>
+</nav>
+
+<main class="auth-container">
+
+    <section class="auth-card">
+
+        <div
+            id="profile-loading"
+            class="auth-message">
+            Loading profile...
+        </div>
+
+        <div
+            id="profile-error"
+            class="auth-message error"
+            hidden>
+        </div>
+
+        <div
+            id="profile-content"
+            hidden>
+
+            <div id="public-avatar"></div>
+
+            <h1 id="public-display-name">
+            </h1>
+
+            <p id="public-username">
+            </p>
+
+            <div id="public-verification"></div>
+
+            <p id="public-bio">
+            </p>
+
+            <div
+                id="profile-actions"
+                class="auth-actions">
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+let viewerSession = null;
+let viewedProfile = null;
+let friendship = null;
+let following = false;
+
+const loading =
+    document.getElementById(
+        "profile-loading"
+    );
+
+const errorElement =
+    document.getElementById(
+        "profile-error"
+    );
+
+const content =
+    document.getElementById(
+        "profile-content"
+    );
+
+const avatar =
+    document.getElementById(
+        "public-avatar"
+    );
+
+const displayName =
+    document.getElementById(
+        "public-display-name"
+    );
+
+const username =
+    document.getElementById(
+        "public-username"
+    );
+
+const verification =
+    document.getElementById(
+        "public-verification"
+    );
+
+const bio =
+    document.getElementById(
+        "public-bio"
+    );
+
+const actions =
+    document.getElementById(
+        "profile-actions"
+    );
+
+function showError(message) {
+
+    loading.hidden = true;
+    content.hidden = true;
+
+    errorElement.textContent =
+        message;
+
+    errorElement.hidden = false;
+}
+
+function getViewedUserId() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get("id");
+}
+
+async function loadFriendship() {
+
+    if (!viewerSession) {
+        return null;
+    }
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("friendships")
+            .select("*")
+            .or(
+                `and(requester_id.eq.${viewerSession.user.id},addressee_id.eq.${viewedProfile.id}),and(requester_id.eq.${viewedProfile.id},addressee_id.eq.${viewerSession.user.id})`
+            )
+            .limit(1);
+
+    if (error) {
+
+        console.error(
+            "Friendship lookup error:",
+            error
+        );
+
+        return null;
+    }
+
+    return data && data.length
+        ? data[0]
+        : null;
+}
+
+async function loadFollowing() {
+
+    if (!viewerSession) {
+        return false;
+    }
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("follows")
+            .select("follower_id, following_id")
+            .eq(
+                "follower_id",
+                viewerSession.user.id
+            )
+            .eq(
+                "following_id",
+                viewedProfile.id
+            )
+            .maybeSingle();
+
+    if (error) {
+
+        console.error(
+            "Follow lookup error:",
+            error
+        );
+
+        return false;
+    }
+
+    return !!data;
+}
+
+function renderActions() {
+
+    actions.innerHTML = "";
+
+    /*
+     * If the viewer is looking at their own
+     * profile, show the edit button instead.
+     */
+    if (
+        viewerSession &&
+        viewerSession.user.id ===
+            viewedProfile.id
+    ) {
+
+        const edit =
+            document.createElement("a");
+
+        edit.href =
+            "/profile/";
+
+        edit.className =
+            "button-link";
+
+        edit.textContent =
+            "Edit Profile";
+
+        actions.appendChild(edit);
+
+        return;
+    }
+
+    /*
+     * Logged-out users cannot interact with
+     * profiles.
+     */
+    if (!viewerSession) {
+
+        const login =
+            document.createElement("a");
+
+        login.href =
+            "/login/?redirect=" +
+            encodeURIComponent(
+                window.location.pathname +
+                window.location.search
+            );
+
+        login.className =
+            "button-link";
+
+        login.textContent =
+            "Log In to Connect";
+
+        actions.appendChild(login);
+
+        return;
+    }
+
+    /*
+     * Friend button.
+     */
+    const friendButton =
+        document.createElement("button");
+
+    if (!friendship) {
+
+        friendButton.textContent =
+            "Add Friend";
+
+        friendButton.addEventListener(
+            "click",
+            sendFriendRequest
+        );
+
+    } else if (
+        friendship.status === "accepted"
+    ) {
+
+        friendButton.textContent =
+            "Friends";
+
+        friendButton.disabled =
+            true;
+
+    } else if (
+        friendship.requester_id ===
+        viewerSession.user.id &&
+        friendship.status === "pending"
+    ) {
+
+        friendButton.textContent =
+            "Request Sent";
+
+        friendButton.disabled =
+            true;
+
+    } else if (
+        friendship.addressee_id ===
+        viewerSession.user.id &&
+        friendship.status === "pending"
+    ) {
+
+        friendButton.textContent =
+            "Accept Request";
+
+        friendButton.addEventListener(
+            "click",
+            acceptFriendRequest
+        );
+    }
+
+    actions.appendChild(
+        friendButton
+    );
+
+    /*
+     * Follow button.
+     */
+    const followButton =
+        document.createElement("button");
+
+    if (following) {
+
+        followButton.textContent =
+            "Unfollow";
+
+        followButton.addEventListener(
+            "click",
+            unfollowUser
+        );
+
+    } else {
+
+        followButton.textContent =
+            "Follow";
+
+        followButton.addEventListener(
+            "click",
+            followUser
+        );
+    }
+
+    actions.appendChild(
+        followButton
+    );
+}
+
+async function sendFriendRequest() {
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("friendships")
+            .insert({
+                requester_id:
+                    viewerSession.user.id,
+
+                addressee_id:
+                    viewedProfile.id,
+
+                status:
+                    "pending"
+            });
+
+    if (error) {
+
+        console.error(
+            "Friend request error:",
+            error
+        );
+
+        alert(
+            error.message
+        );
+
+        return;
+    }
+
+    friendship =
+        await loadFriendship();
+
+    renderActions();
+}
+
+async function acceptFriendRequest() {
+
+    if (!friendship) {
+        return;
+    }
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("friendships")
+            .update({
+                status:
+                    "accepted"
+            })
+            .eq(
+                "id",
+                friendship.id
+            );
+
+    if (error) {
+
+        console.error(
+            "Accept friend request error:",
+            error
+        );
+
+        alert(
+            error.message
+        );
+
+        return;
+    }
+
+    friendship =
+        await loadFriendship();
+
+    renderActions();
+}
+
+async function followUser() {
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("follows")
+            .insert({
+                follower_id:
+                    viewerSession.user.id,
+
+                following_id:
+                    viewedProfile.id
+            });
+
+    if (error) {
+
+        console.error(
+            "Follow error:",
+            error
+        );
+
+        alert(
+            error.message
+        );
+
+        return;
+    }
+
+    following = true;
+
+    renderActions();
+}
+
+async function unfollowUser() {
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("follows")
+            .delete()
+            .eq(
+                "follower_id",
+                viewerSession.user.id
+            )
+            .eq(
+                "following_id",
+                viewedProfile.id
+            );
+
+    if (error) {
+
+        console.error(
+            "Unfollow error:",
+            error
+        );
+
+        alert(
+            error.message
+        );
+
+        return;
+    }
+
+    following = false;
+
+    renderActions();
+}
+
+async function initializePublicProfile() {
+
+    await initNavbar();
+
+    viewerSession =
+        await getSession();
+
+    const userId =
+        getViewedUserId();
+
+    if (!userId) {
+
+        showError(
+            "No user was specified."
+        );
+
+        return;
+    }
+
+    viewedProfile =
+        await getProfile(userId);
+
+    if (!viewedProfile) {
+
+        showError(
+            "This user could not be found."
+        );
+
+        return;
+    }
+
+    /*
+     * Profile information.
+     */
+    displayName.textContent =
+        viewedProfile.display_name ||
+        viewedProfile.username ||
+        "Unknown User";
+
+    username.textContent =
+        viewedProfile.username
+            ? "@" + viewedProfile.username
+            : "";
+
+    bio.textContent =
+        viewedProfile.bio ||
+        "No bio yet.";
+
+    /*
+     * Verified badge.
+     */
+    verification.innerHTML = "";
+
+    if (viewedProfile.is_verified) {
+
+        const badge =
+            document.createElement("span");
+
+        badge.className =
+            "verified-badge";
+
+        badge.textContent =
+            "✓ Verified";
+
+        verification.appendChild(
+            badge
+        );
+    }
+
+    /*
+     * Avatar.
+     */
+    avatar.innerHTML = "";
+
+    avatar.appendChild(
+        createAvatar(
+            viewedProfile,
+            "profile-avatar"
+        )
+    );
+
+    /*
+     * Social information.
+     */
+    if (
+        viewerSession &&
+        viewerSession.user.id !==
+            viewedProfile.id
+    ) {
+
+        friendship =
+            await loadFriendship();
+
+        following =
+            await loadFollowing();
+
+    }
+
+    renderActions();
+
+    loading.hidden = true;
+    errorElement.hidden = true;
+    content.hidden = false;
+}
+
+initializePublicProfile();
+</script>
+
+</body>
+</html>

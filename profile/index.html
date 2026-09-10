@@ -2,177 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Edit Profile - Rip_Dead Authentication</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
-
     <div class="navbar-inner">
 
-        <a
-            href="../"
-            class="navbar-brand"
-        >
+        <a href="/" class="navbar-brand">
             Rip_Dead Authentication
         </a>
 
         <div class="navbar-links">
 
-            <a href="../">
-                Home
-            </a>
+            <a href="/">Home</a>
 
-            <a href="../search/">
+            <a href="/search/" class="auth-only" hidden>
                 Search
             </a>
 
-            <a href="../friends/">
+            <a href="/friends/" class="auth-only" hidden>
                 Friends
             </a>
 
-            <a href="../settings/">
+            <a href="/settings/" class="auth-only" hidden>
                 Settings
             </a>
 
-            <a href="../account/">
+            <a href="/account/" class="auth-only" hidden>
                 Account
+            </a>
+
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
+
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
             </a>
 
             <button
                 type="button"
                 id="navbar-logout"
-                class="navbar-logout"
-            >
+                class="auth-only navbar-logout"
+                hidden>
                 Log Out
             </button>
 
         </div>
 
     </div>
-
 </nav>
 
 <main class="auth-container">
 
-    <div class="auth-card">
+    <section class="auth-card">
 
-        <div class="auth-header">
+        <h1>Edit Profile</h1>
 
-            <h1>Edit Profile</h1>
+        <p class="auth-subtitle">
+            Customize your Rip_Dead profile.
+        </p>
 
-            <p>
-                Update your public profile.
-            </p>
-
-        </div>
-
-        <div class="profile-avatar-container">
-
-            <div
-                id="profile-avatar"
-                class="account-avatar"
-            >
-                ?
-            </div>
-
-            <label
-                for="avatar-input"
-                class="upload-button"
-            >
-                Choose Profile Picture
-            </label>
-
-            <input
-                type="file"
-                id="avatar-input"
-                accept="image/png,image/jpeg,image/webp"
-                hidden
-            >
-
+        <div id="avatar-preview-container">
+            <div id="avatar-preview"></div>
         </div>
 
         <form id="profile-form">
 
-            <div class="form-group">
+            <label for="avatar">
+                Profile Picture
+            </label>
 
-                <label for="username">
-                    Username
-                </label>
+            <input
+                type="file"
+                id="avatar"
+                name="avatar"
+                accept="image/png,image/jpeg,image/webp">
 
-                <input
-                    type="text"
-                    id="username"
-                    maxlength="32"
-                    required
-                >
+            <small>
+                PNG, JPG, or WebP. Maximum 5 MB.
+            </small>
 
-            </div>
+            <label for="username">
+                Username
+            </label>
 
-            <div class="form-group">
+            <input
+                type="text"
+                id="username"
+                name="username"
+                minlength="3"
+                maxlength="32"
+                required>
 
-                <label for="display-name">
-                    Display Name
-                </label>
+            <label for="display-name">
+                Display Name
+            </label>
 
-                <input
-                    type="text"
-                    id="display-name"
-                    maxlength="64"
-                >
+            <input
+                type="text"
+                id="display-name"
+                name="display-name"
+                maxlength="64"
+                required>
 
-            </div>
+            <label for="bio">
+                Bio
+            </label>
 
-            <div class="form-group">
+            <textarea
+                id="bio"
+                name="bio"
+                maxlength="500"
+                rows="5"
+                placeholder="Tell people about yourself..."></textarea>
 
-                <label for="bio">
-                    Bio
-                </label>
-
-                <textarea
-                    id="bio"
-                    maxlength="500"
-                ></textarea>
-
-            </div>
-
-            <button
-                type="submit"
-                id="save-button"
-            >
-                Save Changes
+            <button type="submit">
+                Save Profile
             </button>
 
             <div
-                id="profile-message"
+                id="message"
                 class="auth-message"
-            ></div>
+                aria-live="polite">
+            </div>
 
         </form>
 
-    </div>
+    </section>
 
 </main>
 
 <script>
 let currentSession = null;
+let currentProfile = null;
 
-async function initializeProfile() {
+const profileForm =
+    document.getElementById("profile-form");
+
+const avatarInput =
+    document.getElementById("avatar");
+
+const avatarPreview =
+    document.getElementById("avatar-preview");
+
+const usernameInput =
+    document.getElementById("username");
+
+const displayNameInput =
+    document.getElementById("display-name");
+
+const bioInput =
+    document.getElementById("bio");
+
+const message =
+    document.getElementById("message");
+
+async function loadProfile() {
 
     currentSession =
         await requireAuth();
@@ -181,282 +176,314 @@ async function initializeProfile() {
         return;
     }
 
-    const profile =
+    await initNavbar();
+
+    currentProfile =
         await getProfile(
             currentSession.user.id
         );
 
-    if (!profile) {
+    if (!currentProfile) {
+
+        setMessage(
+            message,
+            "Could not load your profile.",
+            "error"
+        );
+
         return;
     }
 
-    document.getElementById(
-        "username"
-    ).value =
-        profile.username || "";
+    usernameInput.value =
+        currentProfile.username || "";
 
-    document.getElementById(
-        "display-name"
-    ).value =
-        profile.display_name || "";
+    displayNameInput.value =
+        currentProfile.display_name || "";
 
-    document.getElementById(
-        "bio"
-    ).value =
-        profile.bio || "";
+    bioInput.value =
+        currentProfile.bio || "";
 
-    renderProfileAvatar(profile);
-
-    await initNavbar();
+    showAvatar(
+        currentProfile
+    );
 }
 
-function renderProfileAvatar(profile) {
+function showAvatar(profile) {
+
+    avatarPreview.innerHTML = "";
 
     const avatar =
-        document.getElementById(
+        createAvatar(
+            profile,
             "profile-avatar"
         );
 
-    if (profile.avatar_url) {
-
-        avatar.innerHTML =
-            "<img src=\"" +
-            profile.avatar_url +
-            "\" alt=\"\">";
-
-    } else {
-
-        avatar.textContent =
-            getAvatarLetter(profile);
-    }
+    avatarPreview.appendChild(
+        avatar
+    );
 }
 
-document
-    .getElementById("avatar-input")
-    .addEventListener(
-        "change",
-        async (event) => {
+avatarInput.addEventListener(
+    "change",
+    () => {
 
+        const file =
+            avatarInput.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (
+            ![
+                "image/png",
+                "image/jpeg",
+                "image/webp"
+            ].includes(file.type)
+        ) {
+
+            setMessage(
+                message,
+                "Please select a PNG, JPG, or WebP image.",
+                "error"
+            );
+
+            avatarInput.value = "";
+
+            return;
+        }
+
+        if (
+            file.size >
+            5 * 1024 * 1024
+        ) {
+
+            setMessage(
+                message,
+                "The image must be 5 MB or smaller.",
+                "error"
+            );
+
+            avatarInput.value = "";
+
+            return;
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload = event => {
+
+            avatarPreview.innerHTML = "";
+
+            const image =
+                document.createElement("img");
+
+            image.src =
+                event.target.result;
+
+            image.alt =
+                "Avatar preview";
+
+            image.className =
+                "profile-avatar";
+
+            avatarPreview.appendChild(
+                image
+            );
+        };
+
+        reader.readAsDataURL(file);
+    }
+);
+
+profileForm.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        if (!currentSession) {
+            return;
+        }
+
+        const button =
+            profileForm.querySelector(
+                "button[type='submit']"
+            );
+
+        button.disabled = true;
+        button.textContent =
+            "Saving...";
+
+        setMessage(
+            message,
+            "Saving profile...",
+            ""
+        );
+
+        try {
+
+            const username =
+                usernameInput.value.trim();
+
+            const displayName =
+                displayNameInput.value.trim();
+
+            const bio =
+                bioInput.value.trim();
+
+            if (username.length < 3) {
+
+                throw new Error(
+                    "Username must be at least 3 characters."
+                );
+            }
+
+            /*
+             * Upload avatar if a new file was selected.
+             */
             const file =
-                event.target.files[0];
+                avatarInput.files[0];
 
-            if (!file || !currentSession) {
-                return;
-            }
+            let avatarUrl =
+                currentProfile.avatar_url || null;
 
-            if (file.size > 5 * 1024 * 1024) {
+            if (file) {
 
-                setMessage(
-                    document.getElementById(
-                        "profile-message"
-                    ),
-                    "Profile pictures must be 5 MB or smaller.",
-                    "error"
-                );
+                const extension =
+                    file.type === "image/png"
+                        ? "png"
+                        : file.type === "image/webp"
+                            ? "webp"
+                            : "jpg";
 
-                return;
-            }
+                /*
+                 * IMPORTANT:
+                 * This path matches the Storage RLS policy:
+                 *
+                 * avatars/<user-id>/profile.<extension>
+                 */
+                const filePath =
+                    `${currentSession.user.id}/profile.${extension}`;
 
-            const extension =
-                file.name
-                    .split(".")
-                    .pop()
-                    .toLowerCase();
+                const {
+                    error: uploadError
+                } =
+                    await supabaseClient
+                        .storage
+                        .from("avatars")
+                        .upload(
+                            filePath,
+                            file,
+                            {
+                                upsert: true,
+                                contentType: file.type
+                            }
+                        );
 
-            const allowed =
-                [
-                    "png",
-                    "jpg",
-                    "jpeg",
-                    "webp"
-                ];
+                if (uploadError) {
 
-            if (!allowed.includes(extension)) {
-
-                setMessage(
-                    document.getElementById(
-                        "profile-message"
-                    ),
-                    "Unsupported image format.",
-                    "error"
-                );
-
-                return;
-            }
-
-            const path =
-                currentSession.user.id +
-                "/profile." +
-                extension;
-
-            const { error } =
-                await window.supabaseClient.storage
-                    .from("avatars")
-                    .upload(
-                        path,
-                        file,
-                        {
-                            upsert: true,
-                            contentType:
-                                file.type
-                        }
+                    console.error(
+                        "Avatar upload error:",
+                        uploadError
                     );
 
-            if (error) {
+                    throw uploadError;
+                }
 
-                console.error(
-                    "Avatar upload error:",
-                    error
-                );
+                const {
+                    data: publicUrlData
+                } =
+                    supabaseClient
+                        .storage
+                        .from("avatars")
+                        .getPublicUrl(
+                            filePath
+                        );
 
-                setMessage(
-                    document.getElementById(
-                        "profile-message"
-                    ),
-                    error.message,
-                    "error"
-                );
+                avatarUrl =
+                    publicUrlData.publicUrl;
 
-                return;
+                /*
+                 * Add a cache-busting query so the
+                 * browser doesn't keep showing the
+                 * old avatar.
+                 */
+                avatarUrl +=
+                    "?v=" +
+                    Date.now();
             }
 
-            const { data } =
-                window.supabaseClient.storage
-                    .from("avatars")
-                    .getPublicUrl(path);
-
-            const avatarUrl =
-                data.publicUrl +
-                "?t=" +
-                Date.now();
-
-            const { error: updateError } =
+            const {
+                data,
+                error
+            } =
                 await updateProfile({
+
+                    username,
+
+                    display_name:
+                        displayName,
+
+                    bio,
+
                     avatar_url:
                         avatarUrl
                 });
 
-            if (updateError) {
-
-                setMessage(
-                    document.getElementById(
-                        "profile-message"
-                    ),
-                    updateError.message,
-                    "error"
-                );
-
-                return;
-            }
-
-            renderProfileAvatar({
-                avatar_url:
-                    avatarUrl,
-                display_name:
-                    document.getElementById(
-                        "display-name"
-                    ).value,
-                username:
-                    document.getElementById(
-                        "username"
-                    ).value
-            });
-
-            setMessage(
-                document.getElementById(
-                    "profile-message"
-                ),
-                "Profile picture updated.",
-                "success"
-            );
-        }
-    );
-
-document
-    .getElementById("profile-form")
-    .addEventListener(
-        "submit",
-        async (event) => {
-
-            event.preventDefault();
-
-            const button =
-                document.getElementById(
-                    "save-button"
-                );
-
-            const message =
-                document.getElementById(
-                    "profile-message"
-                );
-
-            button.disabled = true;
-            button.textContent =
-                "Saving...";
-
-            const username =
-                document.getElementById(
-                    "username"
-                ).value.trim();
-
-            const displayName =
-                document.getElementById(
-                    "display-name"
-                ).value.trim();
-
-            const bio =
-                document.getElementById(
-                    "bio"
-                ).value.trim();
-
-            if (username.length < 3) {
-
-                setMessage(
-                    message,
-                    "Username must be at least 3 characters.",
-                    "error"
-                );
-
-                button.disabled = false;
-                button.textContent =
-                    "Save Changes";
-
-                return;
-            }
-
-            const { error } =
-                await updateProfile({
-                    username,
-                    display_name:
-                        displayName ||
-                        username,
-                    bio
-                });
-
             if (error) {
 
-                setMessage(
-                    message,
-                    error.message,
-                    "error"
-                );
-
-            } else {
-
-                setMessage(
-                    message,
-                    "Profile saved successfully.",
-                    "success"
-                );
+                throw error;
             }
+
+            currentProfile =
+                data;
+
+            /*
+             * Keep the cache-busting URL if one exists.
+             */
+            showAvatar(
+                currentProfile
+            );
+
+            setMessage(
+                message,
+                "Profile saved successfully!",
+                "success"
+            );
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "/account/";
+
+            }, 800);
+
+        } catch (error) {
+
+            console.error(
+                "Profile save error:",
+                error
+            );
+
+            setMessage(
+                message,
+                error.message ||
+                "Could not save your profile.",
+                "error"
+            );
+
+        } finally {
 
             button.disabled = false;
             button.textContent =
-                "Save Changes";
+                "Save Profile";
         }
-    );
+    }
+);
 
-initializeProfile();
+loadProfile();
 </script>
 
 </body>

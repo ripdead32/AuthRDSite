@@ -2,193 +2,216 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Settings - Rip_Dead Authentication</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
-
     <div class="navbar-inner">
 
-        <a
-            href="../"
-            class="navbar-brand"
-        >
+        <a href="/" class="navbar-brand">
             Rip_Dead Authentication
         </a>
 
         <div class="navbar-links">
+            <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="../">
-                Home
-            </a>
+            <a href="/login/" class="guest-only">Log In</a>
 
-            <a href="../search/">
-                Search
-            </a>
-
-            <a href="../friends/">
-                Friends
-            </a>
-
-            <a href="../settings/">
-                Settings
-            </a>
-
-            <a href="../account/">
-                Account
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
             </a>
 
             <button
                 type="button"
                 id="navbar-logout"
-                class="navbar-logout"
-            >
+                class="auth-only navbar-logout"
+                hidden>
                 Log Out
             </button>
-
         </div>
 
     </div>
-
 </nav>
 
 <main class="auth-container">
 
-    <div class="auth-card">
+    <section class="auth-card">
 
-        <div class="auth-header">
+        <h1>Settings</h1>
 
-            <h1>Settings</h1>
+        <p class="auth-subtitle">
+            Manage your Rip_Dead account.
+        </p>
 
-            <p>
-                Manage your Rip_Dead account.
-            </p>
-
+        <div
+            id="settings-message"
+            class="auth-message"
+            aria-live="polite">
         </div>
 
-        <section class="settings-section">
+        <section>
 
-            <h3>
-                Account
-            </h3>
+            <h2>Account</h2>
 
             <p id="account-email">
                 Loading...
             </p>
 
+        </section>
+
+        <section>
+
+            <h2>Profile</h2>
+
+            <p>
+                Change your profile information,
+                profile picture and bio.
+            </p>
+
             <a
-                href="../profile/"
-                class="button-link"
-            >
+                href="/profile/"
+                class="button-link">
                 Edit Profile
             </a>
 
         </section>
 
-        <section class="settings-section">
+        <section>
 
-            <h3>
-                Session
-            </h3>
-
-            <p>
-                Sign out of this Rip_Dead account on this device.
-            </p>
+            <h2>Security</h2>
 
             <button
                 type="button"
-                id="settings-logout"
-                class="secondary-button"
-            >
+                id="password-reset">
+                Send Password Reset Email
+            </button>
+
+        </section>
+
+        <section>
+
+            <h2>Session</h2>
+
+            <button
+                type="button"
+                id="settings-logout">
                 Log Out
             </button>
 
         </section>
 
-        <section class="settings-section danger-section">
-
-            <h3>
-                Account
-            </h3>
-
-            <p>
-                Account deletion is currently handled manually
-                through the authentication administration system.
-            </p>
-
-        </section>
-
-        <div
-            id="settings-message"
-            class="auth-message"
-        ></div>
-
-    </div>
+    </section>
 
 </main>
 
 <script>
+let settingsSession = null;
+
+const settingsMessage =
+    document.getElementById(
+        "settings-message"
+    );
+
 async function initializeSettings() {
 
-    const session =
+    settingsSession =
         await requireAuth();
 
-    if (!session) {
+    if (!settingsSession) {
         return;
     }
+
+    await initNavbar();
 
     document.getElementById(
         "account-email"
     ).textContent =
-        session.user.email ||
-        "Email unavailable";
-
-    await initNavbar();
+        settingsSession.user.email ||
+        "No email available";
 }
 
-document
-    .getElementById("settings-logout")
-    .addEventListener(
-        "click",
-        async () => {
+document.getElementById(
+    "password-reset"
+).addEventListener(
+    "click",
+    async () => {
 
-            const button =
-                document.getElementById(
-                    "settings-logout"
+        if (!settingsSession) {
+            return;
+        }
+
+        const button =
+            document.getElementById(
+                "password-reset"
+            );
+
+        button.disabled = true;
+        button.textContent =
+            "Sending...";
+
+        const {
+            error
+        } =
+            await supabaseClient.auth
+                .resetPasswordForEmail(
+                    settingsSession.user.email,
+                    {
+                        redirectTo:
+                            "https://auth.ripdead.de5.net/callback/"
+                    }
                 );
 
-            button.disabled = true;
-            button.textContent =
-                "Logging out...";
+        if (error) {
 
-            const success =
-                await signOut();
+            console.error(
+                "Password reset error:",
+                error
+            );
 
-            if (!success) {
+            setMessage(
+                settingsMessage,
+                error.message,
+                "error"
+            );
 
-                button.disabled = false;
+        } else {
 
-                button.textContent =
-                    "Log Out";
-            }
+            setMessage(
+                settingsMessage,
+                "Password reset email sent.",
+                "success"
+            );
         }
-    );
+
+        button.disabled = true;
+        button.textContent =
+            "Send Password Reset Email (NOT YET AVAILABLE)";
+    }
+);
+
+document.getElementById(
+    "settings-logout"
+).addEventListener(
+    "click",
+    async () => {
+
+        await signOut();
+
+    }
+);
 
 initializeSettings();
 </script>

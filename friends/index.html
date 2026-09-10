@@ -2,458 +2,336 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Friends - Rip_Dead Authentication</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
-
     <div class="navbar-inner">
 
-        <a
-            href="../"
-            class="navbar-brand"
-        >
+        <a href="/" class="navbar-brand">
             Rip_Dead Authentication
         </a>
 
         <div class="navbar-links">
+            <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="../">
-                Home
-            </a>
+            <a href="/login/" class="guest-only">Log In</a>
 
-            <a href="../search/">
-                Search
-            </a>
-
-            <a href="../friends/">
-                Friends
-            </a>
-
-            <a href="../settings/">
-                Settings
-            </a>
-
-            <a href="../account/">
-                Account
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
             </a>
 
             <button
                 type="button"
                 id="navbar-logout"
-                class="navbar-logout"
-            >
+                class="auth-only navbar-logout"
+                hidden>
                 Log Out
             </button>
-
         </div>
 
     </div>
-
 </nav>
 
 <main class="auth-container">
 
-    <div class="auth-card wide">
+    <section class="auth-card">
 
-        <div class="auth-header">
+        <h1>Friends</h1>
 
-            <h1>Friends</h1>
+        <p class="auth-subtitle">
+            Manage your Rip_Dead friends.
+        </p>
 
-            <p>
-                Manage your Rip_Dead friendships.
-            </p>
-
+        <div id="friends-message"
+             class="auth-message"
+             aria-live="polite">
         </div>
 
-        <section class="friend-section">
+        <h2>Friend Requests</h2>
 
-            <h3>
-                Pending Requests
-            </h3>
+        <div id="requests">
+            Loading...
+        </div>
 
-            <div id="requests">
-                <div class="search-empty">
-                    Loading...
-                </div>
-            </div>
+        <h2>Your Friends</h2>
 
-        </section>
+        <div id="friends-list">
+            Loading...
+        </div>
 
-        <section class="friend-section">
-
-            <h3>
-                Friends
-            </h3>
-
-            <div id="friends-list">
-                <div class="search-empty">
-                    Loading...
-                </div>
-            </div>
-
-        </section>
-
-        <div
-            id="friends-message"
-            class="auth-message"
-        ></div>
-
-    </div>
+    </section>
 
 </main>
 
 <script>
-let currentUserId = null;
+let friendsSession = null;
 
-async function getProfileById(id) {
+const requestsContainer =
+    document.getElementById("requests");
 
-    const { data, error } =
-        await window.supabaseClient
-            .from("profiles")
-            .select("*")
-            .eq("id", id)
-            .single();
+const friendsContainer =
+    document.getElementById("friends-list");
 
-    if (error) {
-        console.error(
-            "Profile lookup error:",
-            error
-        );
+const friendsMessage =
+    document.getElementById("friends-message");
 
-        return null;
+async function initializeFriends() {
+
+    friendsSession =
+        await requireAuth();
+
+    if (!friendsSession) {
+        return;
     }
 
-    return data;
+    await initNavbar();
+
+    await loadFriendships();
 }
 
-function createFriendElement(
-    profile,
-    buttons = []
-) {
+async function loadFriendships() {
 
-    const item =
-        document.createElement(
-            "div"
-        );
+    requestsContainer.innerHTML =
+        "Loading...";
 
-    item.className =
-        "friend-item";
+    friendsContainer.innerHTML =
+        "Loading...";
 
-    const avatar =
-        createAvatar(
-            profile,
-            "result-avatar"
-        );
-
-    const info =
-        document.createElement(
-            "div"
-        );
-
-    info.className =
-        "friend-item-info";
-
-    const name =
-        document.createElement(
-            "strong"
-        );
-
-    name.textContent =
-        profile.display_name ||
-        profile.username ||
-        "User";
-
-    const username =
-        document.createElement(
-            "span"
-        );
-
-    username.textContent =
-        profile.username
-            ? "@" + profile.username
-            : "";
-
-    info.appendChild(name);
-    info.appendChild(username);
-
-    item.appendChild(avatar);
-    item.appendChild(info);
-
-    if (buttons.length) {
-
-        const actions =
-            document.createElement(
-                "div"
-            );
-
-        actions.className =
-            "friend-actions";
-
-        buttons.forEach(
-            (button) => {
-                actions.appendChild(
-                    button
-                );
-            }
-        );
-
-        item.appendChild(actions);
-    }
-
-    return item;
-}
-
-async function loadFriends() {
-
-    const requests =
-        document.getElementById(
-            "requests"
-        );
-
-    const friends =
-        document.getElementById(
-            "friends-list"
-        );
-
-    requests.innerHTML = "";
-    friends.innerHTML = "";
-
-    const { data, error } =
-        await window.supabaseClient
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from("friendships")
             .select("*")
             .or(
-                "requester_id.eq." +
-                currentUserId +
-                ",addressee_id.eq." +
-                currentUserId
+                `requester_id.eq.${friendsSession.user.id},addressee_id.eq.${friendsSession.user.id}`
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
             );
 
     if (error) {
 
         console.error(
-            "Friendship query error:",
+            "Friendships error:",
             error
         );
 
-        requests.innerHTML =
-            "<div class=\"search-empty\">" +
-            "Unable to load friendships." +
-            "</div>";
+        setMessage(
+            friendsMessage,
+            error.message,
+            "error"
+        );
 
         return;
     }
 
-    let requestCount = 0;
-    let friendCount = 0;
+    requestsContainer.innerHTML = "";
+    friendsContainer.innerHTML = "";
 
-    for (const friendship of data || []) {
-
-        const otherId =
-            friendship.requester_id ===
-            currentUserId
-                ? friendship.addressee_id
-                : friendship.requester_id;
-
-        const profile =
-            await getProfileById(
-                otherId
-            );
-
-        if (!profile) {
-            continue;
-        }
-
-        if (
-            friendship.status ===
-            "pending" &&
+    const receivedRequests =
+        data.filter(friendship =>
             friendship.addressee_id ===
-            currentUserId
-        ) {
+            friendsSession.user.id &&
+            friendship.status === "pending"
+        );
 
-            requestCount++;
+    const accepted =
+        data.filter(friendship =>
+            friendship.status === "accepted"
+        );
+
+    if (receivedRequests.length === 0) {
+
+        requestsContainer.textContent =
+            "No pending friend requests.";
+
+    } else {
+
+        for (const friendship of receivedRequests) {
+
+            const profile =
+                await getProfile(
+                    friendship.requester_id
+                );
+
+            if (!profile) {
+                continue;
+            }
+
+            const card =
+                createFriendCard(
+                    profile
+                );
 
             const accept =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
 
             accept.textContent =
                 "Accept";
 
             accept.addEventListener(
                 "click",
-                async () => {
-
-                    const { error } =
-                        await window.supabaseClient
-                            .from("friendships")
-                            .update({
-                                status:
-                                    "accepted"
-                            })
-                            .eq(
-                                "id",
-                                friendship.id
-                            );
-
-                    if (error) {
-                        alert(
-                            error.message
-                        );
-                        return;
-                    }
-
-                    await loadFriends();
-                }
+                () =>
+                    updateFriendRequest(
+                        friendship.id,
+                        "accepted"
+                    )
             );
 
             const decline =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
 
             decline.textContent =
                 "Decline";
 
-            decline.className =
-                "danger-button";
-
             decline.addEventListener(
                 "click",
-                async () => {
-
-                    const { error } =
-                        await window.supabaseClient
-                            .from("friendships")
-                            .delete()
-                            .eq(
-                                "id",
-                                friendship.id
-                            );
-
-                    if (error) {
-                        alert(
-                            error.message
-                        );
-                        return;
-                    }
-
-                    await loadFriends();
-                }
+                () =>
+                    updateFriendRequest(
+                        friendship.id,
+                        "declined"
+                    )
             );
 
-            requests.appendChild(
-                createFriendElement(
-                    profile,
-                    [
-                        accept,
-                        decline
-                    ]
-                )
+            card.appendChild(accept);
+            card.appendChild(decline);
+
+            requestsContainer.appendChild(
+                card
             );
         }
+    }
 
-        if (
-            friendship.status ===
-            "accepted"
-        ) {
+    if (accepted.length === 0) {
 
-            friendCount++;
+        friendsContainer.textContent =
+            "You don't have any friends yet.";
 
-            const remove =
-                document.createElement(
-                    "button"
+    } else {
+
+        for (const friendship of accepted) {
+
+            const friendId =
+                friendship.requester_id ===
+                friendsSession.user.id
+                    ? friendship.addressee_id
+                    : friendship.requester_id;
+
+            const profile =
+                await getProfile(
+                    friendId
                 );
 
-            remove.textContent =
-                "Remove";
+            if (!profile) {
+                continue;
+            }
 
-            remove.className =
-                "danger-button";
-
-            remove.addEventListener(
-                "click",
-                async () => {
-
-                    const { error } =
-                        await window.supabaseClient
-                            .from("friendships")
-                            .delete()
-                            .eq(
-                                "id",
-                                friendship.id
-                            );
-
-                    if (error) {
-                        alert(
-                            error.message
-                        );
-                        return;
-                    }
-
-                    await loadFriends();
-                }
-            );
-
-            friends.appendChild(
-                createFriendElement(
-                    profile,
-                    [remove]
-                )
+            friendsContainer.appendChild(
+                createFriendCard(profile)
             );
         }
-    }
-
-    if (requestCount === 0) {
-
-        requests.innerHTML =
-            "<div class=\"search-empty\">" +
-            "No pending requests." +
-            "</div>";
-    }
-
-    if (friendCount === 0) {
-
-        friends.innerHTML =
-            "<div class=\"search-empty\">" +
-            "You don't have any friends yet." +
-            "</div>";
     }
 }
 
-async function initializeFriends() {
+function createFriendCard(profile) {
 
-    const session =
-        await requireAuth();
+    const card =
+        document.createElement("div");
 
-    if (!session) {
+    card.className =
+        "friend-card";
+
+    const avatar =
+        createAvatar(
+            profile,
+            "friend-avatar"
+        );
+
+    const information =
+        document.createElement("div");
+
+    information.className =
+        "friend-info";
+
+    const name =
+        document.createElement("strong");
+
+    name.textContent =
+        profile.display_name ||
+        profile.username ||
+        "Unknown User";
+
+    const username =
+        document.createElement("span");
+
+    username.textContent =
+        profile.username
+            ? "@" + profile.username
+            : "";
+
+    information.appendChild(name);
+    information.appendChild(username);
+
+    card.appendChild(avatar);
+    card.appendChild(information);
+
+    return card;
+}
+
+async function updateFriendRequest(
+    friendshipId,
+    status
+) {
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("friendships")
+            .update({
+                status
+            })
+            .eq(
+                "id",
+                friendshipId
+            );
+
+    if (error) {
+
+        console.error(
+            "Friend request update error:",
+            error
+        );
+
+        setMessage(
+            friendsMessage,
+            error.message,
+            "error"
+        );
+
         return;
     }
 
-    currentUserId =
-        session.user.id;
-
-    await initNavbar();
-
-    await loadFriends();
+    await loadFriendships();
 }
 
 initializeFriends();

@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Rip_Dead Authentication</title>
+    <title>Authentication Callback - Rip_Dead</title>
 
-    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
@@ -20,60 +17,35 @@
 <nav class="site-navbar">
     <div class="navbar-inner">
 
-        <a href="./" class="navbar-brand">
+        <a href="/" class="navbar-brand">
             Rip_Dead Authentication
         </a>
 
         <div class="navbar-links">
 
-            <a href="./">
-                Home
-            </a>
+            <a href="/">Home</a>
 
-            <a
-                href="./search/"
-                class="auth-only"
-                hidden
-            >
+            <a href="/search/" class="auth-only" hidden>
                 Search
             </a>
 
-            <a
-                href="./friends/"
-                class="auth-only"
-                hidden
-            >
+            <a href="/friends/" class="auth-only" hidden>
                 Friends
             </a>
 
-            <a
-                href="./settings/"
-                class="auth-only"
-                hidden
-            >
+            <a href="/settings/" class="auth-only" hidden>
                 Settings
             </a>
 
-            <a
-                href="./account/"
-                class="auth-only"
-                hidden
-            >
+            <a href="/account/" class="auth-only" hidden>
                 Account
             </a>
 
-            <a
-                href="./login/"
-                class="guest-only"
-            >
+            <a href="/login/" class="guest-only">
                 Log In
             </a>
 
-            <a
-                href="./signup/"
-                class="guest-only button-link"
-                style="width:auto;"
-            >
+            <a href="/signup/" class="guest-only button-link">
                 Create Account
             </a>
 
@@ -81,8 +53,7 @@
                 type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden
-            >
+                hidden>
                 Log Out
             </button>
 
@@ -93,171 +64,116 @@
 
 <main class="auth-container">
 
-    <div class="auth-card">
+    <section class="auth-card">
 
-        <div class="auth-header">
+        <h1 id="title">
+            Completing authentication...
+        </h1>
 
-            <h1 id="page-title">
-                Rip_Dead Authentication
-            </h1>
-
-            <p id="page-description">
-                Your centralized Rip_Dead account system.
-            </p>
-
-        </div>
-
-        <div id="logged-out-content">
-
-            <p>
-                Sign in or create a Rip_Dead account to access
-                your profile, friends, and account features.
-            </p>
-
-            <div class="account-links">
-
-                <a
-                    href="./login/"
-                    class="button-link"
-                >
-                    Log In
-                </a>
-
-                <a
-                    href="./signup/"
-                    class="button-link secondary-button"
-                >
-                    Create Account
-                </a>
-
-            </div>
-
-        </div>
-
-        <div
-            id="logged-in-content"
-            hidden
-        >
-
-            <div class="account-header">
-
-                <div
-                    id="index-avatar"
-                    class="account-avatar"
-                >
-                    ?
-                </div>
-
-                <h2 id="welcome-name">
-                    Welcome back
-                </h2>
-
-                <p
-                    id="welcome-username"
-                    class="username"
-                ></p>
-
-            </div>
-
-            <div class="account-links">
-
-                <a
-                    href="./account/"
-                    class="button-link"
-                >
-                    Go to Account
-                </a>
-
-                <a
-                    href="./search/"
-                    class="button-link secondary-button"
-                >
-                    Search Users
-                </a>
-
-            </div>
-
-        </div>
-
-        <div
-            id="index-message"
+        <p
+            id="message"
             class="auth-message"
-            aria-live="polite"
-        ></div>
+            aria-live="polite">
+            Please wait.
+        </p>
 
-    </div>
+    </section>
 
 </main>
 
 <script>
-async function initializeIndex() {
+async function handleCallback() {
 
-    const session =
-        await initNavbar();
+    const title =
+        document.getElementById("title");
 
-    const loggedOut =
-        document.getElementById(
-            "logged-out-content"
+    const message =
+        document.getElementById("message");
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getSession();
+
+        if (error) {
+            throw error;
+        }
+
+        if (data.session) {
+
+            title.textContent =
+                "Authentication successful!";
+
+            setMessage(
+                message,
+                "Redirecting to your account...",
+                "success"
+            );
+
+            setTimeout(() => {
+                window.location.href =
+                    "/account/";
+            }, 700);
+
+            return;
+        }
+
+        const hash =
+            window.location.hash;
+
+        const params =
+            new URLSearchParams(
+                hash.startsWith("#")
+                    ? hash.substring(1)
+                    : hash
+            );
+
+        if (params.get("error_description")) {
+
+            throw new Error(
+                params.get("error_description")
+            );
+        }
+
+        title.textContent =
+            "Authentication complete";
+
+        setMessage(
+            message,
+            "Please log in to continue.",
+            ""
         );
 
-    const loggedIn =
-        document.getElementById(
-            "logged-in-content"
+        setTimeout(() => {
+            window.location.href =
+                "/login/";
+        }, 1200);
+
+    } catch (error) {
+
+        console.error(
+            "Callback error:",
+            error
         );
 
-    if (!session) {
-        loggedOut.hidden = false;
-        loggedIn.hidden = true;
-        return;
-    }
+        title.textContent =
+            "Authentication failed";
 
-    loggedOut.hidden = true;
-    loggedIn.hidden = false;
-
-    const profile =
-        await getProfile(session.user.id);
-
-    if (!profile) {
-        return;
-    }
-
-    const name =
-        profile.display_name ||
-        profile.username ||
-        "Rip_Dead User";
-
-    document.getElementById(
-        "welcome-name"
-    ).textContent =
-        "Welcome back, " + name;
-
-    document.getElementById(
-        "welcome-username"
-    ).textContent =
-        profile.username
-            ? "@" + profile.username
-            : "";
-
-    const avatar =
-        document.getElementById(
-            "index-avatar"
+        setMessage(
+            message,
+            error.message ||
+            "Something went wrong.",
+            "error"
         );
-
-    if (profile.avatar_url) {
-
-        avatar.innerHTML =
-            "<img src=\"" +
-            profile.avatar_url +
-            "\" alt=\"\">";
-
-    } else {
-
-        avatar.textContent =
-            getAvatarLetter(profile);
     }
 }
 
-initializeIndex();
+initNavbar();
+
+handleCallback();
 </script>
 
 </body>

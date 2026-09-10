@@ -2,98 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Search - Rip_Dead Authentication</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
-
     <div class="navbar-inner">
 
-        <a
-            href="../"
-            class="navbar-brand"
-        >
+        <a href="/" class="navbar-brand">
             Rip_Dead Authentication
         </a>
 
         <div class="navbar-links">
+            <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="../">
-                Home
-            </a>
+            <a href="/login/" class="guest-only">Log In</a>
 
-            <a href="../search/">
-                Search
-            </a>
-
-            <a href="../friends/">
-                Friends
-            </a>
-
-            <a href="../settings/">
-                Settings
-            </a>
-
-            <a href="../account/">
-                Account
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
             </a>
 
             <button
                 type="button"
                 id="navbar-logout"
-                class="navbar-logout"
-            >
+                class="auth-only navbar-logout"
+                hidden>
                 Log Out
             </button>
-
         </div>
 
     </div>
-
 </nav>
 
 <main class="auth-container">
 
-    <div class="auth-card wide">
+    <section class="auth-card">
 
-        <div class="auth-header">
+        <h1>Search Users</h1>
 
-            <h1>Search Users</h1>
+        <p class="auth-subtitle">
+            Find people on Rip_Dead.
+        </p>
 
-            <p>
-                Find Rip_Dead users by username or display name.
-            </p>
+        <form id="search-form">
 
-        </div>
-
-        <form
-            id="search-form"
-            class="search-row"
-        >
+            <label for="search-input">
+                Username or display name
+            </label>
 
             <input
                 type="search"
                 id="search-input"
                 placeholder="Search users..."
+                autocomplete="off"
                 maxlength="64"
-                required
-            >
+                required>
 
             <button type="submit">
                 Search
@@ -104,193 +79,219 @@
         <div
             id="search-message"
             class="auth-message"
-        ></div>
+            aria-live="polite">
+        </div>
 
-        <div id="results"></div>
+        <div id="search-results"></div>
 
-    </div>
+    </section>
 
 </main>
 
 <script>
-let currentUserId = null;
+let searchSession = null;
+
+const searchForm =
+    document.getElementById("search-form");
+
+const searchInput =
+    document.getElementById("search-input");
+
+const searchResults =
+    document.getElementById("search-results");
+
+const searchMessage =
+    document.getElementById("search-message");
 
 async function initializeSearch() {
 
-    const session =
+    searchSession =
         await requireAuth();
 
-    if (!session) {
+    if (!searchSession) {
         return;
     }
-
-    currentUserId =
-        session.user.id;
 
     await initNavbar();
 }
 
-document
-    .getElementById("search-form")
-    .addEventListener(
-        "submit",
-        async (event) => {
+function clearResults() {
+    searchResults.innerHTML = "";
+}
 
-            event.preventDefault();
+function createSearchResult(profile) {
 
-            const query =
-                document
-                    .getElementById(
-                        "search-input"
-                    )
-                    .value
-                    .trim();
+    const card =
+        document.createElement("div");
 
-            const results =
-                document.getElementById(
-                    "results"
-                );
+    card.className =
+        "search-result";
 
-            const message =
-                document.getElementById(
-                    "search-message"
-                );
+    const avatar =
+        createAvatar(
+            profile,
+            "search-result-avatar"
+        );
 
-            results.innerHTML = "";
+    const information =
+        document.createElement("div");
 
-            if (!query) {
-                return;
-            }
+    information.className =
+        "search-result-info";
 
-            setMessage(
-                message,
-                "Searching..."
+    const name =
+        document.createElement("h3");
+
+    name.textContent =
+        profile.display_name ||
+        profile.username ||
+        "Unknown User";
+
+    const username =
+        document.createElement("p");
+
+    username.textContent =
+        profile.username
+            ? "@" + profile.username
+            : "";
+
+    information.appendChild(name);
+    information.appendChild(username);
+
+    if (profile.is_verified) {
+
+        const badge =
+            document.createElement("span");
+
+        badge.className =
+            "verified-badge";
+
+        badge.textContent =
+            "✓ Verified";
+
+        information.appendChild(
+            badge
+        );
+    }
+
+    const viewButton =
+        document.createElement("a");
+
+    viewButton.className =
+        "button-link";
+
+    viewButton.href =
+        "/user/?id=" +
+        encodeURIComponent(profile.id);
+
+    viewButton.textContent =
+        "View Profile";
+
+    card.appendChild(avatar);
+    card.appendChild(information);
+    card.appendChild(viewButton);
+
+    return card;
+}
+
+searchForm.addEventListener(
+    "submit",
+    async event => {
+
+        event.preventDefault();
+
+        if (!searchSession) {
+            return;
+        }
+
+        const query =
+            searchInput.value.trim();
+
+        if (!query) {
+            return;
+        }
+
+        clearResults();
+
+        setMessage(
+            searchMessage,
+            "Searching...",
+            ""
+        );
+
+        /*
+         * Search username and display name.
+         *
+         * The profiles SELECT policy allows
+         * authenticated users to view profiles.
+         */
+        const escapedQuery =
+            query
+                .replace(/\\/g, "\\\\")
+                .replace(/%/g, "\\%")
+                .replace(/_/g, "\\_");
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select(
+                    "id, username, display_name, avatar_url, bio, is_verified"
+                )
+                .or(
+                    `username.ilike.%${escapedQuery}%,display_name.ilike.%${escapedQuery}%`
+                )
+                .neq(
+                    "id",
+                    searchSession.user.id
+                )
+                .limit(25);
+
+        if (error) {
+
+            console.error(
+                "Search error:",
+                error
             );
 
-            const { data, error } =
-                await window.supabaseClient
-                    .from("profiles")
-                    .select("*")
-                    .or(
-                        "username.ilike.%" +
-                        query +
-                        "%,display_name.ilike.%" +
-                        query +
-                        "%"
-                    )
-                    .neq(
-                        "id",
-                        currentUserId
-                    )
-                    .limit(30);
+            setMessage(
+                searchMessage,
+                "Search failed: " +
+                error.message,
+                "error"
+            );
 
-            if (error) {
-
-                console.error(
-                    "Search error:",
-                    error
-                );
-
-                setMessage(
-                    message,
-                    error.message,
-                    "error"
-                );
-
-                return;
-            }
-
-            setMessage(message, "");
-
-            if (!data || data.length === 0) {
-
-                results.innerHTML =
-                    "<div class=\"search-empty\">" +
-                    "No users found." +
-                    "</div>";
-
-                return;
-            }
-
-            data.forEach((profile) => {
-
-                const item =
-                    document.createElement(
-                        "a"
-                    );
-
-                item.className =
-                    "user-result";
-
-                item.href =
-                    "../profile/?id=" +
-                    encodeURIComponent(
-                        profile.id
-                    );
-
-                const avatar =
-                    createAvatar(
-                        profile,
-                        "result-avatar"
-                    );
-
-                const info =
-                    document.createElement(
-                        "div"
-                    );
-
-                info.className =
-                    "result-info";
-
-                const name =
-                    document.createElement(
-                        "strong"
-                    );
-
-                name.textContent =
-                    profile.display_name ||
-                    profile.username ||
-                    "User";
-
-                const username =
-                    document.createElement(
-                        "span"
-                    );
-
-                username.textContent =
-                    profile.username
-                        ? "@" +
-                          profile.username
-                        : "";
-
-                info.appendChild(name);
-                info.appendChild(username);
-
-                if (profile.is_verified) {
-
-                    const verified =
-                        document.createElement(
-                            "span"
-                        );
-
-                    verified.textContent =
-                        "Verified";
-
-                    verified.className =
-                        "verified-badge small";
-
-                    info.appendChild(
-                        verified
-                    );
-                }
-
-                item.appendChild(avatar);
-                item.appendChild(info);
-
-                results.appendChild(item);
-            });
+            return;
         }
-    );
+
+        if (!data || data.length === 0) {
+
+            setMessage(
+                searchMessage,
+                "No users found.",
+                ""
+            );
+
+            return;
+        }
+
+        setMessage(
+            searchMessage,
+            `${data.length} user${data.length === 1 ? "" : "s"} found.`,
+            "success"
+        );
+
+        data.forEach(profile => {
+
+            searchResults.appendChild(
+                createSearchResult(profile)
+            );
+
+        });
+    }
+);
 
 initializeSearch();
 </script>

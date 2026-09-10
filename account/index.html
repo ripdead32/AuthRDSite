@@ -2,167 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Account - Rip_Dead Authentication</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/auth.js"></script>
+    <script src="/js/auth.js"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
-
     <div class="navbar-inner">
 
-        <a
-            href="../"
-            class="navbar-brand"
-        >
+        <a href="/" class="navbar-brand">
             Rip_Dead Authentication
         </a>
 
         <div class="navbar-links">
+            <a href="/">Home</a>
+            <a href="/search/" class="auth-only" hidden>Search</a>
+            <a href="/friends/" class="auth-only" hidden>Friends</a>
+            <a href="/settings/" class="auth-only" hidden>Settings</a>
+            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="../">
-                Home
-            </a>
-
-            <a href="../search/">
-                Search
-            </a>
-
-            <a href="../friends/">
-                Friends
-            </a>
-
-            <a href="../settings/">
-                Settings
-            </a>
-
-            <a href="../account/">
-                Account
+            <a href="/login/" class="guest-only">Log In</a>
+            <a href="/signup/" class="guest-only button-link">
+                Create Account
             </a>
 
             <button
                 type="button"
                 id="navbar-logout"
-                class="navbar-logout"
-            >
+                class="auth-only navbar-logout"
+                hidden>
                 Log Out
             </button>
-
         </div>
 
     </div>
-
 </nav>
 
 <main class="auth-container">
 
-    <div class="auth-card">
+    <section class="auth-card">
 
-        <div class="account-header">
+        <h1 id="welcome">
+            Loading account...
+        </h1>
 
-            <div
-                id="account-avatar"
-                class="account-avatar"
-            >
-                ?
-            </div>
+        <p class="auth-subtitle" id="email">
+            Loading...
+        </p>
 
-            <h1 id="display-name">
-                Loading account
-            </h1>
+        <div id="account-content">
 
-            <p
-                id="username"
-                class="username"
-            ></p>
+            <div id="avatar-container"></div>
 
-            <div
-                id="verified"
-                class="verified-badge"
-                hidden
-            >
-                Verified
-            </div>
+            <h2 id="display-name"></h2>
 
-            <p
-                id="bio"
-                class="profile-bio"
-            ></p>
+            <p id="username"></p>
 
-        </div>
+            <p id="bio"></p>
 
-        <div class="profile-stats">
+            <p id="verification"></p>
 
-            <div>
-                <strong id="friend-count">
-                    0
-                </strong>
+            <div class="auth-actions">
 
-                <span>
-                    Friends
-                </span>
-            </div>
+                <a
+                    href="/profile/"
+                    class="button-link">
+                    Edit Profile
+                </a>
 
-            <div>
-                <strong id="follower-count">
-                    0
-                </strong>
+                <a
+                    href="/settings/"
+                    class="button-link">
+                    Settings
+                </a>
 
-                <span>
-                    Followers
-                </span>
-            </div>
-
-            <div>
-                <strong id="following-count">
-                    0
-                </strong>
-
-                <span>
-                    Following
-                </span>
             </div>
 
         </div>
 
         <div
-            id="account-message"
+            id="message"
             class="auth-message"
-        ></div>
-
-        <div class="account-links">
-
-            <a
-                href="../profile/"
-                class="button-link"
-            >
-                Edit Profile
-            </a>
-
-            <a
-                href="../settings/"
-                class="button-link secondary-button"
-            >
-                Settings
-            </a>
-
+            aria-live="polite">
         </div>
 
-    </div>
+    </section>
 
 </main>
 
@@ -176,138 +107,96 @@ async function initializeAccount() {
         return;
     }
 
+    await initNavbar();
+
+    const message =
+        document.getElementById("message");
+
+    const welcome =
+        document.getElementById("welcome");
+
+    const email =
+        document.getElementById("email");
+
+    const displayName =
+        document.getElementById("display-name");
+
+    const username =
+        document.getElementById("username");
+
+    const bio =
+        document.getElementById("bio");
+
+    const verification =
+        document.getElementById("verification");
+
+    const avatarContainer =
+        document.getElementById("avatar-container");
+
+    email.textContent =
+        session.user.email || "";
+
     const profile =
-        await getProfile(
-            session.user.id
-        );
+        await getProfile(session.user.id);
 
     if (!profile) {
 
+        welcome.textContent =
+            "Account";
+
         setMessage(
-            document.getElementById(
-                "account-message"
-            ),
-            "Unable to load your profile.",
+            message,
+            "Your account profile could not be loaded.",
             "error"
         );
 
         return;
     }
 
-    document.getElementById(
-        "display-name"
-    ).textContent =
+    const name =
         profile.display_name ||
         profile.username ||
-        "Rip_Dead User";
+        "Account";
 
-    document.getElementById(
-        "username"
-    ).textContent =
+    welcome.textContent =
+        "Welcome, " + name;
+
+    displayName.textContent =
+        profile.display_name || "";
+
+    username.textContent =
         profile.username
             ? "@" + profile.username
             : "";
 
-    document.getElementById(
-        "bio"
-    ).textContent =
-        profile.bio || "";
+    bio.textContent =
+        profile.bio || "No bio yet.";
 
     if (profile.is_verified) {
 
-        document.getElementById(
-            "verified"
-        ).hidden = false;
-    }
+        verification.textContent =
+            "✓ Verified";
 
-    const avatar =
-        document.getElementById(
-            "account-avatar"
-        );
-
-    if (profile.avatar_url) {
-
-        avatar.innerHTML =
-            "<img src=\"" +
-            profile.avatar_url +
-            "\" alt=\"\">";
+        verification.className =
+            "verified-badge";
 
     } else {
 
-        avatar.textContent =
-            getAvatarLetter(profile);
+        verification.textContent =
+            "";
     }
 
-    const userId =
-        session.user.id;
+    avatarContainer.innerHTML = "";
 
-    const { count: friendCount } =
-        await window.supabaseClient
-            .from("friendships")
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            )
-            .or(
-                "requester_id.eq." +
-                userId +
-                ",addressee_id.eq." +
-                userId
-            )
-            .eq(
-                "status",
-                "accepted"
-            );
+    const avatar =
+        createAvatar(
+            profile,
+            "profile-avatar"
+        );
 
-    const { count: followerCount } =
-        await window.supabaseClient
-            .from("follows")
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            )
-            .eq(
-                "following_id",
-                userId
-            );
-
-    const { count: followingCount } =
-        await window.supabaseClient
-            .from("follows")
-            .select(
-                "*",
-                {
-                    count: "exact",
-                    head: true
-                }
-            )
-            .eq(
-                "follower_id",
-                userId
-            );
-
-    document.getElementById(
-        "friend-count"
-    ).textContent =
-        friendCount || 0;
-
-    document.getElementById(
-        "follower-count"
-    ).textContent =
-        followerCount || 0;
-
-    document.getElementById(
-        "following-count"
-    ).textContent =
-        followingCount || 0;
-
-    await initNavbar();
+    avatarContainer.appendChild(
+        avatar
+    );
 }
 
 initializeAccount();
