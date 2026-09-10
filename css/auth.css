@@ -3,18 +3,13 @@
 }
 
 :root {
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family: Arial, Helvetica, sans-serif;
     color-scheme: dark;
 
     --bg: #07070b;
     --surface: #101017;
     --surface-2: #0b0b11;
     --surface-3: #17171f;
-
     --border: #272733;
 
     --text: #f4f4f7;
@@ -57,7 +52,10 @@ a:hover {
     color: var(--purple-hover);
 }
 
-/* NAVBAR */
+
+/* =========================
+   NAVBAR
+========================= */
 
 .site-navbar {
     position: sticky;
@@ -71,6 +69,7 @@ a:hover {
     border-bottom: 1px solid var(--border);
 
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
 .navbar-inner {
@@ -78,7 +77,6 @@ a:hover {
     max-width: 1200px;
 
     margin: 0 auto;
-
     padding: 14px 24px;
 
     display: flex;
@@ -107,7 +105,6 @@ a:hover {
     justify-content: flex-end;
 
     gap: 8px;
-
     flex-wrap: wrap;
 }
 
@@ -120,11 +117,15 @@ a:hover {
     border-radius: 8px;
 
     background: transparent;
-
     color: var(--muted);
 
+    font-family: inherit;
     font-size: 14px;
     font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
 
     transition:
         background 0.2s,
@@ -145,7 +146,6 @@ a:hover {
 
 .navbar-user {
     display: flex;
-
     align-items: center;
 
     gap: 8px;
@@ -162,11 +162,9 @@ a:hover {
     justify-content: center;
 
     border-radius: 50%;
-
     overflow: hidden;
 
     background: var(--purple);
-
     color: white;
 
     font-size: 12px;
@@ -180,7 +178,10 @@ a:hover {
     object-fit: cover;
 }
 
-/* LAYOUT */
+
+/* =========================
+   LAYOUT
+========================= */
 
 .auth-container {
     min-height: calc(100vh - 61px);
@@ -201,7 +202,6 @@ a:hover {
     background: rgba(16, 16, 23, 0.96);
 
     border: 1px solid var(--border);
-
     border-radius: 20px;
 
     box-shadow:
@@ -238,7 +238,10 @@ a:hover {
     line-height: 1.5;
 }
 
-/* FORMS */
+
+/* =========================
+   FORMS
+========================= */
 
 .form-group {
     margin-bottom: 18px;
@@ -262,7 +265,6 @@ a:hover {
 
     border: 1px solid var(--border);
     border-radius: 10px;
-
     outline: none;
 
     background: var(--surface-2);
@@ -278,7 +280,6 @@ a:hover {
 
 .form-group textarea {
     min-height: 120px;
-
     resize: vertical;
 }
 
@@ -297,7 +298,6 @@ button,
     width: 100%;
 
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
 
@@ -307,11 +307,13 @@ button,
     border-radius: 10px;
 
     background: var(--purple);
-
     color: white;
 
+    font-family: inherit;
     font-size: 15px;
     font-weight: 700;
+
+    text-decoration: none;
 
     cursor: pointer;
 
@@ -324,7 +326,6 @@ button,
 button:hover,
 .button-link:hover {
     background: var(--purple-hover);
-
     color: white;
 
     transform: translateY(-1px);
@@ -356,7 +357,10 @@ button:disabled {
     background: #ff707c;
 }
 
-/* MESSAGES */
+
+/* =========================
+   MESSAGES
+========================= */
 
 .auth-message {
     min-height: 20px;
@@ -364,7 +368,6 @@ button:disabled {
     margin: 16px 0;
 
     font-size: 14px;
-
     line-height: 1.5;
 }
 
@@ -376,11 +379,13 @@ button:disabled {
     color: var(--success);
 }
 
-/* LINKS */
+
+/* =========================
+   LINKS
+========================= */
 
 .account-links {
     display: flex;
-
     flex-wrap: wrap;
 
     gap: 12px;
@@ -393,7 +398,10 @@ button:disabled {
     min-width: 180px;
 }
 
-/* ACCOUNT */
+
+/* =========================
+   ACCOUNT
+========================= */
 
 .account-header {
     text-align: center;
@@ -412,11 +420,9 @@ button:disabled {
     justify-content: center;
 
     border-radius: 50%;
-
     overflow: hidden;
 
     background: var(--purple);
-
     color: white;
 
     font-size: 34px;
@@ -440,13 +446,11 @@ button:disabled {
     display: inline-block;
 
     margin-top: 12px;
-
     padding: 5px 10px;
 
     border-radius: 999px;
 
     background: rgba(139, 92, 246, 0.15);
-
     color: var(--purple-hover);
 
     font-size: 13px;
@@ -467,7 +471,6 @@ button:disabled {
 
 .profile-stats {
     display: flex;
-
     justify-content: center;
 
     gap: 50px;
@@ -491,13 +494,14 @@ button:disabled {
     font-size: 13px;
 }
 
-/* AVATAR UPLOAD */
+
+/* =========================
+   AVATAR UPLOAD
+========================= */
 
 .profile-avatar-container {
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
 
     gap: 12px;
@@ -511,7 +515,6 @@ button:disabled {
     padding: 9px 14px;
 
     border: 1px solid var(--border);
-
     border-radius: 9px;
 
     color: var(--text);
@@ -525,7 +528,10 @@ button:disabled {
     background: var(--surface-3);
 }
 
-/* SEARCH */
+
+/* =========================
+   SEARCH
+========================= */
 
 .search-row {
     display: flex;
@@ -537,7 +543,6 @@ button:disabled {
 
 .search-row button {
     width: auto;
-
     min-width: 120px;
 }
 
@@ -551,17 +556,14 @@ button:disabled {
 
 .user-result {
     display: flex;
-
     align-items: center;
 
     gap: 14px;
 
     padding: 14px;
-
     margin-bottom: 10px;
 
     border: 1px solid var(--border);
-
     border-radius: 12px;
 
     background: var(--surface-2);
@@ -578,16 +580,13 @@ button:disabled {
     height: 48px;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     border-radius: 50%;
-
     overflow: hidden;
 
     background: var(--purple);
-
     color: white;
 
     font-weight: 800;
@@ -602,11 +601,9 @@ button:disabled {
 
 .result-info {
     flex: 1;
-
     min-width: 0;
 
     display: flex;
-
     flex-direction: column;
 }
 
@@ -620,7 +617,10 @@ button:disabled {
     font-size: 13px;
 }
 
-/* FRIENDS */
+
+/* =========================
+   FRIENDS
+========================= */
 
 .friend-section {
     margin-bottom: 30px;
@@ -632,17 +632,14 @@ button:disabled {
 
 .friend-item {
     display: flex;
-
     align-items: center;
 
     gap: 12px;
 
     padding: 12px;
-
     margin-bottom: 8px;
 
     border: 1px solid var(--border);
-
     border-radius: 10px;
 
     background: var(--surface-2);
@@ -677,11 +674,13 @@ button:disabled {
 
 .friend-actions button {
     width: auto;
-
     min-width: 90px;
 }
 
-/* SETTINGS */
+
+/* =========================
+   SETTINGS
+========================= */
 
 .settings-section {
     padding: 20px 0;
@@ -714,7 +713,10 @@ button:disabled {
         rgba(255, 95, 109, 0.25);
 }
 
-/* FOOTER */
+
+/* =========================
+   FOOTER
+========================= */
 
 .auth-footer {
     margin-top: 25px;
@@ -730,12 +732,14 @@ button:disabled {
     font-size: 14px;
 }
 
-/* MOBILE */
+
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 700px) {
     .navbar-inner {
         align-items: flex-start;
-
         flex-direction: column;
     }
 
@@ -765,7 +769,6 @@ button:disabled {
 
     .friend-item {
         align-items: flex-start;
-
         flex-wrap: wrap;
     }
 
