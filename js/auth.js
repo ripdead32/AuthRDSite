@@ -1,18 +1,24 @@
-const SUPABASE_URL = "https://vcwfgyikbvfzgqiljmry.supabase.co";
-const SUPABASE_KEY = "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
+const SUPABASE_URL =
+    "https://vcwfgyikbvfzgqiljmry.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
 
 if (!window.supabase) {
-    throw new Error("Supabase JavaScript library failed to load.");
+    throw new Error(
+        "Supabase JavaScript library failed to load."
+    );
 }
 
-window.supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+window.supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
 
 
 /* =========================
-   AUTH
+   SESSION
 ========================= */
 
 async function getSession() {
@@ -20,7 +26,11 @@ async function getSession() {
         await window.supabaseClient.auth.getSession();
 
     if (error) {
-        console.error("Session error:", error);
+        console.error(
+            "Session error:",
+            error
+        );
+
         return null;
     }
 
@@ -28,8 +38,13 @@ async function getSession() {
 }
 
 
+/* =========================
+   REQUIRE LOGIN
+========================= */
+
 async function requireAuth() {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     if (!session) {
         const currentPath =
@@ -37,7 +52,7 @@ async function requireAuth() {
             window.location.search;
 
         window.location.href =
-            "../login/?redirect=" +
+            "/login/?redirect=" +
             encodeURIComponent(currentPath);
 
         return null;
@@ -47,32 +62,20 @@ async function requireAuth() {
 }
 
 
-async function signOut() {
-    const { error } =
-        await window.supabaseClient.auth.signOut();
-
-    if (error) {
-        console.error("Logout error:", error);
-        return false;
-    }
-
-    window.location.href = "../login/";
-    return true;
-}
-
-
 /* =========================
-   PROFILES
+   PROFILE
 ========================= */
 
 async function getProfile(userId = null) {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     if (!session) {
         return null;
     }
 
-    const id = userId || session.user.id;
+    const id =
+        userId || session.user.id;
 
     const { data, error } =
         await window.supabaseClient
@@ -82,7 +85,11 @@ async function getProfile(userId = null) {
             .single();
 
     if (error) {
-        console.error("Profile error:", error);
+        console.error(
+            "Profile error:",
+            error
+        );
+
         return null;
     }
 
@@ -91,12 +98,15 @@ async function getProfile(userId = null) {
 
 
 async function updateProfile(updates) {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     if (!session) {
         return {
             data: null,
-            error: new Error("You are not logged in.")
+            error: new Error(
+                "You are not logged in."
+            )
         };
     }
 
@@ -109,7 +119,10 @@ async function updateProfile(updates) {
             .single();
 
     if (error) {
-        console.error("Profile update error:", error);
+        console.error(
+            "Profile update error:",
+            error
+        );
     }
 
     return {
@@ -129,7 +142,9 @@ function getAvatarLetter(profile) {
         profile?.username ||
         "?";
 
-    return name.charAt(0).toUpperCase();
+    return name
+        .charAt(0)
+        .toUpperCase();
 }
 
 
@@ -138,11 +153,15 @@ function getAvatarUrl(profile) {
 }
 
 
-function createAvatar(profile, className = "avatar") {
+function createAvatar(
+    profile,
+    className = "avatar"
+) {
     const wrapper =
         document.createElement("div");
 
-    wrapper.className = className;
+    wrapper.className =
+        className;
 
     const avatarUrl =
         getAvatarUrl(profile);
@@ -151,10 +170,14 @@ function createAvatar(profile, className = "avatar") {
         const image =
             document.createElement("img");
 
-        image.src = avatarUrl;
+        image.src =
+            avatarUrl;
+
         image.alt = "";
 
-        wrapper.appendChild(image);
+        wrapper.appendChild(
+            image
+        );
     } else {
         wrapper.textContent =
             getAvatarLetter(profile);
@@ -165,15 +188,20 @@ function createAvatar(profile, className = "avatar") {
 
 
 /* =========================
-   MESSAGES
+   MESSAGE
 ========================= */
 
-function setMessage(element, text, type = "") {
+function setMessage(
+    element,
+    text,
+    type = ""
+) {
     if (!element) {
         return;
     }
 
-    element.textContent = text;
+    element.textContent =
+        text;
 
     element.className =
         type
@@ -187,34 +215,49 @@ function setMessage(element, text, type = "") {
 ========================= */
 
 async function initNavbar() {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     const guestElements =
-        document.querySelectorAll(".guest-only");
+        document.querySelectorAll(
+            ".guest-only"
+        );
 
     const authElements =
-        document.querySelectorAll(".auth-only");
-
-    guestElements.forEach((element) => {
-        element.hidden = !!session;
-    });
-
-    authElements.forEach((element) => {
-        element.hidden = !session;
-    });
+        document.querySelectorAll(
+            ".auth-only"
+        );
 
 
-    /* Navbar account */
+    guestElements.forEach(
+        (element) => {
+            element.hidden =
+                !!session;
+        }
+    );
+
+
+    authElements.forEach(
+        (element) => {
+            element.hidden =
+                !session;
+        }
+    );
+
 
     const navbarUser =
-        document.getElementById("navbar-user");
+        document.getElementById(
+            "navbar-user"
+        );
 
     if (navbarUser) {
         navbarUser.innerHTML = "";
 
         if (session) {
             const profile =
-                await getProfile(session.user.id);
+                await getProfile(
+                    session.user.id
+                );
 
             if (profile) {
                 const avatar =
@@ -224,15 +267,22 @@ async function initNavbar() {
                     );
 
                 const name =
-                    document.createElement("span");
+                    document.createElement(
+                        "span"
+                    );
 
                 name.textContent =
                     profile.display_name ||
                     profile.username ||
                     "Account";
 
-                navbarUser.appendChild(avatar);
-                navbarUser.appendChild(name);
+                navbarUser.appendChild(
+                    avatar
+                );
+
+                navbarUser.appendChild(
+                    name
+                );
             } else {
                 navbarUser.textContent =
                     session.user.email;
@@ -241,30 +291,38 @@ async function initNavbar() {
     }
 
 
-    /* Navbar logout */
-
     const logoutButton =
-        document.getElementById("navbar-logout");
+        document.getElementById(
+            "navbar-logout"
+        );
 
     if (logoutButton) {
-        logoutButton.onclick = async () => {
-            if (logoutButton.disabled) {
-                return;
-            }
+        logoutButton.onclick =
+            async () => {
 
-            logoutButton.disabled = true;
-            logoutButton.textContent =
-                "Logging out...";
+                if (
+                    logoutButton.disabled
+                ) {
+                    return;
+                }
 
-            const success =
-                await signOut();
+                logoutButton.disabled =
+                    true;
 
-            if (!success) {
-                logoutButton.disabled = false;
                 logoutButton.textContent =
-                    "Log Out";
-            }
-        };
+                    "Logging out...";
+
+                const success =
+                    await signOut();
+
+                if (!success) {
+                    logoutButton.disabled =
+                        false;
+
+                    logoutButton.textContent =
+                        "Log Out";
+                }
+            };
     }
 
     return session;
@@ -272,42 +330,88 @@ async function initNavbar() {
 
 
 /* =========================
-   AUTH STATE
+   SIGN OUT
 ========================= */
 
-window.supabaseClient.auth.onAuthStateChange(
-    (event, session) => {
-        console.log(
-            "Auth event:",
-            event
+async function signOut() {
+    const { error } =
+        await window.supabaseClient
+            .auth
+            .signOut();
+
+    if (error) {
+        console.error(
+            "Logout error:",
+            error
         );
 
-        if (session) {
-            console.log(
-                "Logged in as:",
-                session.user.email
-            );
-        }
+        return false;
     }
-);
+
+    window.location.href =
+        "/login/";
+
+    return true;
+}
 
 
 /* =========================
-   GLOBAL FUNCTIONS
+   AUTH STATE
 ========================= */
 
-window.getSession = getSession;
-window.requireAuth = requireAuth;
+window.supabaseClient.auth
+    .onAuthStateChange(
+        (event, session) => {
 
-window.getProfile = getProfile;
-window.updateProfile = updateProfile;
+            console.log(
+                "Auth event:",
+                event
+            );
 
-window.signOut = signOut;
+            if (session) {
+                console.log(
+                    "Logged in as:",
+                    session.user.email
+                );
+            } else {
+                console.log(
+                    "No active session."
+                );
+            }
+        }
+    );
 
-window.getAvatarLetter = getAvatarLetter;
-window.getAvatarUrl = getAvatarUrl;
-window.createAvatar = createAvatar;
 
-window.setMessage = setMessage;
+/* =========================
+   GLOBAL API
+========================= */
 
-window.initNavbar = initNavbar;
+window.getSession =
+    getSession;
+
+window.requireAuth =
+    requireAuth;
+
+window.getProfile =
+    getProfile;
+
+window.updateProfile =
+    updateProfile;
+
+window.signOut =
+    signOut;
+
+window.getAvatarLetter =
+    getAvatarLetter;
+
+window.getAvatarUrl =
+    getAvatarUrl;
+
+window.createAvatar =
+    createAvatar;
+
+window.setMessage =
+    setMessage;
+
+window.initNavbar =
+    initNavbar;
