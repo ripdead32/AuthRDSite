@@ -3,7 +3,6 @@ const SUPABASE_URL = "https://vcwfgyikbvfzgqiljmry.supabase.co";
 // KEEP YOUR EXISTING SUPABASE PUBLISHABLE KEY HERE
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
 
-
 /* =========================================================
    SUPABASE
 ========================================================= */
@@ -12,7 +11,6 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
 );
-
 
 /* =========================================================
    SESSION
@@ -32,7 +30,6 @@ async function getSession() {
     return data.session || null;
 }
 
-
 /* =========================================================
    AUTH GUARD
 ========================================================= */
@@ -48,14 +45,12 @@ async function requireAuth() {
     return session;
 }
 
-
 /* =========================================================
    PROFILE
 ========================================================= */
 
 async function getProfile(userId = null) {
     const session = await getSession();
-
     const id = userId || session?.user?.id;
 
     if (!id) {
@@ -78,7 +73,6 @@ async function getProfile(userId = null) {
 
     return data;
 }
-
 
 async function updateProfile(updates) {
     const session = await getSession();
@@ -115,7 +109,6 @@ async function updateProfile(updates) {
     };
 }
 
-
 /* =========================================================
    AVATAR
 ========================================================= */
@@ -124,7 +117,6 @@ function getAvatarLetter() {
     // No random fallback letters.
     return "";
 }
-
 
 function getAvatarUrl(profile) {
     if (!profile) {
@@ -141,12 +133,14 @@ function getAvatarUrl(profile) {
     return null;
 }
 
-
 function createAvatar(profile, className = "") {
     const wrapper = document.createElement("div");
 
     wrapper.className =
         `account-avatar empty ${className}`.trim();
+
+    wrapper.style.overflow = "hidden";
+    wrapper.style.borderRadius = "50%";
 
     const avatarUrl = getAvatarUrl(profile);
 
@@ -155,6 +149,14 @@ function createAvatar(profile, className = "") {
 
         image.src = avatarUrl;
         image.alt = "";
+
+        image.style.display = "block";
+        image.style.width = "100%";
+        image.style.height = "100%";
+        image.style.maxWidth = "100%";
+        image.style.maxHeight = "100%";
+        image.style.objectFit = "cover";
+        image.style.borderRadius = "50%";
 
         image.addEventListener("error", () => {
             image.remove();
@@ -165,7 +167,6 @@ function createAvatar(profile, className = "") {
 
     return wrapper;
 }
-
 
 /* =========================================================
    MESSAGES
@@ -182,14 +183,12 @@ function setMessage(elementOrId, message, type = "") {
     }
 
     element.textContent = message || "";
-
     element.className = "message";
 
     if (type) {
         element.classList.add(type);
     }
 }
-
 
 /* =========================================================
    NAVBAR
@@ -205,7 +204,6 @@ async function initNavbar() {
         session ? "LOGGED IN" : "LOGGED OUT"
     );
 
-
     /* ---------------------------------------------------------
        GUEST ELEMENTS
        Log In / Create Account
@@ -213,7 +211,6 @@ async function initNavbar() {
 
     const guestElements =
         document.querySelectorAll(".guest-only");
-
 
     /* ---------------------------------------------------------
        AUTH ELEMENTS
@@ -223,19 +220,10 @@ async function initNavbar() {
     const authElements =
         document.querySelectorAll(".auth-only");
 
-
     if (session) {
-
         console.log(
             "[Auth] Showing authenticated navbar."
         );
-
-
-        /*
-         * LOGGED IN
-         *
-         * Hide every guest element.
-         */
 
         guestElements.forEach(element => {
             element.hidden = true;
@@ -243,40 +231,21 @@ async function initNavbar() {
             element.setAttribute("aria-hidden", "true");
         });
 
-
-        /*
-         * Show authenticated elements.
-         */
-
         authElements.forEach(element => {
             element.hidden = false;
             element.style.removeProperty("display");
             element.removeAttribute("aria-hidden");
         });
-
     } else {
-
         console.log(
             "[Auth] Showing guest navbar."
         );
-
-
-        /*
-         * LOGGED OUT
-         *
-         * Show guest elements.
-         */
 
         guestElements.forEach(element => {
             element.hidden = false;
             element.style.removeProperty("display");
             element.removeAttribute("aria-hidden");
         });
-
-
-        /*
-         * Hide authenticated elements.
-         */
 
         authElements.forEach(element => {
             element.hidden = true;
@@ -284,7 +253,6 @@ async function initNavbar() {
             element.setAttribute("aria-hidden", "true");
         });
     }
-
 
     /* =========================================================
        NAVBAR USER
@@ -294,16 +262,13 @@ async function initNavbar() {
         document.getElementById("navbar-user");
 
     if (navbarUser) {
-
         navbarUser.innerHTML = "";
 
         if (session) {
-
             const profile =
                 await getProfile(session.user.id);
 
             if (profile) {
-
                 const avatar =
                     createAvatar(
                         profile,
@@ -312,8 +277,9 @@ async function initNavbar() {
 
                 avatar.style.width = "28px";
                 avatar.style.height = "28px";
+                avatar.style.minWidth = "28px";
+                avatar.style.minHeight = "28px";
                 avatar.style.flex = "0 0 28px";
-
 
                 const name =
                     document.createElement("span");
@@ -323,18 +289,14 @@ async function initNavbar() {
                     profile.username ||
                     "Account";
 
-
                 navbarUser.appendChild(avatar);
                 navbarUser.appendChild(name);
-
             } else {
-
                 navbarUser.textContent =
                     "Account";
             }
         }
     }
-
 
     /* =========================================================
        LOGOUT BUTTON
@@ -344,14 +306,13 @@ async function initNavbar() {
         document.getElementById("navbar-logout");
 
     if (logoutButton) {
-
         logoutButton.onclick = async () => {
-
             if (logoutButton.disabled) {
                 return;
             }
 
             logoutButton.disabled = true;
+
             logoutButton.textContent =
                 "Logging out...";
 
@@ -359,7 +320,6 @@ async function initNavbar() {
                 await signOut();
 
             if (!success) {
-
                 logoutButton.disabled = false;
 
                 logoutButton.textContent =
@@ -368,23 +328,19 @@ async function initNavbar() {
         };
     }
 
-
     return session;
 }
-
 
 /* =========================================================
    SIGN OUT
 ========================================================= */
 
 async function signOut() {
-
     const {
         error
     } = await supabaseClient.auth.signOut();
 
     if (error) {
-
         console.error(
             "Sign out error:",
             error
@@ -393,12 +349,10 @@ async function signOut() {
         return false;
     }
 
-
     window.location.href = "/login/";
 
     return true;
 }
-
 
 /* =========================================================
    AUTH STATE LISTENER
@@ -406,27 +360,21 @@ async function signOut() {
 
 supabaseClient.auth.onAuthStateChange(
     (event, session) => {
-
         console.log(
             "[Auth] Auth event:",
             event
         );
 
-
         if (session) {
-
             console.log(
                 "[Auth] Logged in as:",
                 session.user.email
             );
-
         } else {
-
             console.log(
                 "[Auth] No active session."
             );
         }
-
 
         /*
          * Do NOT automatically redirect here.
@@ -435,7 +383,6 @@ supabaseClient.auth.onAuthStateChange(
          */
     }
 );
-
 
 /* =========================================================
    GLOBAL EXPORTS
