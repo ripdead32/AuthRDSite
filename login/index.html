@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Log In | Rip_Dead</title>
+
+<link rel="stylesheet" href="../../css/auth.css">
+```
+
+</head>
+
+<body>
+
+```
+<main class="auth-container">
+
+    <section class="auth-card">
+
+        <div class="auth-logo">
+            <div class="logo-mark">RD</div>
+            <h1>Rip_Dead</h1>
+        </div>
+
+        <div class="auth-header">
+            <h2>Welcome back</h2>
+            <p>Log in to your Rip_Dead account.</p>
+        </div>
+
+        <form id="login-form">
+
+            <div class="form-group">
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Your password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                id="login-button"
+            >
+                Log In
+            </button>
+
+            <p
+                id="message"
+                class="auth-message"
+            ></p>
+
+        </form>
+
+        <div class="auth-footer">
+            <p>
+                Don't have an account?
+                <a href="../signup/">Create one</a>
+            </p>
+        </div>
+
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../js/auth.js"></script>
+
+<script>
+
+    const loginForm =
+        document.getElementById("login-form");
+
+    const loginButton =
+        document.getElementById("login-button");
+
+    const message =
+        document.getElementById("message");
+
+
+    loginForm.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
+
+
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
+
+
+            message.textContent = "";
+            message.className = "auth-message";
+
+
+            loginButton.disabled = true;
+            loginButton.textContent =
+                "Logging in...";
+
+
+            try {
+
+                const { data, error } =
+                    await window.supabaseClient
+                        .auth
+                        .signInWithPassword({
+
+                            email: email,
+
+                            password: password
+
+                        });
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                if (data.session) {
+
+                    window.location.href =
+                        "../account/";
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
+
+                message.textContent =
+                    error.message ||
+                    "Unable to log in.";
+
+                message.classList.add("error");
+
+
+            } finally {
+
+                loginButton.disabled = false;
+
+                loginButton.textContent =
+                    "Log In";
+
+            }
+
+        }
+    );
+
+</script>
+```
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Account | Rip_Dead</title>
+
+<link rel="stylesheet" href="../../css/auth.css">
+```
+
+</head>
+
+<body>
+
+```
+<main class="auth-container">
+
+    <section class="auth-card account-card">
+
+        <div class="auth-logo">
+            <div class="logo-mark">RD</div>
+            <h1>Rip_Dead</h1>
+        </div>
+
+        <div
+            class="account-avatar"
+            id="avatar"
+        >
+            ?
+        </div>
+
+        <div class="auth-header">
+
+            <h2 id="display-name">
+                Your Account
+            </h2>
+
+            <p
+                id="email"
+                class="account-email"
+            >
+                Loading...
+            </p>
+
+        </div>
+
+        <div class="account-info">
+
+            <p>
+                <strong>Username:</strong>
+
+                <span id="username">
+                    Not set
+                </span>
+            </p>
+
+            <p>
+                <strong>Display name:</strong>
+
+                <span id="profile-name">
+                    Not set
+                </span>
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            id="logout-button"
+        >
+            Log Out
+        </button>
+
+        <div class="auth-footer">
+
+            <p>
+                <a href="https://ripdead.de5.net">
+                    Back to Rip_Dead Site
+                </a>
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../js/auth.js"></script>
+
+<script>
+
+    async function loadAccount() {
+
+        const session =
+            await getSession();
+
+
+        if (!session) {
+
+            window.location.href =
+                "../login/";
+
+            return;
+        }
+
+
+        document.getElementById(
+            "email"
+        ).textContent =
+            session.user.email;
+
+
+        const profile =
+            await getProfile();
+
+
+        if (!profile) {
+            return;
+        }
+
+
+        const displayName =
+            profile.display_name ||
+            "Rip_Dead User";
+
+
+        document.getElementById(
+            "display-name"
+        ).textContent =
+            displayName;
+
+
+        document.getElementById(
+            "profile-name"
+        ).textContent =
+            profile.display_name ||
+            "Not set";
+
+
+        document.getElementById(
+            "username"
+        ).textContent =
+            profile.username ||
+            "Not set";
+
+
+        const firstLetter =
+            displayName
+                .trim()
+                .charAt(0)
+                .toUpperCase();
+
+
+        document.getElementById(
+            "avatar"
+        ).textContent =
+            firstLetter || "?";
+
+    }
+
+
+    document
+        .getElementById("logout-button")
+        .addEventListener(
+            "click",
+            async () => {
+
+                const button =
+                    document.getElementById(
+                        "logout-button"
+                    );
+
+                button.disabled = true;
+
+                button.textContent =
+                    "Logging out...";
+
+                await signOut();
+
+            }
+        );
+
+
+    loadAccount();
+
+</script>
+```
+
+</body>
+</html>

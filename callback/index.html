@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Authentication | Rip_Dead</title>
+
+<link rel="stylesheet" href="../../css/auth.css">
+```
+
+</head>
+
+<body>
+
+```
+<main class="auth-container">
+
+    <section class="auth-card">
+
+        <div class="auth-logo">
+            <div class="logo-mark">RD</div>
+            <h1>Rip_Dead</h1>
+        </div>
+
+        <div class="auth-header">
+
+            <h2 id="status">
+                Finishing authentication...
+            </h2>
+
+            <p id="message">
+                Please wait a moment.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../js/auth.js"></script>
+
+<script>
+
+    async function handleCallback() {
+
+        const status =
+            document.getElementById("status");
+
+        const message =
+            document.getElementById("message");
+
+
+        try {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            const errorParam =
+                params.get("error");
+
+            const errorDescription =
+                params.get("error_description");
+
+
+            if (errorParam) {
+
+                throw new Error(
+                    errorDescription ||
+                    errorParam ||
+                    "Authentication failed."
+                );
+
+            }
+
+
+            const code =
+                params.get("code");
+
+
+            if (code) {
+
+                const { error } =
+                    await window.supabaseClient
+                        .auth
+                        .exchangeCodeForSession(
+                            code
+                        );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    window.location.pathname
+                );
+
+            }
+
+
+            const { data, error } =
+                await window.supabaseClient
+                    .auth
+                    .getSession();
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            if (!data.session) {
+
+                status.textContent =
+                    "Authentication failed";
+
+                message.textContent =
+                    "No active session was found.";
+
+                return;
+            }
+
+
+            status.textContent =
+                "Authentication successful!";
+
+            message.textContent =
+                "Redirecting to your account...";
+
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "../account/";
+
+            }, 800);
+
+
+        } catch (error) {
+
+            console.error(
+                "Callback error:",
+                error
+            );
+
+            status.textContent =
+                "Something went wrong";
+
+            message.textContent =
+                error.message ||
+                "Unable to complete authentication.";
+
+        }
+
+    }
+
+
+    handleCallback();
+
+</script>
+```
+
+</body>
+</html>
