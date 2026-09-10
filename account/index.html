@@ -2,385 +2,316 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Account | Rip_Dead</title>
-    <link rel="stylesheet" href="../../css/auth.css">
-</head>
-<body>
-    <main class="auth-container">
-        <section class="auth-card account-card">
-            <div class="auth-logo">
-                <div class="logo-mark">RD</div>
-                <h1>Rip_Dead</h1>
-            </div>
 
-            <div id="loading">
-                <p>Loading your account...</p>
-            </div>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-            <div id="account-content" hidden>
-                <div class="profile-avatar-container">
-                    <div class="account-avatar" id="avatar">
-                        ?
-                    </div>
+    <title>Account - Rip_Dead Authentication</title>
 
-                    <label class="upload-button">
-                        Change PFP
-                        <input
-                            type="file"
-                            id="avatar-input"
-                            accept="image/jpeg,image/png,image/webp"
-                            hidden
-                        >
-                    </label>
-                </div>
-
-                <div class="account-header">
-                    <h2 id="display-name">
-                        Loading...
-                    </h2>
-
-                    <p class="username" id="username">
-                        @username
-                    </p>
-
-                    <span
-                        class="verified-badge"
-                        id="verified-badge"
-                        hidden
-                    >
-                        ✓ Verified
-                    </span>
-                </div>
-
-                <div class="form-group">
-                    <label for="username-input">
-                        Username
-                    </label>
-
-                    <input
-                        type="text"
-                        id="username-input"
-                        maxlength="24"
-                        placeholder="Username"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="display-name-input">
-                        Display name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="display-name-input"
-                        maxlength="32"
-                        placeholder="Display name"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="bio-input">
-                        Bio
-                    </label>
-
-                    <textarea
-                        id="bio-input"
-                        maxlength="160"
-                        placeholder="Tell people about yourself..."
-                    ></textarea>
-                </div>
-
-                <p
-                    class="auth-message"
-                    id="message"
-                ></p>
-
-                <button id="save-button">
-                    Save Profile
-                </button>
-
-                <button
-                    class="secondary-button"
-                    id="logout-button"
-                >
-                    Log Out
-                </button>
-
-                <div class="account-links">
-                    <a href="../profile/">View Profile</a>
-                    <a href="../search/">Search Users</a>
-                    <a href="../friends/">Friends</a>
-                    <a href="../settings/">Settings</a>
-                </div>
-            </div>
-        </section>
-    </main>
+    <link
+        rel="stylesheet"
+        href="../css/auth.css"
+    >
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../js/auth.js"></script>
+    <script src="../js/auth.js"></script>
+</head>
 
-    <script>
-        let currentSession = null;
-        let currentProfile = null;
+<body>
 
-        async function loadAccount() {
-            currentSession = await requireAuth();
+<nav class="site-navbar">
 
-            if (!currentSession) {
-                return;
-            }
+    <div class="navbar-inner">
 
-            currentProfile =
-                await getProfile(currentSession.user.id);
+        <a
+            href="../"
+            class="navbar-brand"
+        >
+            Rip_Dead Authentication
+        </a>
 
-            if (!currentProfile) {
-                document.getElementById("loading").textContent =
-                    "Unable to load your profile.";
-                return;
-            }
+        <div class="navbar-links">
 
-            document.getElementById("loading").hidden = true;
-            document.getElementById("account-content").hidden = false;
+            <a href="../">
+                Home
+            </a>
 
-            document.getElementById("username-input").value =
-                currentProfile.username || "";
+            <a href="../search/">
+                Search
+            </a>
 
-            document.getElementById("display-name-input").value =
-                currentProfile.display_name || "";
+            <a href="../friends/">
+                Friends
+            </a>
 
-            document.getElementById("bio-input").value =
-                currentProfile.bio || "";
+            <a href="../settings/">
+                Settings
+            </a>
 
-            updateProfilePreview();
-        }
+            <a href="../account/">
+                Account
+            </a>
 
-        function updateProfilePreview() {
-            const avatar =
-                document.getElementById("avatar");
+            <button
+                type="button"
+                id="navbar-logout"
+                class="navbar-logout"
+            >
+                Log Out
+            </button>
 
-            const avatarUrl =
-                getAvatarUrl(currentProfile);
+        </div>
 
-            if (avatarUrl) {
-                avatar.innerHTML =
-                    `<img src="${avatarUrl}" alt="Profile picture">`;
-            } else {
-                avatar.textContent =
-                    getAvatarLetter(currentProfile);
-            }
+    </div>
 
-            document.getElementById("display-name").textContent =
-                currentProfile.display_name ||
-                currentProfile.username ||
-                "Unnamed User";
+</nav>
 
-            document.getElementById("username").textContent =
-                currentProfile.username
-                    ? "@" + currentProfile.username
-                    : "No username";
+<main class="auth-container">
 
-            const badge =
-                document.getElementById("verified-badge");
+    <div class="auth-card">
 
-            badge.hidden =
-                !currentProfile.is_verified;
-        }
+        <div class="account-header">
 
-        document
-            .getElementById("save-button")
-            .addEventListener("click", async () => {
-                const message =
-                    document.getElementById("message");
+            <div
+                id="account-avatar"
+                class="account-avatar"
+            >
+                ?
+            </div>
 
-                const username =
-                    document
-                        .getElementById("username-input")
-                        .value
-                        .trim();
+            <h1 id="display-name">
+                Loading account
+            </h1>
 
-                const displayName =
-                    document
-                        .getElementById("display-name-input")
-                        .value
-                        .trim();
+            <p
+                id="username"
+                class="username"
+            ></p>
 
-                const bio =
-                    document
-                        .getElementById("bio-input")
-                        .value
-                        .trim();
+            <div
+                id="verified"
+                class="verified-badge"
+                hidden
+            >
+                Verified
+            </div>
 
-                if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
-                    message.textContent =
-                        "Username must be 3–24 characters and only contain letters, numbers, and underscores.";
-                    message.className =
-                        "auth-message error";
-                    return;
+            <p
+                id="bio"
+                class="profile-bio"
+            ></p>
+
+        </div>
+
+        <div class="profile-stats">
+
+            <div>
+                <strong id="friend-count">
+                    0
+                </strong>
+
+                <span>
+                    Friends
+                </span>
+            </div>
+
+            <div>
+                <strong id="follower-count">
+                    0
+                </strong>
+
+                <span>
+                    Followers
+                </span>
+            </div>
+
+            <div>
+                <strong id="following-count">
+                    0
+                </strong>
+
+                <span>
+                    Following
+                </span>
+            </div>
+
+        </div>
+
+        <div
+            id="account-message"
+            class="auth-message"
+        ></div>
+
+        <div class="account-links">
+
+            <a
+                href="../profile/"
+                class="button-link"
+            >
+                Edit Profile
+            </a>
+
+            <a
+                href="../settings/"
+                class="button-link secondary-button"
+            >
+                Settings
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+async function initializeAccount() {
+
+    const session =
+        await requireAuth();
+
+    if (!session) {
+        return;
+    }
+
+    const profile =
+        await getProfile(
+            session.user.id
+        );
+
+    if (!profile) {
+
+        setMessage(
+            document.getElementById(
+                "account-message"
+            ),
+            "Unable to load your profile.",
+            "error"
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "display-name"
+    ).textContent =
+        profile.display_name ||
+        profile.username ||
+        "Rip_Dead User";
+
+    document.getElementById(
+        "username"
+    ).textContent =
+        profile.username
+            ? "@" + profile.username
+            : "";
+
+    document.getElementById(
+        "bio"
+    ).textContent =
+        profile.bio || "";
+
+    if (profile.is_verified) {
+
+        document.getElementById(
+            "verified"
+        ).hidden = false;
+    }
+
+    const avatar =
+        document.getElementById(
+            "account-avatar"
+        );
+
+    if (profile.avatar_url) {
+
+        avatar.innerHTML =
+            "<img src=\"" +
+            profile.avatar_url +
+            "\" alt=\"\">";
+
+    } else {
+
+        avatar.textContent =
+            getAvatarLetter(profile);
+    }
+
+    const userId =
+        session.user.id;
+
+    const { count: friendCount } =
+        await window.supabaseClient
+            .from("friendships")
+            .select(
+                "*",
+                {
+                    count: "exact",
+                    head: true
                 }
+            )
+            .or(
+                "requester_id.eq." +
+                userId +
+                ",addressee_id.eq." +
+                userId
+            )
+            .eq(
+                "status",
+                "accepted"
+            );
 
-                if (!displayName) {
-                    message.textContent =
-                        "Please enter a display name.";
-                    message.className =
-                        "auth-message error";
-                    return;
+    const { count: followerCount } =
+        await window.supabaseClient
+            .from("follows")
+            .select(
+                "*",
+                {
+                    count: "exact",
+                    head: true
                 }
+            )
+            .eq(
+                "following_id",
+                userId
+            );
 
-                const button =
-                    document.getElementById("save-button");
-
-                button.disabled = true;
-                button.textContent = "Saving...";
-
-                const { error } =
-                    await window.supabaseClient
-                        .from("profiles")
-                        .update({
-                            username,
-                            display_name: displayName,
-                            bio
-                        })
-                        .eq("id", currentSession.user.id);
-
-                button.disabled = false;
-                button.textContent = "Save Profile";
-
-                if (error) {
-                    console.error(error);
-
-                    if (error.code === "23505") {
-                        message.textContent =
-                            "That username is already taken.";
-                    } else {
-                        message.textContent =
-                            "Failed to save your profile.";
-                    }
-
-                    message.className =
-                        "auth-message error";
-
-                    return;
+    const { count: followingCount } =
+        await window.supabaseClient
+            .from("follows")
+            .select(
+                "*",
+                {
+                    count: "exact",
+                    head: true
                 }
+            )
+            .eq(
+                "follower_id",
+                userId
+            );
 
-                currentProfile.username = username;
-                currentProfile.display_name = displayName;
-                currentProfile.bio = bio;
+    document.getElementById(
+        "friend-count"
+    ).textContent =
+        friendCount || 0;
 
-                updateProfilePreview();
+    document.getElementById(
+        "follower-count"
+    ).textContent =
+        followerCount || 0;
 
-                message.textContent =
-                    "Profile saved successfully.";
+    document.getElementById(
+        "following-count"
+    ).textContent =
+        followingCount || 0;
 
-                message.className =
-                    "auth-message success";
-            });
+    await initNavbar();
+}
 
-        document
-            .getElementById("avatar-input")
-            .addEventListener("change", async (event) => {
-                const file = event.target.files[0];
+initializeAccount();
+</script>
 
-                if (!file || !currentSession) {
-                    return;
-                }
-
-                const allowedTypes = [
-                    "image/jpeg",
-                    "image/png",
-                    "image/webp"
-                ];
-
-                if (!allowedTypes.includes(file.type)) {
-                    alert(
-                        "Only JPEG, PNG, and WebP images are allowed."
-                    );
-                    return;
-                }
-
-                if (file.size > 5 * 1024 * 1024) {
-                    alert(
-                        "Profile pictures must be 5 MB or smaller."
-                    );
-                    return;
-                }
-
-                const extension =
-                    file.type === "image/jpeg"
-                        ? "jpg"
-                        : file.type === "image/png"
-                            ? "png"
-                            : "webp";
-
-                const path =
-                    `${currentSession.user.id}/profile.${extension}`;
-
-                const button =
-                    document.querySelector(".upload-button");
-
-                button.textContent = "Uploading...";
-
-                const { error } =
-                    await window.supabaseClient
-                        .storage
-                        .from("avatars")
-                        .upload(path, file, {
-                            upsert: true,
-                            contentType: file.type
-                        });
-
-                if (error) {
-                    console.error(error);
-
-                    alert(
-                        "Failed to upload profile picture."
-                    );
-
-                    button.textContent = "Change PFP";
-                    return;
-                }
-
-                const { data } =
-                    window.supabaseClient
-                        .storage
-                        .from("avatars")
-                        .getPublicUrl(path);
-
-                const avatarUrl =
-                    data.publicUrl + "?t=" + Date.now();
-
-                const { error: profileError } =
-                    await window.supabaseClient
-                        .from("profiles")
-                        .update({
-                            avatar_url: avatarUrl
-                        })
-                        .eq("id", currentSession.user.id);
-
-                if (profileError) {
-                    console.error(profileError);
-
-                    alert(
-                        "Picture uploaded, but the profile could not be updated."
-                    );
-
-                    button.textContent = "Change PFP";
-                    return;
-                }
-
-                currentProfile.avatar_url =
-                    avatarUrl;
-
-                updateProfilePreview();
-
-                button.textContent = "Change PFP";
-            });
-
-        document
-            .getElementById("logout-button")
-            .addEventListener("click", signOut);
-
-        loadAccount();
-    </script>
 </body>
 </html>

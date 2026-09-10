@@ -1,38 +1,68 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-```
-<title>Log In | Rip_Dead</title>
+    <title>Log In - Rip_Dead Authentication</title>
 
-<link rel="stylesheet" href="../../css/auth.css">
-```
+    <link
+        rel="stylesheet"
+        href="../css/auth.css"
+    >
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/auth.js"></script>
 </head>
 
 <body>
 
-```
-<main class="auth-container">
+<nav class="site-navbar">
+    <div class="navbar-inner">
 
-    <section class="auth-card">
+        <a
+            href="../"
+            class="navbar-brand"
+        >
+            Rip_Dead Authentication
+        </a>
 
-        <div class="auth-logo">
-            <div class="logo-mark">RD</div>
-            <h1>Rip_Dead</h1>
+        <div class="navbar-links">
+
+            <a href="../">
+                Home
+            </a>
+
+            <a href="../signup/">
+                Create Account
+            </a>
+
         </div>
 
+    </div>
+</nav>
+
+<main class="auth-container">
+
+    <div class="auth-card">
+
         <div class="auth-header">
-            <h2>Welcome back</h2>
-            <p>Log in to your Rip_Dead account.</p>
+
+            <h1>Log In</h1>
+
+            <p>
+                Sign in to your Rip_Dead account.
+            </p>
+
         </div>
 
         <form id="login-form">
 
             <div class="form-group">
+
                 <label for="email">
                     Email
                 </label>
@@ -40,13 +70,14 @@
                 <input
                     type="email"
                     id="email"
-                    placeholder="you@example.com"
                     autocomplete="email"
                     required
                 >
+
             </div>
 
             <div class="form-group">
+
                 <label for="password">
                     Password
                 </label>
@@ -54,10 +85,10 @@
                 <input
                     type="password"
                     id="password"
-                    placeholder="Your password"
                     autocomplete="current-password"
                     required
                 >
+
             </div>
 
             <button
@@ -67,45 +98,53 @@
                 Log In
             </button>
 
-            <p
-                id="message"
+            <div
+                id="login-message"
                 class="auth-message"
-            ></p>
+                aria-live="polite"
+            ></div>
 
         </form>
 
         <div class="auth-footer">
-            <p>
-                Don't have an account?
-                <a href="../signup/">Create one</a>
-            </p>
+
+            Don't have an account?
+
+            <a href="../signup/">
+                Create one
+            </a>
+
         </div>
 
-    </section>
+    </div>
 
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../js/auth.js"></script>
-
 <script>
+const form =
+    document.getElementById("login-form");
 
-    const loginForm =
-        document.getElementById("login-form");
+const button =
+    document.getElementById("login-button");
 
-    const loginButton =
-        document.getElementById("login-button");
+const message =
+    document.getElementById("login-message");
 
-    const message =
-        document.getElementById("message");
+form.addEventListener(
+    "submit",
+    async (event) => {
 
+        event.preventDefault();
 
-    loginForm.addEventListener(
-        "submit",
-        async (event) => {
+        button.disabled = true;
+        button.textContent = "Logging in...";
 
-            event.preventDefault();
+        setMessage(
+            message,
+            ""
+        );
 
+        try {
 
             const email =
                 document
@@ -113,76 +152,68 @@
                     .value
                     .trim();
 
-
             const password =
                 document
                     .getElementById("password")
                     .value;
 
+            const { data, error } =
+                await window.supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
 
-            message.textContent = "";
-            message.className = "auth-message";
-
-
-            loginButton.disabled = true;
-            loginButton.textContent =
-                "Logging in...";
-
-
-            try {
-
-                const { data, error } =
-                    await window.supabaseClient
-                        .auth
-                        .signInWithPassword({
-
-                            email: email,
-
-                            password: password
-
-                        });
-
-
-                if (error) {
-                    throw error;
-                }
-
-
-                if (data.session) {
-
-                    window.location.href =
-                        "../account/";
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Login error:",
-                    error
+            if (error) {
+                setMessage(
+                    message,
+                    error.message,
+                    "error"
                 );
 
-                message.textContent =
-                    error.message ||
-                    "Unable to log in.";
-
-                message.classList.add("error");
-
-
-            } finally {
-
-                loginButton.disabled = false;
-
-                loginButton.textContent =
-                    "Log In";
-
+                return;
             }
 
-        }
-    );
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
 
+            const redirect =
+                params.get("redirect");
+
+            if (
+                redirect &&
+                redirect.startsWith("/")
+            ) {
+                window.location.href =
+                    redirect;
+            } else {
+                window.location.href =
+                    "../account/";
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+            setMessage(
+                message,
+                error.message ||
+                "Unable to log in.",
+                "error"
+            );
+
+        } finally {
+
+            button.disabled = false;
+            button.textContent = "Log In";
+        }
+    }
+);
 </script>
-```
 
 </body>
 </html>

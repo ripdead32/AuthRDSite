@@ -26,7 +26,14 @@ async function requireAuth() {
     const session = await getSession();
 
     if (!session) {
-        window.location.href = "../login/";
+        const currentPath =
+            window.location.pathname +
+            window.location.search;
+
+        window.location.href =
+            "../login/?redirect=" +
+            encodeURIComponent(currentPath);
+
         return null;
     }
 
@@ -57,6 +64,31 @@ async function getProfile(userId = null) {
     return data;
 }
 
+async function updateProfile(updates) {
+    const session = await getSession();
+
+    if (!session) {
+        return {
+            data: null,
+            error: new Error("You are not logged in.")
+        };
+    }
+
+    const { data, error } =
+        await window.supabaseClient
+            .from("profiles")
+            .update(updates)
+            .eq("id", session.user.id)
+            .select()
+            .single();
+
+    if (error) {
+        console.error("Profile update error:", error);
+    }
+
+    return { data, error };
+}
+
 async function signOut() {
     const { error } =
         await window.supabaseClient.auth.signOut();
@@ -83,14 +115,132 @@ function getAvatarUrl(profile) {
     return profile?.avatar_url || null;
 }
 
-window.supabaseClient.auth.onAuthStateChange(
-    (event, session) => {
-        console.log("Auth event:", event);
+function setMessage(element, text, type = "") {
+    if (!element) {
+        return;
+    }
 
-        if (session) {
-            console.log("Logged in as:", session.user.email);
-        } else {
-            console.log("No active session.");
+    element.textContent = text;
+    element.className =
+        type
+            ? "auth-message " + type
+            : "auth-message";
+}
+
+function createAvatar(profile, className = "avatar") {
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className = className;
+
+    const avatarUrl =
+        getAvatarUrl(profile);
+
+    if (avatarUrl) {
+        const image =
+            document.createElement("img");
+
+        image.src = avatarUrl;
+        image.alt = "";
+
+        wrapper.appendChild(image);
+    } else {
+        wrapper.textContent =
+            getAvatarLetter(profile);
+    }
+
+    return wrapper;
+}
+
+async function initNavbar() {
+    const session = await getSession();
+
+    const guestElements =
+        document.querySelectorAll(".guest-only");
+
+    const authElements =
+        document.querySelectorAll(".auth-only");
+
+    guestElements.forEach((element) => {
+        element.hidden = !!session;
+    });
+
+    authElements.forEach((element) => {
+        element.hidden = !session;
+    });
+
+    const navbarUser =
+        document.getElementById("navbar-user");
+
+    if (navbarUser && session) {
+        const profile =
+            await getProfile(session.user.id);
+
+        if (profile) {
+            navbarUser.innerHTML = "";
+
+            const avatar =
+                createAvatar(
+                    profile,
+                    "navbar-avatar"
+                );
+
+            const name =
+                document.createElement("span");
+
+            name.textContent =
+                profile.display_name ||
+                profile.username ||
+                "Account";
+
+            navbarUser.appendChild(avatar);
+            navbarUser.appendChild(name);
         }
     }
+
+    const logoutButton =
+        document.getElementById("navbar-logout");
+
+    if (logoutButton) {
+        logoutButton.addEventListener(
+            "click",
+            async () => {
+
+                logoutButton.disabled = true;
+                logoutButton.textContent =
+                    "Logging out...";
+
+                const success =
+                    await signOut();
+
+                if (!success) {
+                    logoutButton.disabled = false;
+                    logoutButton.textContent =
+                        "Log Out";
+                }
+            }
+        );
+    }
+
+    return session;
+}
+
+window.supabaseClient.auth.onAuthStateChange(
+    (event, session) => {
+        console.log(
+            "Auth event:",
+            event
+        );
+    }
 );
+
+window.getSession = getSession;
+window.requireAuth = requireAuth;
+window.getProfile = getProfile;
+window.updateProfile = updateProfile;
+window.signOut = signOut;
+window.getAvatarLetter = getAvatarLetter;
+window.getAvatarUrl = getAvatarUrl;
+window.setMessage = setMessage;
+window.createAvatar = createAvatar;
+window.initNavbar = initNavbar;

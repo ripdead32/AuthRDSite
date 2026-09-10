@@ -1,93 +1,131 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-```
-<title>Create Account - Rip_Dead Authentication</title>
+    <title>Create Account - Rip_Dead Authentication</title>
 
-<link rel="stylesheet" href="../css/auth.css">
+    <link
+        rel="stylesheet"
+        href="../css/auth.css"
+    >
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/auth.js"></script>
-```
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/auth.js"></script>
 </head>
 
 <body>
 
-```
+<nav class="site-navbar">
+    <div class="navbar-inner">
+
+        <a
+            href="../"
+            class="navbar-brand"
+        >
+            Rip_Dead Authentication
+        </a>
+
+        <div class="navbar-links">
+
+            <a href="../">
+                Home
+            </a>
+
+            <a href="../login/">
+                Log In
+            </a>
+
+        </div>
+
+    </div>
+</nav>
+
 <main class="auth-container">
 
     <div class="auth-card">
 
         <div class="auth-header">
+
             <h1>Create Account</h1>
-            <p>Create your Rip_Dead account.</p>
+
+            <p>
+                Create your Rip_Dead account.
+            </p>
+
         </div>
 
         <form id="signup-form">
 
             <div class="form-group">
-                <label for="username">Username</label>
+
+                <label for="username">
+                    Username
+                </label>
 
                 <input
                     type="text"
                     id="username"
-                    name="username"
-                    placeholder="rip_dead"
                     autocomplete="username"
-                    required
                     maxlength="32"
+                    required
                 >
+
             </div>
 
             <div class="form-group">
-                <label for="display-name">Display Name</label>
+
+                <label for="display-name">
+                    Display Name
+                </label>
 
                 <input
                     type="text"
                     id="display-name"
-                    name="display-name"
-                    placeholder="Rip_Dead"
                     autocomplete="name"
                     maxlength="64"
                 >
+
             </div>
 
             <div class="form-group">
-                <label for="email">Email</label>
+
+                <label for="email">
+                    Email
+                </label>
 
                 <input
                     type="email"
                     id="email"
-                    name="email"
-                    placeholder="you@example.com"
                     autocomplete="email"
                     required
                 >
+
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+
+                <label for="password">
+                    Password
+                </label>
 
                 <input
                     type="password"
                     id="password"
-                    name="password"
-                    placeholder="••••••••"
                     autocomplete="new-password"
-                    required
                     minlength="6"
+                    required
                 >
+
             </div>
 
             <button
                 type="submit"
                 id="signup-button"
-                class="auth-button"
             >
                 Create Account
             </button>
@@ -101,10 +139,13 @@
         </form>
 
         <div class="auth-footer">
-            <p>
-                Already have an account?
-                <a href="../login/">Log in</a>
-            </p>
+
+            Already have an account?
+
+            <a href="../login/">
+                Log in
+            </a>
+
         </div>
 
     </div>
@@ -112,13 +153,27 @@
 </main>
 
 <script>
-    const form = document.getElementById("signup-form");
-    const signupButton = document.getElementById("signup-button");
-    const message = document.getElementById("signup-message");
+const form =
+    document.getElementById(
+        "signup-form"
+    );
 
-    let signingUp = false;
+const button =
+    document.getElementById(
+        "signup-button"
+    );
 
-    form.addEventListener("submit", async (event) => {
+const message =
+    document.getElementById(
+        "signup-message"
+    );
+
+let signingUp = false;
+
+form.addEventListener(
+    "submit",
+    async (event) => {
+
         event.preventDefault();
 
         if (signingUp) {
@@ -127,96 +182,133 @@
 
         signingUp = true;
 
-        signupButton.disabled = true;
-        signupButton.textContent = "Creating account...";
+        button.disabled = true;
+        button.textContent =
+            "Creating account...";
 
-        message.textContent = "";
-        message.className = "auth-message";
-
-        const username =
-            document.getElementById("username").value.trim();
-
-        const displayName =
-            document.getElementById("display-name").value.trim();
-
-        const email =
-            document.getElementById("email").value.trim();
-
-        const password =
-            document.getElementById("password").value;
+        setMessage(message, "");
 
         try {
+
+            const username =
+                document
+                    .getElementById("username")
+                    .value
+                    .trim();
+
+            const displayName =
+                document
+                    .getElementById("display-name")
+                    .value
+                    .trim();
+
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
+
             if (!username) {
-                throw new Error("Please enter a username.");
+                throw new Error(
+                    "Please enter a username."
+                );
+            }
+
+            if (username.length < 3) {
+                throw new Error(
+                    "Username must be at least 3 characters."
+                );
             }
 
             if (!email) {
-                throw new Error("Please enter your email address.");
-            }
-
-            if (!password) {
-                throw new Error("Please enter a password.");
+                throw new Error(
+                    "Please enter your email address."
+                );
             }
 
             if (password.length < 6) {
                 throw new Error(
-                    "Your password must be at least 6 characters."
+                    "Password must be at least 6 characters."
                 );
             }
 
             const { data, error } =
                 await window.supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
+                    email,
+                    password,
 
                     options: {
                         emailRedirectTo:
                             "https://auth.ripdead.de5.net/callback/",
 
                         data: {
-                            username: username,
+                            username,
                             display_name:
-                                displayName || username
+                                displayName ||
+                                username
                         }
                     }
                 });
 
             if (error) {
-                console.error("Signup error:", error);
 
-                message.textContent = error.message;
-                message.className = "auth-message error";
+                console.error(
+                    "Signup error:",
+                    error
+                );
+
+                setMessage(
+                    message,
+                    error.message,
+                    "error"
+                );
 
                 return;
             }
 
-            console.log("Signup successful:", data);
+            console.log(
+                "Signup successful:",
+                data
+            );
 
-            message.textContent =
-                "Account created! Check your email to confirm your address.";
-
-            message.className = "auth-message success";
+            setMessage(
+                message,
+                "Account created. Check your email to confirm your address.",
+                "success"
+            );
 
             form.reset();
 
         } catch (error) {
-            console.error("Unexpected signup error:", error);
 
-            message.textContent =
+            console.error(
+                "Unexpected signup error:",
+                error
+            );
+
+            setMessage(
+                message,
                 error.message ||
-                "Something went wrong. Please try again.";
-
-            message.className = "auth-message error";
+                "Something went wrong.",
+                "error"
+            );
 
         } finally {
+
             signingUp = false;
 
-            signupButton.disabled = false;
-            signupButton.textContent = "Create Account";
+            button.disabled = false;
+            button.textContent =
+                "Create Account";
         }
-    });
+    }
+);
 </script>
-```
 
 </body>
 </html>

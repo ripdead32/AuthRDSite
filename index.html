@@ -1,51 +1,264 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-```
-<title>Rip_Dead Authentication</title>
+    <title>Rip_Dead Authentication</title>
 
-<link rel="stylesheet" href="css/auth.css">
-```
+    <link rel="stylesheet" href="css/auth.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth.js"></script>
 </head>
 
 <body>
 
-```
+<nav class="site-navbar">
+    <div class="navbar-inner">
+
+        <a href="./" class="navbar-brand">
+            Rip_Dead Authentication
+        </a>
+
+        <div class="navbar-links">
+
+            <a href="./">
+                Home
+            </a>
+
+            <a
+                href="./search/"
+                class="auth-only"
+                hidden
+            >
+                Search
+            </a>
+
+            <a
+                href="./friends/"
+                class="auth-only"
+                hidden
+            >
+                Friends
+            </a>
+
+            <a
+                href="./settings/"
+                class="auth-only"
+                hidden
+            >
+                Settings
+            </a>
+
+            <a
+                href="./account/"
+                class="auth-only"
+                hidden
+            >
+                Account
+            </a>
+
+            <a
+                href="./login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+            <a
+                href="./signup/"
+                class="guest-only button-link"
+                style="width:auto;"
+            >
+                Create Account
+            </a>
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden
+            >
+                Log Out
+            </button>
+
+        </div>
+
+    </div>
+</nav>
+
 <main class="auth-container">
 
-    <section class="auth-card">
-
-        <div class="auth-logo">
-            <div class="logo-mark">RD</div>
-            <h1>Rip_Dead</h1>
-        </div>
+    <div class="auth-card">
 
         <div class="auth-header">
-            <h2>Rip_Dead Account</h2>
-            <p>One account for the Rip_Dead ecosystem.</p>
+
+            <h1 id="page-title">
+                Rip_Dead Authentication
+            </h1>
+
+            <p id="page-description">
+                Your centralized Rip_Dead account system.
+            </p>
+
         </div>
 
-        <a href="login/" class="button-link">
-            Log In
-        </a>
+        <div id="logged-out-content">
 
-        <a href="signup/" class="button-link secondary-button">
-            Create Account
-        </a>
+            <p>
+                Sign in or create a Rip_Dead account to access
+                your profile, friends, and account features.
+            </p>
 
-        <div class="auth-footer">
-            <p>Rip_Dead Authentication</p>
+            <div class="account-links">
+
+                <a
+                    href="./login/"
+                    class="button-link"
+                >
+                    Log In
+                </a>
+
+                <a
+                    href="./signup/"
+                    class="button-link secondary-button"
+                >
+                    Create Account
+                </a>
+
+            </div>
+
         </div>
 
-    </section>
+        <div
+            id="logged-in-content"
+            hidden
+        >
+
+            <div class="account-header">
+
+                <div
+                    id="index-avatar"
+                    class="account-avatar"
+                >
+                    ?
+                </div>
+
+                <h2 id="welcome-name">
+                    Welcome back
+                </h2>
+
+                <p
+                    id="welcome-username"
+                    class="username"
+                ></p>
+
+            </div>
+
+            <div class="account-links">
+
+                <a
+                    href="./account/"
+                    class="button-link"
+                >
+                    Go to Account
+                </a>
+
+                <a
+                    href="./search/"
+                    class="button-link secondary-button"
+                >
+                    Search Users
+                </a>
+
+            </div>
+
+        </div>
+
+        <div
+            id="index-message"
+            class="auth-message"
+            aria-live="polite"
+        ></div>
+
+    </div>
 
 </main>
-```
+
+<script>
+async function initializeIndex() {
+
+    const session =
+        await initNavbar();
+
+    const loggedOut =
+        document.getElementById(
+            "logged-out-content"
+        );
+
+    const loggedIn =
+        document.getElementById(
+            "logged-in-content"
+        );
+
+    if (!session) {
+        loggedOut.hidden = false;
+        loggedIn.hidden = true;
+        return;
+    }
+
+    loggedOut.hidden = true;
+    loggedIn.hidden = false;
+
+    const profile =
+        await getProfile(session.user.id);
+
+    if (!profile) {
+        return;
+    }
+
+    const name =
+        profile.display_name ||
+        profile.username ||
+        "Rip_Dead User";
+
+    document.getElementById(
+        "welcome-name"
+    ).textContent =
+        "Welcome back, " + name;
+
+    document.getElementById(
+        "welcome-username"
+    ).textContent =
+        profile.username
+            ? "@" + profile.username
+            : "";
+
+    const avatar =
+        document.getElementById(
+            "index-avatar"
+        );
+
+    if (profile.avatar_url) {
+
+        avatar.innerHTML =
+            "<img src=\"" +
+            profile.avatar_url +
+            "\" alt=\"\">";
+
+    } else {
+
+        avatar.textContent =
+            getAvatarLetter(profile);
+    }
+}
+
+initializeIndex();
+</script>
 
 </body>
 </html>
