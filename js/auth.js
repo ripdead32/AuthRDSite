@@ -1,10 +1,12 @@
 const SUPABASE_URL = "https://vcwfgyikbvfzgqiljmry.supabase.co";
 
-/*
- * Keep your existing Supabase publishable key here.
- * Do NOT replace it with a service-role key.
- */
+// KEEP YOUR EXISTING SUPABASE PUBLISHABLE KEY HERE
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
+
+
+/* =========================================================
+   SUPABASE
+========================================================= */
 
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
@@ -12,9 +14,9 @@ const supabaseClient = window.supabase.createClient(
 );
 
 
-/* =========================
+/* =========================================================
    SESSION
-========================= */
+========================================================= */
 
 async function getSession() {
     const {
@@ -31,9 +33,9 @@ async function getSession() {
 }
 
 
-/* =========================
+/* =========================================================
    AUTH GUARD
-========================= */
+========================================================= */
 
 async function requireAuth() {
     const session = await getSession();
@@ -47,9 +49,9 @@ async function requireAuth() {
 }
 
 
-/* =========================
+/* =========================================================
    PROFILE
-========================= */
+========================================================= */
 
 async function getProfile(userId = null) {
     const session = await getSession();
@@ -114,16 +116,12 @@ async function updateProfile(updates) {
 }
 
 
-/* =========================
+/* =========================================================
    AVATAR
-========================= */
+========================================================= */
 
 function getAvatarLetter() {
-    /*
-     * Intentionally disabled.
-     *
-     * We no longer randomly display "R", "A", etc.
-     */
+    // No random fallback letters.
     return "";
 }
 
@@ -147,7 +145,8 @@ function getAvatarUrl(profile) {
 function createAvatar(profile, className = "") {
     const wrapper = document.createElement("div");
 
-    wrapper.className = `account-avatar empty ${className}`.trim();
+    wrapper.className =
+        `account-avatar empty ${className}`.trim();
 
     const avatarUrl = getAvatarUrl(profile);
 
@@ -168,9 +167,9 @@ function createAvatar(profile, className = "") {
 }
 
 
-/* =========================
+/* =========================================================
    MESSAGES
-========================= */
+========================================================= */
 
 function setMessage(elementOrId, message, type = "") {
     const element =
@@ -183,6 +182,7 @@ function setMessage(elementOrId, message, type = "") {
     }
 
     element.textContent = message || "";
+
     element.className = "message";
 
     if (type) {
@@ -191,102 +191,208 @@ function setMessage(elementOrId, message, type = "") {
 }
 
 
-/* =========================
+/* =========================================================
    NAVBAR
-========================= */
+========================================================= */
 
 async function initNavbar() {
+    console.log("[Auth] Initializing navbar...");
+
     const session = await getSession();
 
-    /*
-     * This is the ONLY place controlling navbar auth visibility.
-     */
-
-    document.querySelectorAll(".guest-only").forEach(element => {
-        element.hidden = Boolean(session);
-    });
-
-    document.querySelectorAll(".auth-only").forEach(element => {
-        element.hidden = !session;
-    });
+    console.log(
+        "[Auth] Navbar session:",
+        session ? "LOGGED IN" : "LOGGED OUT"
+    );
 
 
-    /*
-     * Optional navbar user display.
-     */
-    const navbarUser = document.getElementById("navbar-user");
+    /* ---------------------------------------------------------
+       GUEST ELEMENTS
+       Log In / Create Account
+    --------------------------------------------------------- */
+
+    const guestElements =
+        document.querySelectorAll(".guest-only");
+
+
+    /* ---------------------------------------------------------
+       AUTH ELEMENTS
+       Search / Friends / Settings / Account / Log Out
+    --------------------------------------------------------- */
+
+    const authElements =
+        document.querySelectorAll(".auth-only");
+
+
+    if (session) {
+
+        console.log(
+            "[Auth] Showing authenticated navbar."
+        );
+
+
+        /*
+         * LOGGED IN
+         *
+         * Hide every guest element.
+         */
+
+        guestElements.forEach(element => {
+            element.hidden = true;
+            element.style.display = "none";
+            element.setAttribute("aria-hidden", "true");
+        });
+
+
+        /*
+         * Show authenticated elements.
+         */
+
+        authElements.forEach(element => {
+            element.hidden = false;
+            element.style.removeProperty("display");
+            element.removeAttribute("aria-hidden");
+        });
+
+    } else {
+
+        console.log(
+            "[Auth] Showing guest navbar."
+        );
+
+
+        /*
+         * LOGGED OUT
+         *
+         * Show guest elements.
+         */
+
+        guestElements.forEach(element => {
+            element.hidden = false;
+            element.style.removeProperty("display");
+            element.removeAttribute("aria-hidden");
+        });
+
+
+        /*
+         * Hide authenticated elements.
+         */
+
+        authElements.forEach(element => {
+            element.hidden = true;
+            element.style.display = "none";
+            element.setAttribute("aria-hidden", "true");
+        });
+    }
+
+
+    /* =========================================================
+       NAVBAR USER
+    ========================================================= */
+
+    const navbarUser =
+        document.getElementById("navbar-user");
 
     if (navbarUser) {
+
         navbarUser.innerHTML = "";
 
         if (session) {
-            const profile = await getProfile(session.user.id);
+
+            const profile =
+                await getProfile(session.user.id);
 
             if (profile) {
-                const avatar = createAvatar(
-                    profile,
-                    "navbar-avatar"
-                );
+
+                const avatar =
+                    createAvatar(
+                        profile,
+                        "navbar-avatar"
+                    );
 
                 avatar.style.width = "28px";
                 avatar.style.height = "28px";
                 avatar.style.flex = "0 0 28px";
 
-                const name = document.createElement("span");
+
+                const name =
+                    document.createElement("span");
 
                 name.textContent =
                     profile.display_name ||
                     profile.username ||
                     "Account";
 
+
                 navbarUser.appendChild(avatar);
                 navbarUser.appendChild(name);
+
+            } else {
+
+                navbarUser.textContent =
+                    "Account";
             }
         }
     }
 
 
-    /*
-     * Logout
-     */
+    /* =========================================================
+       LOGOUT BUTTON
+    ========================================================= */
+
     const logoutButton =
         document.getElementById("navbar-logout");
 
     if (logoutButton) {
+
         logoutButton.onclick = async () => {
+
             if (logoutButton.disabled) {
                 return;
             }
 
             logoutButton.disabled = true;
-            logoutButton.textContent = "Logging out...";
+            logoutButton.textContent =
+                "Logging out...";
 
-            const success = await signOut();
+            const success =
+                await signOut();
 
             if (!success) {
+
                 logoutButton.disabled = false;
-                logoutButton.textContent = "Log Out";
+
+                logoutButton.textContent =
+                    "Log Out";
             }
         };
     }
+
 
     return session;
 }
 
 
-/* =========================
+/* =========================================================
    SIGN OUT
-========================= */
+========================================================= */
 
 async function signOut() {
+
     const {
         error
     } = await supabaseClient.auth.signOut();
 
     if (error) {
-        console.error("Sign out error:", error);
+
+        console.error(
+            "Sign out error:",
+            error
+        );
+
         return false;
     }
+
 
     window.location.href = "/login/";
 
@@ -294,41 +400,76 @@ async function signOut() {
 }
 
 
-/* =========================
-   AUTH LISTENER
-========================= */
+/* =========================================================
+   AUTH STATE LISTENER
+========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
     (event, session) => {
-        console.log("Auth event:", event);
+
+        console.log(
+            "[Auth] Auth event:",
+            event
+        );
+
 
         if (session) {
+
             console.log(
-                "Logged in as:",
+                "[Auth] Logged in as:",
                 session.user.email
             );
+
+        } else {
+
+            console.log(
+                "[Auth] No active session."
+            );
         }
+
+
+        /*
+         * Do NOT automatically redirect here.
+         *
+         * Individual pages decide what they should do.
+         */
     }
 );
 
 
-/* =========================
+/* =========================================================
    GLOBAL EXPORTS
-========================= */
+========================================================= */
 
-window.supabaseClient = supabaseClient;
+window.supabaseClient =
+    supabaseClient;
 
-window.getSession = getSession;
-window.requireAuth = requireAuth;
+window.getSession =
+    getSession;
 
-window.getProfile = getProfile;
-window.updateProfile = updateProfile;
+window.requireAuth =
+    requireAuth;
 
-window.getAvatarLetter = getAvatarLetter;
-window.getAvatarUrl = getAvatarUrl;
-window.createAvatar = createAvatar;
+window.getProfile =
+    getProfile;
 
-window.setMessage = setMessage;
+window.updateProfile =
+    updateProfile;
 
-window.initNavbar = initNavbar;
-window.signOut = signOut;
+window.getAvatarLetter =
+    getAvatarLetter;
+
+window.getAvatarUrl =
+    getAvatarUrl;
+
+window.createAvatar =
+    createAvatar;
+
+window.setMessage =
+    setMessage;
+
+window.initNavbar =
+    initNavbar;
+
+window.signOut =
+    signOut;
