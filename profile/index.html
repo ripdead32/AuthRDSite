@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Authentication - Rip_Dead</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Edit Profile — Rip_Dead Authentication</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 
@@ -22,16 +26,20 @@
         </a>
 
         <div class="navbar-links">
-
             <a href="/">Home</a>
             <a href="/search/" class="auth-only" hidden>Search</a>
             <a href="/friends/" class="auth-only" hidden>Friends</a>
             <a href="/settings/" class="auth-only" hidden>Settings</a>
             <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
@@ -39,140 +47,330 @@
                 type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
-
         </div>
 
     </div>
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card">
+<main class="page page-small">
 
-        <span class="auth-eyebrow">
-            AUTHENTICATION
-        </span>
+    <h1 class="page-title">
+        Edit Profile
+    </h1>
 
-        <h1 id="callback-title">
-            Completing authentication...
-        </h1>
+    <p class="page-description">
+        Update the information shown on your Rip_Dead profile.
+    </p>
 
-        <p
-            id="callback-message"
-            class="auth-message"
-            aria-live="polite">
-            Please wait.
-        </p>
+
+    <section class="card">
+
+        <div class="form-group">
+
+            <label
+                for="username"
+                class="form-label"
+            >
+                Username
+            </label>
+
+            <input
+                id="username"
+                type="text"
+                autocomplete="username"
+                maxlength="32"
+                placeholder="Your username"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label
+                for="display-name"
+                class="form-label"
+            >
+                Display Name
+            </label>
+
+            <input
+                id="display-name"
+                type="text"
+                maxlength="64"
+                placeholder="Your display name"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label
+                for="bio"
+                class="form-label"
+            >
+                Bio
+            </label>
+
+            <textarea
+                id="bio"
+                maxlength="500"
+                placeholder="Tell people a little about yourself..."
+            ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label
+                for="avatar"
+                class="form-label"
+            >
+                Profile Picture
+            </label>
+
+            <input
+                id="avatar"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+            >
+
+            <span class="form-help">
+                PNG, JPEG, or WebP. Maximum 5 MB.
+            </span>
+
+        </div>
+
+
+        <div
+            id="profile-message"
+            class="message"
+        ></div>
+
+
+        <div class="button-row">
+
+            <button id="save-profile">
+                Save Changes
+            </button>
+
+            <a
+                href="/account/"
+                class="button button-secondary"
+            >
+                Cancel
+            </a>
+
+        </div>
 
     </section>
 
 </main>
 
+
 <script>
-async function handleCallback() {
+document.addEventListener("DOMContentLoaded", async () => {
 
-    const title =
-        document.getElementById(
-            "callback-title"
+    const session = await requireAuth();
+
+    if (!session) {
+        return;
+    }
+
+    await initNavbar();
+
+    const profile = await getProfile(session.user.id);
+
+    if (!profile) {
+        setMessage(
+            "profile-message",
+            "Could not load your profile.",
+            "error"
         );
 
-    const message =
-        document.getElementById(
-            "callback-message"
-        );
+        return;
+    }
 
-    try {
+    document.getElementById("username").value =
+        profile.username || "";
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth
-                .getSession();
+    document.getElementById("display-name").value =
+        profile.display_name || "";
 
-        if (error) {
-            throw error;
-        }
+    document.getElementById("bio").value =
+        profile.bio || "";
 
-        if (data.session) {
 
-            title.textContent =
-                "Authentication successful!";
+    document.getElementById("save-profile").onclick =
+        async () => {
+
+            const button =
+                document.getElementById("save-profile");
+
+            button.disabled = true;
+            button.textContent = "Saving...";
+
+            setMessage("profile-message", "");
+
+
+            const username =
+                document.getElementById("username").value.trim();
+
+            const displayName =
+                document.getElementById("display-name").value.trim();
+
+            const bio =
+                document.getElementById("bio").value.trim();
+
+
+            const result = await updateProfile({
+                username,
+                display_name: displayName,
+                bio
+            });
+
+
+            if (!result.success) {
+
+                setMessage(
+                    "profile-message",
+                    result.error,
+                    "error"
+                );
+
+                button.disabled = false;
+                button.textContent = "Save Changes";
+
+                return;
+            }
+
+
+            /* =========================
+               AVATAR UPLOAD
+            ========================= */
+
+            const file =
+                document.getElementById("avatar").files[0];
+
+            if (file) {
+
+                if (file.size > 5 * 1024 * 1024) {
+
+                    setMessage(
+                        "profile-message",
+                        "Avatar must be smaller than 5 MB.",
+                        "error"
+                    );
+
+                    button.disabled = false;
+                    button.textContent = "Save Changes";
+
+                    return;
+                }
+
+
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+
+                const filePath =
+                    `${session.user.id}/profile.${extension}`;
+
+
+                const {
+                    error: uploadError
+                } = await supabaseClient
+                    .storage
+                    .from("avatars")
+                    .upload(
+                        filePath,
+                        file,
+                        {
+                            upsert: true,
+                            contentType: file.type
+                        }
+                    );
+
+
+                if (uploadError) {
+
+                    console.error(
+                        "Avatar upload error:",
+                        uploadError
+                    );
+
+                    setMessage(
+                        "profile-message",
+                        uploadError.message,
+                        "error"
+                    );
+
+                    button.disabled = false;
+                    button.textContent = "Save Changes";
+
+                    return;
+                }
+
+
+                const {
+                    data: publicData
+                } = supabaseClient
+                    .storage
+                    .from("avatars")
+                    .getPublicUrl(filePath);
+
+
+                const avatarUrl =
+                    publicData.publicUrl;
+
+
+                const {
+                    error: avatarUpdateError
+                } = await supabaseClient
+                    .from("profiles")
+                    .update({
+                        avatar_url: avatarUrl
+                    })
+                    .eq("id", session.user.id);
+
+
+                if (avatarUpdateError) {
+
+                    setMessage(
+                        "profile-message",
+                        avatarUpdateError.message,
+                        "error"
+                    );
+
+                    button.disabled = false;
+                    button.textContent = "Save Changes";
+
+                    return;
+                }
+            }
+
 
             setMessage(
-                message,
-                "Redirecting to your account...",
+                "profile-message",
+                "Profile saved successfully.",
                 "success"
             );
 
-            setTimeout(() => {
-                window.location.href =
-                    "/account/";
-            }, 700);
 
-            return;
-        }
-
-        const hash =
-            window.location.hash;
-
-        const params =
-            new URLSearchParams(
-                hash.startsWith("#")
-                    ? hash.substring(1)
-                    : hash
-            );
-
-        const errorDescription =
-            params.get(
-                "error_description"
-            );
-
-        if (errorDescription) {
-            throw new Error(
-                errorDescription
-            );
-        }
-
-        title.textContent =
-            "Authentication complete";
-
-        setMessage(
-            message,
-            "Please log in to continue.",
-            ""
-        );
-
-        setTimeout(() => {
-            window.location.href =
-                "/login/";
-        }, 1200);
-
-    } catch (error) {
-
-        console.error(
-            "Callback error:",
-            error
-        );
-
-        title.textContent =
-            "Authentication failed";
-
-        setMessage(
-            message,
-            error.message ||
-            "Something went wrong.",
-            "error"
-        );
-    }
-}
-
-initNavbar();
-
-handleCallback();
+            button.disabled = false;
+            button.textContent = "Save Changes";
+        };
+});
 </script>
 
 </body>

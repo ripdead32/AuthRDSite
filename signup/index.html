@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Create Account - Rip_Dead Authentication</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Account — Rip_Dead Authentication</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 
@@ -22,202 +26,277 @@
         </a>
 
         <div class="navbar-links">
-            <a href="/">Home</a>
-            <a href="/search/" class="auth-only" hidden>Search</a>
-            <a href="/friends/" class="auth-only" hidden>Friends</a>
-            <a href="/settings/" class="auth-only" hidden>Settings</a>
-            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a href="/">
+                Home
+            </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a href="/search/" class="auth-only" hidden>
+                Search
+            </a>
+
+            <a href="/friends/" class="auth-only" hidden>
+                Friends
+            </a>
+
+            <a href="/settings/" class="auth-only" hidden>
+                Settings
+            </a>
+
+            <a href="/account/" class="auth-only" hidden>
+                Account
+            </a>
+
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
             <button
-                type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
+
         </div>
 
     </div>
 </nav>
 
-<main class="auth-container">
+
+<main class="center-page">
 
     <section class="auth-card">
 
-        <h1>Create Account</h1>
+        <h1>
+            Create your account
+        </h1>
 
-        <p class="auth-subtitle">
-            Create your Rip_Dead account.
+        <p>
+            Join the Rip_Dead account system.
         </p>
+
 
         <form id="signup-form">
 
-            <label for="username">
-                Username
-            </label>
+            <div class="form-group">
 
-            <input
-                type="text"
-                id="username"
-                name="username"
-                minlength="3"
-                maxlength="32"
-                autocomplete="username"
-                required>
+                <label
+                    for="username"
+                    class="form-label"
+                >
+                    Username
+                </label>
 
-            <label for="display-name">
-                Display Name
-            </label>
+                <input
+                    id="username"
+                    type="text"
+                    maxlength="32"
+                    autocomplete="username"
+                    placeholder="your_username"
+                    required
+                >
 
-            <input
-                type="text"
-                id="display-name"
-                name="display-name"
-                maxlength="64"
-                required>
+            </div>
 
-            <label for="email">
-                Email
-            </label>
 
-            <input
-                type="email"
-                id="email"
-                name="email"
-                autocomplete="email"
-                required>
+            <div class="form-group">
 
-            <label for="password">
-                Password
-            </label>
+                <label
+                    for="display-name"
+                    class="form-label"
+                >
+                    Display Name
+                </label>
 
-            <input
-                type="password"
-                id="password"
-                name="password"
-                autocomplete="new-password"
-                minlength="6"
-                required>
+                <input
+                    id="display-name"
+                    type="text"
+                    maxlength="64"
+                    placeholder="Your Name"
+                    required
+                >
 
-            <button type="submit">
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    for="email"
+                    class="form-label"
+                >
+                    Email
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    for="password"
+                    class="form-label"
+                >
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Create a password"
+                    required
+                >
+
+            </div>
+
+
+            <div
+                id="signup-message"
+                class="message"
+            ></div>
+
+
+            <button
+                id="signup-button"
+                type="submit"
+                class="button-full"
+            >
                 Create Account
             </button>
 
-            <div
-                id="message"
-                class="auth-message"
-                aria-live="polite">
-            </div>
-
         </form>
 
-        <p>
+
+        <p
+            style="
+                margin-top:20px;
+                margin-bottom:0;
+                text-align:center;
+            "
+        >
             Already have an account?
-            <a href="/login/">Log in</a>.
+            <a href="/login/">
+                Log in
+            </a>
         </p>
 
     </section>
 
 </main>
 
+
 <script>
-const signupForm =
-    document.getElementById("signup-form");
+document.addEventListener("DOMContentLoaded", async () => {
 
-const message =
-    document.getElementById("message");
+    const session = await getSession();
 
-signupForm.addEventListener("submit", async event => {
+    await initNavbar();
 
-    event.preventDefault();
-
-    const username =
-        document.getElementById("username")
-            .value
-            .trim();
-
-    const displayName =
-        document.getElementById("display-name")
-            .value
-            .trim();
-
-    const email =
-        document.getElementById("email")
-            .value
-            .trim();
-
-    const password =
-        document.getElementById("password")
-            .value;
-
-    const button =
-        signupForm.querySelector("button");
-
-    button.disabled = true;
-    button.textContent = "Creating account...";
-
-    setMessage(
-        message,
-        "Creating account...",
-        ""
-    );
-
-    const { data, error } =
-        await supabaseClient.auth.signUp({
-
-            email,
-            password,
-
-            options: {
-                data: {
-                    username,
-                    display_name: displayName
-                }
-            }
-        });
-
-    if (error) {
-
-        console.error(
-            "Signup error:",
-            error
-        );
-
-        setMessage(
-            message,
-            error.message,
-            "error"
-        );
-
-        button.disabled = false;
-        button.textContent = "Create Account";
-
+    if (session) {
+        window.location.href = "/account/";
         return;
     }
 
-    console.log(
-        "Signup result:",
-        data
-    );
 
-    setMessage(
-        message,
-        "Account created successfully!",
-        "success"
-    );
+    document.getElementById("signup-form").addEventListener(
+        "submit",
+        async event => {
 
-    setTimeout(() => {
-        window.location.href = "/account/";
-    }, 1000);
+            event.preventDefault();
+
+            const button =
+                document.getElementById("signup-button");
+
+            button.disabled = true;
+            button.textContent = "Creating...";
+
+            setMessage("signup-message", "");
+
+
+            const username =
+                document.getElementById("username").value.trim();
+
+            const displayName =
+                document
+                    .getElementById("display-name")
+                    .value
+                    .trim();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.signUp({
+                email,
+                password,
+
+                options: {
+                    data: {
+                        username,
+                        display_name: displayName
+                    }
+                }
+            });
+
+
+            if (error) {
+
+                setMessage(
+                    "signup-message",
+                    error.message,
+                    "error"
+                );
+
+                button.disabled = false;
+                button.textContent = "Create Account";
+
+                return;
+            }
+
+
+            if (!data.session) {
+
+                setMessage(
+                    "signup-message",
+                    "Account created. Check your email to confirm your account.",
+                    "success"
+                );
+
+                button.disabled = false;
+                button.textContent = "Create Account";
+
+                return;
+            }
+
+
+            window.location.href = "/account/";
+        }
+    );
 });
-
-initNavbar();
 </script>
 
 </body>

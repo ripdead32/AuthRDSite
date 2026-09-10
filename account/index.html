@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Account - Rip_Dead Authentication</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Account — Rip_Dead Authentication</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 
@@ -22,16 +26,32 @@
         </a>
 
         <div class="navbar-links">
-
             <a href="/">Home</a>
-            <a href="/search/" class="auth-only" hidden>Search</a>
-            <a href="/friends/" class="auth-only" hidden>Friends</a>
-            <a href="/settings/" class="auth-only" hidden>Settings</a>
-            <a href="/account/" class="auth-only" hidden>Account</a>
 
-            <a href="/login/" class="guest-only">Log In</a>
+            <a href="/search/" class="auth-only" hidden>
+                Search
+            </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a href="/friends/" class="auth-only" hidden>
+                Friends
+            </a>
+
+            <a href="/settings/" class="auth-only" hidden>
+                Settings
+            </a>
+
+            <a href="/account/" class="auth-only" hidden>
+                Account
+            </a>
+
+            <a href="/login/" class="guest-only">
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
@@ -39,177 +59,192 @@
                 type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
-
         </div>
 
     </div>
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card">
+<main class="page page-small">
 
-        <div id="account-loading">
-            <span class="auth-eyebrow">
-                RIP_DEAD ACCOUNT
-            </span>
+    <div class="account-header">
 
-            <h1>Loading account...</h1>
+        <div id="account-avatar" class="account-avatar empty"></div>
+
+        <div>
+            <h1 id="account-name" class="account-name">
+                Loading...
+            </h1>
+
+            <div
+                id="account-username"
+                class="account-username"
+            >
+                Loading...
+            </div>
         </div>
 
-        <div id="account-content" hidden>
+    </div>
 
-            <div id="avatar-container"></div>
 
-            <span
-                id="verification"
-                class="verified-badge">
-            </span>
+    <section class="card">
 
-            <h1 id="display-name"></h1>
+        <h2 class="section-title">
+            Account Information
+        </h2>
 
-            <p id="username" class="auth-subtitle"></p>
+        <div class="form-group">
+            <label class="form-label">
+                Email
+            </label>
 
-            <p id="email"></p>
+            <input
+                id="account-email"
+                type="email"
+                class="account-field"
+                readonly
+            >
+        </div>
 
-            <p id="bio"></p>
+        <div class="form-group">
+            <label class="form-label">
+                Username
+            </label>
 
-            <div class="auth-actions">
+            <input
+                id="account-username-field"
+                type="text"
+                class="account-field"
+                readonly
+            >
+        </div>
 
-                <a
-                    href="/profile/"
-                    class="button-link">
-                    Edit Profile
-                </a>
+        <div class="form-group">
+            <label class="form-label">
+                Display Name
+            </label>
 
-                <a
-                    href="/search/"
-                    class="button-link">
-                    Find Users
-                </a>
+            <input
+                id="account-display-name"
+                type="text"
+                class="account-field"
+                readonly
+            >
+        </div>
 
-                <a
-                    href="/friends/"
-                    class="button-link">
-                    Friends
-                </a>
+    </section>
 
-            </div>
 
+    <section class="card">
+
+        <h2 class="section-title">
+            Profile
+        </h2>
+
+        <div
+            id="account-bio"
+            style="
+                color:#c7c7d0;
+                white-space:pre-wrap;
+            "
+        >
+            No bio yet.
         </div>
 
         <div
-            id="account-message"
-            class="auth-message"
-            aria-live="polite">
+            class="button-row"
+            style="margin-top:18px;"
+        >
+            <a
+                href="/profile/"
+                class="button"
+            >
+                Edit Profile
+            </a>
         </div>
 
     </section>
 
 </main>
 
-<script>
-async function initializeAccount() {
 
-    const session =
-        await requireAuth();
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const session = await initNavbar();
 
     if (!session) {
+        window.location.href = "/login/";
         return;
     }
 
-    await initNavbar();
-
-    const loading =
-        document.getElementById(
-            "account-loading"
-        );
-
-    const content =
-        document.getElementById(
-            "account-content"
-        );
-
-    const message =
-        document.getElementById(
-            "account-message"
-        );
-
-    const profile =
-        await getProfile(
-            session.user.id
-        );
+    const profile = await getProfile(session.user.id);
 
     if (!profile) {
+        document.getElementById("account-name").textContent =
+            "Account";
 
-        loading.hidden = true;
+        document.getElementById("account-username").textContent =
+            "Profile unavailable";
 
-        setMessage(
-            message,
-            "Could not load your profile.",
-            "error"
-        );
+        document.getElementById("account-email").value =
+            session.user.email || "";
 
         return;
     }
 
-    document.getElementById(
-        "display-name"
-    ).textContent =
+    const displayName =
         profile.display_name ||
         profile.username ||
         "Account";
 
-    document.getElementById(
-        "username"
-    ).textContent =
-        profile.username
-            ? "@" + profile.username
-            : "";
+    const username =
+        profile.username ||
+        "No username";
 
-    document.getElementById(
-        "email"
-    ).textContent =
+    document.getElementById("account-name").textContent =
+        displayName;
+
+    document.getElementById("account-username").textContent =
+        `@${username}`;
+
+    document.getElementById("account-email").value =
         session.user.email || "";
 
-    document.getElementById(
-        "bio"
-    ).textContent =
-        profile.bio ||
-        "No bio yet.";
+    document.getElementById("account-username-field").value =
+        profile.username || "";
 
-    const verification =
-        document.getElementById(
-            "verification"
-        );
+    document.getElementById("account-display-name").value =
+        profile.display_name || "";
 
-    verification.textContent =
-        profile.is_verified
-            ? "✓ Verified"
-            : "";
+    document.getElementById("account-bio").textContent =
+        profile.bio || "No bio yet.";
+
 
     const avatarContainer =
-        document.getElementById(
-            "avatar-container"
-        );
+        document.getElementById("account-avatar");
 
     avatarContainer.innerHTML = "";
 
-    avatarContainer.appendChild(
-        createAvatar(
-            profile,
-            "profile-avatar"
-        )
-    );
+    const avatarUrl = getAvatarUrl(profile);
 
-    loading.hidden = true;
-    content.hidden = false;
-}
+    if (avatarUrl) {
+        const image = document.createElement("img");
 
-initializeAccount();
+        image.src = avatarUrl;
+        image.alt = "";
+
+        image.onerror = () => {
+            image.remove();
+        };
+
+        avatarContainer.appendChild(image);
+    }
+});
 </script>
 
 </body>

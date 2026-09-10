@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Log In - Rip_Dead Authentication</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Log In — Rip_Dead Authentication</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 
@@ -23,37 +27,61 @@
 
         <div class="navbar-links">
 
-            <a href="/">Home</a>
+            <a href="/">
+                Home
+            </a>
 
-            <a href="/search/" class="auth-only" hidden>
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden
+            >
                 Search
             </a>
 
-            <a href="/friends/" class="auth-only" hidden>
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden
+            >
                 Friends
             </a>
 
-            <a href="/settings/" class="auth-only" hidden>
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden
+            >
                 Settings
             </a>
 
-            <a href="/account/" class="auth-only" hidden>
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden
+            >
                 Account
             </a>
 
-            <a href="/login/" class="guest-only">
+            <a
+                href="/login/"
+                class="guest-only"
+            >
                 Log In
             </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
             <button
-                type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
 
@@ -62,154 +90,166 @@
     </div>
 </nav>
 
-<main class="auth-container">
 
-    <section class="auth-card auth-form-card">
+<main class="center-page">
 
-        <div class="auth-card-header">
-            <span class="auth-eyebrow">
-                WELCOME BACK
-            </span>
+    <section class="auth-card">
 
-            <h1>Log In</h1>
+        <h1>
+            Welcome back
+        </h1>
 
-            <p class="auth-subtitle">
-                Sign in to your Rip_Dead account.
-            </p>
-        </div>
+        <p>
+            Log in to your Rip_Dead account.
+        </p>
+
 
         <form id="login-form">
 
-            <label for="email">
-                Email
-            </label>
+            <div class="form-group">
 
-            <input
-                type="email"
-                id="email"
-                name="email"
-                autocomplete="email"
-                placeholder="you@example.com"
-                required>
+                <label
+                    for="email"
+                    class="form-label"
+                >
+                    Email
+                </label>
 
-            <label for="password">
-                Password
-            </label>
+                <input
+                    id="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                >
 
-            <input
-                type="password"
-                id="password"
-                name="password"
-                autocomplete="current-password"
-                placeholder="Your password"
-                required>
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    for="password"
+                    class="form-label"
+                >
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Your password"
+                    required
+                >
+
+            </div>
+
+
+            <div
+                id="login-message"
+                class="message"
+            ></div>
+
 
             <button
                 type="submit"
-                id="login-button">
+                class="button-full"
+                id="login-button"
+            >
                 Log In
             </button>
 
-            <div
-                id="message"
-                class="auth-message"
-                aria-live="polite">
-            </div>
-
         </form>
 
-        <p class="auth-footer-text">
+
+        <p
+            style="
+                margin-top:20px;
+                margin-bottom:0;
+                text-align:center;
+            "
+        >
             Don't have an account?
-            <a href="/signup/">Create one</a>.
+            <a href="/signup/">
+                Create one
+            </a>
         </p>
 
     </section>
 
 </main>
 
+
 <script>
-const loginForm =
-    document.getElementById("login-form");
+document.addEventListener("DOMContentLoaded", async () => {
 
-const message =
-    document.getElementById("message");
+    const session = await getSession();
 
-loginForm.addEventListener(
-    "submit",
-    async event => {
+    await initNavbar();
 
-        event.preventDefault();
-
-        const email =
-            document.getElementById("email")
-                .value
-                .trim();
-
-        const password =
-            document.getElementById("password")
-                .value;
-
-        const button =
-            document.getElementById("login-button");
-
-        button.disabled = true;
-        button.textContent = "Logging in...";
-
-        setMessage(
-            message,
-            "Logging in...",
-            ""
-        );
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth
-                .signInWithPassword({
-                    email,
-                    password
-                });
-
-        if (error) {
-
-            console.error(
-                "Login error:",
-                error
-            );
-
-            setMessage(
-                message,
-                error.message,
-                "error"
-            );
-
-            button.disabled = false;
-            button.textContent = "Log In";
-
-            return;
-        }
-
-        setMessage(
-            message,
-            "Login successful!",
-            "success"
-        );
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
-
-        const redirect =
-            params.get("redirect");
-
-        window.location.href =
-            redirect || "/account/";
+    /*
+     * Already logged in?
+     * Don't show the login form as the main action.
+     */
+    if (session) {
+        window.location.href = "/account/";
+        return;
     }
-);
 
-initNavbar();
+
+    document.getElementById("login-form").addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const button =
+                document.getElementById("login-button");
+
+            button.disabled = true;
+            button.textContent = "Logging in...";
+
+            setMessage("login-message", "");
+
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
+
+
+            if (error) {
+
+                setMessage(
+                    "login-message",
+                    error.message,
+                    "error"
+                );
+
+                button.disabled = false;
+                button.textContent = "Log In";
+
+                return;
+            }
+
+
+            if (data.session) {
+                window.location.href = "/account/";
+            }
+        }
+    );
+});
 </script>
 
 </body>
