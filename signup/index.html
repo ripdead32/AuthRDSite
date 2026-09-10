@@ -1,236 +1,219 @@
+```html
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
-<title>Sign Up | Rip_Dead</title>
+    <title>Create Account - Rip_Dead Authentication</title>
 
-<link rel="stylesheet" href="../../css/auth.css">
-```
+    <link rel="stylesheet" href="../css/auth.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/auth.js"></script>
 </head>
 
 <body>
 
-```
-<main class="auth-container">
+    <main class="auth-page">
 
-    <section class="auth-card">
+        <div class="auth-card">
 
-        <div class="auth-logo">
-            <div class="logo-mark">RD</div>
-            <h1>Rip_Dead</h1>
-        </div>
-
-        <div class="auth-header">
-            <h2>Create an account</h2>
-            <p>Join the Rip_Dead ecosystem.</p>
-        </div>
-
-        <form id="signup-form">
-
-            <div class="form-group">
-                <label for="email">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    placeholder="you@example.com"
-                    autocomplete="email"
-                    required
-                >
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Create your Rip_Dead account.</p>
             </div>
 
-            <div class="form-group">
-                <label for="password">
-                    Password
-                </label>
+            <form id="signup-form">
 
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Create a password"
-                    autocomplete="new-password"
-                    minlength="6"
-                    required
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="rip_dead"
+                        autocomplete="username"
+                        required
+                        maxlength="32"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="display-name">Display Name</label>
+
+                    <input
+                        type="text"
+                        id="display-name"
+                        name="display-name"
+                        placeholder="Rip_Dead"
+                        autocomplete="name"
+                        maxlength="64"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="signup-button"
+                    class="auth-button"
                 >
+                    Create Account
+                </button>
+
+                <div
+                    id="signup-message"
+                    class="auth-message"
+                    aria-live="polite"
+                ></div>
+
+            </form>
+
+            <div class="auth-footer">
+                <p>
+                    Already have an account?
+                    <a href="../login/">Log in</a>
+                </p>
             </div>
 
-            <div class="form-group">
-                <label for="confirm-password">
-                    Confirm password
-                </label>
-
-                <input
-                    type="password"
-                    id="confirm-password"
-                    placeholder="Enter your password again"
-                    autocomplete="new-password"
-                    minlength="6"
-                    required
-                >
-            </div>
-
-            <button
-                type="submit"
-                id="signup-button"
-            >
-                Create Account
-            </button>
-
-            <p
-                id="message"
-                class="auth-message"
-            ></p>
-
-        </form>
-
-        <div class="auth-footer">
-            <p>
-                Already have an account?
-                <a href="../login/">Log in</a>
-            </p>
         </div>
 
-    </section>
+    </main>
 
-</main>
+    <script>
+        const form = document.getElementById("signup-form");
+        const signupButton = document.getElementById("signup-button");
+        const message = document.getElementById("signup-message");
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../js/auth.js"></script>
+        let signingUp = false;
 
-<script>
-
-    const signupForm =
-        document.getElementById("signup-form");
-
-    const signupButton =
-        document.getElementById("signup-button");
-
-    const message =
-        document.getElementById("message");
-
-
-    signupForm.addEventListener(
-        "submit",
-        async (event) => {
-
+        form.addEventListener("submit", async (event) => {
             event.preventDefault();
 
+            // Prevent multiple signup requests.
+            if (signingUp) {
+                return;
+            }
 
-            const email =
-                document
-                    .getElementById("email")
-                    .value
-                    .trim();
+            signingUp = true;
 
-
-            const password =
-                document
-                    .getElementById("password")
-                    .value;
-
-
-            const confirmPassword =
-                document
-                    .getElementById("confirm-password")
-                    .value;
-
+            signupButton.disabled = true;
+            signupButton.textContent = "Creating account...";
 
             message.textContent = "";
             message.className = "auth-message";
 
+            const username =
+                document.getElementById("username").value.trim();
 
-            if (password !== confirmPassword) {
+            const displayName =
+                document.getElementById("display-name").value.trim();
 
-                message.textContent =
-                    "Passwords do not match.";
+            const email =
+                document.getElementById("email").value.trim();
 
-                message.classList.add("error");
-
-                return;
-            }
-
-
-            signupButton.disabled = true;
-            signupButton.textContent =
-                "Creating account...";
-
+            const password =
+                document.getElementById("password").value;
 
             try {
+                if (!username) {
+                    throw new Error("Please enter a username.");
+                }
+
+                if (!email) {
+                    throw new Error("Please enter your email address.");
+                }
+
+                if (!password) {
+                    throw new Error("Please enter a password.");
+                }
+
+                if (password.length < 6) {
+                    throw new Error(
+                        "Your password must be at least 6 characters."
+                    );
+                }
 
                 const { data, error } =
                     await window.supabaseClient.auth.signUp({
-
                         email: email,
-
                         password: password,
 
                         options: {
                             emailRedirectTo:
-                                window.location.origin +
-                                "/callback/"
-                        }
+                                "https://auth.ripdead.de5.net/callback/",
 
+                            data: {
+                                username: username,
+                                display_name:
+                                    displayName || username
+                            }
+                        }
                     });
 
-
                 if (error) {
-                    throw error;
+                    console.error("Signup error:", error);
+
+                    message.textContent = error.message;
+                    message.className = "auth-message error";
+
+                    return;
                 }
 
+                console.log("Signup successful:", data);
 
-                if (data.session) {
+                message.textContent =
+                    "Account created! Check your email to confirm your address.";
 
-                    message.textContent =
-                        "Account created successfully!";
+                message.className = "auth-message success";
 
-                } else {
-
-                    message.textContent =
-                        "Account created! Check your email to confirm your account.";
-
-                }
-
-
-                message.classList.add("success");
-
-                signupForm.reset();
-
+                form.reset();
 
             } catch (error) {
-
-                console.error(
-                    "Signup error:",
-                    error
-                );
+                console.error("Unexpected signup error:", error);
 
                 message.textContent =
                     error.message ||
-                    "Unable to create your account.";
+                    "Something went wrong. Please try again.";
 
-                message.classList.add("error");
-
+                message.className = "auth-message error";
 
             } finally {
+                signingUp = false;
 
                 signupButton.disabled = false;
-
-                signupButton.textContent =
-                    "Create Account";
-
+                signupButton.textContent = "Create Account";
             }
-
-        }
-    );
-
-</script>
-```
+        });
+    </script>
 
 </body>
 </html>
+```
