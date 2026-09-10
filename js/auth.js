@@ -136,8 +136,8 @@ function getAvatarUrl(profile) {
 function createAvatar(profile, className = "") {
     const wrapper = document.createElement("div");
 
-    wrapper.className =
-        `account-avatar empty ${className}`.trim();
+    wrapper.className = className || "account-avatar";
+    wrapper.classList.add("empty");
 
     wrapper.style.overflow = "hidden";
     wrapper.style.borderRadius = "50%";
@@ -156,6 +156,7 @@ function createAvatar(profile, className = "") {
         image.style.maxWidth = "100%";
         image.style.maxHeight = "100%";
         image.style.objectFit = "cover";
+        image.style.objectPosition = "center";
         image.style.borderRadius = "50%";
 
         image.addEventListener("error", () => {
