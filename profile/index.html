@@ -23,6 +23,7 @@
 
 <nav class="site-navbar">
 
+
 <div class="navbar-inner">
 
     <a href="/" class="navbar-brand">
@@ -125,6 +126,8 @@
 
 <section class="card">
 
+    <!-- USERNAME -->
+
     <div class="form-group">
 
         <label
@@ -145,6 +148,8 @@
     </div>
 
 
+    <!-- DISPLAY NAME -->
+
     <div class="form-group">
 
         <label
@@ -164,6 +169,8 @@
     </div>
 
 
+    <!-- BIO -->
+
     <div class="form-group">
 
         <label
@@ -181,6 +188,8 @@
 
     </div>
 
+
+    <!-- PROFILE PICTURE -->
 
     <div class="form-group">
 
@@ -201,11 +210,12 @@
             PNG, JPEG, or WebP. Maximum 5 MB.
         </span>
 
+
         <div
             id="avatar-preview"
             style="
-                display:none;
-                margin-top:12px;
+                display: none;
+                margin-top: 12px;
             "
         >
 
@@ -213,12 +223,12 @@
                 id="avatar-preview-image"
                 alt="Profile picture preview"
                 style="
-                    width:80px;
-                    height:80px;
-                    display:block;
-                    object-fit:cover;
-                    object-position:center;
-                    border-radius:50%;
+                    width: 80px;
+                    height: 80px;
+                    display: block;
+                    object-fit: cover;
+                    object-position: center;
+                    border-radius: 50%;
                 "
             >
 
@@ -227,11 +237,15 @@
     </div>
 
 
+    <!-- MESSAGE -->
+
     <div
         id="profile-message"
         class="message"
     ></div>
 
+
+    <!-- BUTTONS -->
 
     <div class="button-row">
 
@@ -257,7 +271,9 @@
 
 <script>
 
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+const MAX_AVATAR_SIZE =
+    5 * 1024 * 1024;
+
 
 const ALLOWED_AVATAR_TYPES = [
     "image/png",
@@ -270,6 +286,10 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
+        /*
+         * REQUIRE LOGIN
+         */
+
         const session =
             await requireAuth();
 
@@ -278,8 +298,16 @@ document.addEventListener(
         }
 
 
+        /*
+         * INITIALIZE NAVBAR
+         */
+
         await initNavbar();
 
+
+        /*
+         * LOAD PROFILE
+         */
 
         const profile =
             await getProfile(
@@ -298,6 +326,10 @@ document.addEventListener(
             return;
         }
 
+
+        /*
+         * FILL FORM
+         */
 
         document.getElementById(
             "username"
@@ -318,7 +350,7 @@ document.addEventListener(
 
 
         /*
-         * PROFILE PICTURE PREVIEW
+         * AVATAR ELEMENTS
          */
 
         const avatarInput =
@@ -326,16 +358,22 @@ document.addEventListener(
                 "avatar"
             );
 
+
         const avatarPreview =
             document.getElementById(
                 "avatar-preview"
             );
+
 
         const avatarPreviewImage =
             document.getElementById(
                 "avatar-preview-image"
             );
 
+
+        /*
+         * AVATAR PREVIEW
+         */
 
         avatarInput.addEventListener(
             "change",
@@ -356,6 +394,10 @@ document.addEventListener(
                     return;
                 }
 
+
+                /*
+                 * Validate MIME type.
+                 */
 
                 if (
                     !ALLOWED_AVATAR_TYPES.includes(
@@ -379,6 +421,10 @@ document.addEventListener(
                 }
 
 
+                /*
+                 * Validate size.
+                 */
+
                 if (
                     file.size >
                     MAX_AVATAR_SIZE
@@ -399,6 +445,10 @@ document.addEventListener(
                     return;
                 }
 
+
+                /*
+                 * Preview image.
+                 */
 
                 const reader =
                     new FileReader();
@@ -450,6 +500,10 @@ document.addEventListener(
                 ""
             );
 
+
+            /*
+             * GET TEXT VALUES
+             */
 
             const username =
                 document
@@ -514,7 +568,7 @@ document.addEventListener(
 
 
             /*
-             * AVATAR UPLOAD
+             * GET SELECTED AVATAR
              */
 
             const file =
@@ -522,6 +576,10 @@ document.addEventListener(
 
 
             if (file) {
+
+                /*
+                 * Validate MIME type again.
+                 */
 
                 if (
                     !ALLOWED_AVATAR_TYPES.includes(
@@ -545,6 +603,10 @@ document.addEventListener(
                 }
 
 
+                /*
+                 * Validate size again.
+                 */
+
                 if (
                     file.size >
                     MAX_AVATAR_SIZE
@@ -567,7 +629,7 @@ document.addEventListener(
 
 
                 /*
-                 * Determine extension from MIME type.
+                 * Determine extension.
                  */
 
                 const extension =
@@ -579,20 +641,26 @@ document.addEventListener(
 
 
                 /*
-                 * Storage path:
+                 * IMPORTANT:
                  *
-                 * avatars/
-                 *     USER_UUID/
-                 *         profile.png
+                 * Generate a UNIQUE filename.
+                 *
+                 * This prevents the browser/CDN
+                 * from returning the old cached
+                 * profile.png.
                  */
 
                 const filePath =
-                    `${session.user.id}/profile.${extension}`;
+                    `${session.user.id}/profile-${Date.now()}.${extension}`;
 
 
                 button.textContent =
                     "Uploading Picture...";
 
+
+                /*
+                 * UPLOAD
+                 */
 
                 const {
                     error: uploadError
@@ -604,9 +672,11 @@ document.addEventListener(
                             filePath,
                             file,
                             {
-                                upsert: true,
+                                upsert: false,
                                 contentType:
-                                    file.type
+                                    file.type,
+                                cacheControl:
+                                    "3600"
                             }
                         );
 
@@ -635,7 +705,7 @@ document.addEventListener(
 
 
                 /*
-                 * Get public URL.
+                 * GET PUBLIC URL
                  */
 
                 const {
@@ -672,7 +742,8 @@ document.addEventListener(
 
 
                 /*
-                 * Save avatar URL to profile.
+                 * SAVE NEW AVATAR URL
+                 * TO PROFILE
                  */
 
                 const {
@@ -717,8 +788,7 @@ document.addEventListener(
 
 
                 /*
-                 * Clear the file input after
-                 * successful upload.
+                 * Successfully saved.
                  */
 
                 avatarInput.value =
@@ -732,6 +802,10 @@ document.addEventListener(
 
             }
 
+
+            /*
+             * SUCCESS
+             */
 
             setMessage(
                 "profile-message",
