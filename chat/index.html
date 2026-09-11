@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
     <title>Chat - Rip_Dead Account</title>
 
     <link rel="stylesheet" href="/css/auth.css">
@@ -447,8 +449,6 @@
             color: white;
         }
 
-        /* Confirmation modal */
-
         .confirm-modal {
             position: fixed;
             inset: 0;
@@ -753,8 +753,6 @@
 
 </main>
 
-<!-- 1-ON-1 CHAT MODAL -->
-
 <div
     id="new-chat-panel"
     class="new-chat-panel"
@@ -792,8 +790,6 @@
 
     </div>
 </div>
-
-<!-- GROUP CHAT MODAL -->
 
 <div
     id="group-chat-panel"
@@ -856,8 +852,6 @@
     </div>
 </div>
 
-<!-- CONFIRMATION MODAL -->
-
 <div
     id="confirm-modal"
     class="confirm-modal"
@@ -903,22 +897,31 @@
 
     let currentSession = null;
     let currentConversationId = null;
+
     let conversations = [];
     let profiles = {};
     let conversationDetails = {};
     let conversationMembers = {};
+
     let messageChannel = null;
     let conversationChannel = null;
+    let profileChannel = null;
+    let attachmentChannel = null;
+
     let searchTimeout = null;
     let groupSearchTimeout = null;
+
     let selectedGroupUsers = [];
+
+    let realtimeReady = false;
 
     /* -------------------------
        ERROR HANDLING
     ------------------------- */
 
     function showChatError(message) {
-        const element = document.getElementById("chat-error");
+        const element =
+            document.getElementById("chat-error");
 
         if (!element) {
             return;
@@ -929,7 +932,8 @@
     }
 
     function clearChatError() {
-        const element = document.getElementById("chat-error");
+        const element =
+            document.getElementById("chat-error");
 
         if (!element) {
             return;
@@ -949,11 +953,30 @@
         confirmText = "Confirm"
     ) {
         return new Promise(resolve => {
-            const modal = document.getElementById("confirm-modal");
-            const titleElement = document.getElementById("confirm-title");
-            const messageElement = document.getElementById("confirm-message");
-            const cancelButton = document.getElementById("confirm-cancel");
-            const confirmButton = document.getElementById("confirm-ok");
+            const modal =
+                document.getElementById(
+                    "confirm-modal"
+                );
+
+            const titleElement =
+                document.getElementById(
+                    "confirm-title"
+                );
+
+            const messageElement =
+                document.getElementById(
+                    "confirm-message"
+                );
+
+            const cancelButton =
+                document.getElementById(
+                    "confirm-cancel"
+                );
+
+            const confirmButton =
+                document.getElementById(
+                    "confirm-ok"
+                );
 
             titleElement.textContent = title;
             messageElement.textContent = message;
@@ -1042,20 +1065,26 @@
     }
 
     /* -------------------------
-       VERIFIED UI
+       VERIFIED BADGE
     ------------------------- */
 
     function createVerifiedBadge() {
-        const badge = document.createElement("span");
+        const badge =
+            document.createElement("span");
 
-        badge.className = "verified-badge";
+        badge.className =
+            "verified-badge";
+
         badge.textContent = "✓";
         badge.title = "Verified";
 
         return badge;
     }
 
-    function appendVerifiedBadge(parent, profile) {
+    function appendVerifiedBadge(
+        parent,
+        profile
+    ) {
         if (!profile?.is_verified) {
             return;
         }
@@ -1069,9 +1098,13 @@
        GROUP HELPERS
     ------------------------- */
 
-    function getConversationName(conversationId) {
+    function getConversationName(
+        conversationId
+    ) {
         const conversation =
-            conversationDetails[conversationId];
+            conversationDetails[
+                conversationId
+            ];
 
         if (!conversation) {
             return null;
@@ -1082,16 +1115,22 @@
             : null;
     }
 
-    function isGroupConversation(conversationId) {
+    function isGroupConversation(
+        conversationId
+    ) {
         return Boolean(
-            conversationDetails[conversationId]?.is_group
+            conversationDetails[
+                conversationId
+            ]?.is_group
         );
     }
 
     async function loadConversationDetails() {
-        const ids = conversations.map(
-            conversation => conversation.conversation_id
-        );
+        const ids =
+            conversations.map(
+                conversation =>
+                    conversation.conversation_id
+            );
 
         if (!ids.length) {
             return;
@@ -1102,7 +1141,9 @@
             error
         } = await db
             .from("conversations")
-            .select("id, name, is_group, created_at")
+            .select(
+                "id, name, is_group, created_at"
+            )
             .in("id", ids);
 
         if (error) {
@@ -1110,18 +1151,28 @@
                 "[Chat] Conversation details error:",
                 error
             );
+
             return;
         }
 
         for (const conversation of data || []) {
-            conversationDetails[conversation.id] =
-                conversation;
+            conversationDetails[
+                conversation.id
+            ] = conversation;
         }
     }
 
-    async function getConversationMembers(conversationId) {
-        if (conversationMembers[conversationId]) {
-            return conversationMembers[conversationId];
+    async function getConversationMembers(
+        conversationId
+    ) {
+        if (
+            conversationMembers[
+                conversationId
+            ]
+        ) {
+            return conversationMembers[
+                conversationId
+            ];
         }
 
         const {
@@ -1144,26 +1195,33 @@
             return [];
         }
 
-        conversationMembers[conversationId] =
-            data || [];
+        conversationMembers[
+            conversationId
+        ] = data || [];
 
         return data || [];
     }
 
-    async function getProfilesForMembers(members) {
-        const ids = members
-            .map(member => member.user_id)
-            .filter(
-                id => id !== currentSession.user.id
-            );
+    async function getProfilesForMembers(
+        members
+    ) {
+        const ids =
+            members
+                .map(member => member.user_id)
+                .filter(
+                    id =>
+                        id !==
+                        currentSession.user.id
+                );
 
         if (!ids.length) {
             return [];
         }
 
-        const missingIds = ids.filter(
-            id => !profiles[id]
-        );
+        const missingIds =
+            ids.filter(
+                id => !profiles[id]
+            );
 
         if (missingIds.length) {
             const {
@@ -1181,8 +1239,9 @@
                 );
             } else {
                 for (const profile of data || []) {
-                    profiles[profile.id] =
-                        profile;
+                    profiles[
+                        profile.id
+                    ] = profile;
                 }
             }
         }
@@ -1192,17 +1251,20 @@
             .filter(Boolean);
     }
 
-    async function getOtherUser(conversationId) {
+    async function getOtherUser(
+        conversationId
+    ) {
         const members =
             await getConversationMembers(
                 conversationId
             );
 
-        const other = members.find(
-            member =>
-                member.user_id !==
-                currentSession.user.id
-        );
+        const other =
+            members.find(
+                member =>
+                    member.user_id !==
+                    currentSession.user.id
+            );
 
         if (!other) {
             return null;
@@ -1234,8 +1296,9 @@
         }
 
         if (data) {
-            profiles[other.user_id] =
-                data;
+            profiles[
+                other.user_id
+            ] = data;
         }
 
         return data;
@@ -1284,22 +1347,26 @@
                 break;
             }
 
-            await new Promise(resolve =>
-                setTimeout(
-                    resolve,
-                    100
-                )
+            await new Promise(
+                resolve =>
+                    setTimeout(
+                        resolve,
+                        100
+                    )
             );
         }
 
         if (!session) {
-            window.location.href = "/login/";
+            window.location.href =
+                "/login/";
+
             return;
         }
 
         currentSession = session;
 
         await initNavbar();
+
         await loadConversations();
 
         setupRealtime();
@@ -1315,18 +1382,18 @@
                 "conversation-list"
             );
 
-        list.innerHTML = `
-            <div class="empty-chat" style="padding:20px;">
-                Loading chats...
-            </div>
-        `;
+        if (!list) {
+            return;
+        }
 
         const {
             data,
             error
         } = await db
             .from("conversation_members")
-            .select("conversation_id, joined_at")
+            .select(
+                "conversation_id, joined_at"
+            )
             .eq(
                 "user_id",
                 currentSession.user.id
@@ -1357,7 +1424,8 @@
             return;
         }
 
-        conversations = data || [];
+        conversations =
+            data || [];
 
         await loadConversationDetails();
 
@@ -1374,10 +1442,6 @@
         await renderConversationList();
     }
 
-    /* -------------------------
-       CONVERSATION LIST
-    ------------------------- */
-
     async function renderConversationList() {
         const list =
             document.getElementById(
@@ -1386,7 +1450,10 @@
 
         list.innerHTML = "";
 
-        for (const conversation of conversations) {
+        for (
+            const conversation
+            of conversations
+        ) {
             const conversationId =
                 conversation.conversation_id;
 
@@ -1414,26 +1481,37 @@
             }
 
             const button =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             button.type = "button";
-            button.className = "conversation-item";
+
+            button.className =
+                "conversation-item";
 
             if (
                 currentConversationId ===
                 conversationId
             ) {
-                button.classList.add("active");
+                button.classList.add(
+                    "active"
+                );
             }
 
             let avatar;
 
             if (group) {
                 avatar =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
-                avatar.className = "group-avatar";
-                avatar.textContent = "👥";
+                avatar.className =
+                    "group-avatar";
+
+                avatar.textContent =
+                    "👥";
             } else {
                 avatar =
                     createAvatar(
@@ -1443,22 +1521,37 @@
             }
 
             const info =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            info.style.minWidth = "0";
-            info.style.flex = "1";
+            info.style.minWidth =
+                "0";
+
+            info.style.flex =
+                "1";
 
             const nameRow =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
-            nameRow.style.display = "flex";
-            nameRow.style.alignItems = "center";
-            nameRow.style.minWidth = "0";
+            nameRow.style.display =
+                "flex";
+
+            nameRow.style.alignItems =
+                "center";
+
+            nameRow.style.minWidth =
+                "0";
 
             const name =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
-            name.className = "conversation-name";
+            name.className =
+                "conversation-name";
 
             name.textContent =
                 group
@@ -1474,7 +1567,9 @@
                         "Unknown User"
                     );
 
-            nameRow.appendChild(name);
+            nameRow.appendChild(
+                name
+            );
 
             if (!group) {
                 appendVerifiedBadge(
@@ -1483,19 +1578,31 @@
                 );
             }
 
-            info.appendChild(nameRow);
+            info.appendChild(
+                nameRow
+            );
 
-            button.appendChild(avatar);
-            button.appendChild(info);
+            button.appendChild(
+                avatar
+            );
+
+            button.appendChild(
+                info
+            );
 
             const deleteButton =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
-            deleteButton.type = "button";
+            deleteButton.type =
+                "button";
+
             deleteButton.className =
                 "conversation-delete";
 
-            deleteButton.textContent = "×";
+            deleteButton.textContent =
+                "×";
 
             deleteButton.title =
                 group
@@ -1525,7 +1632,9 @@
                 }
             );
 
-            button.appendChild(deleteButton);
+            button.appendChild(
+                deleteButton
+            );
 
             button.addEventListener(
                 "click",
@@ -1536,7 +1645,9 @@
                 }
             );
 
-            list.appendChild(button);
+            list.appendChild(
+                button
+            );
         }
     }
 
@@ -1544,7 +1655,9 @@
        OPEN CONVERSATION
     ------------------------- */
 
-    async function openConversation(conversationId) {
+    async function openConversation(
+        conversationId
+    ) {
         clearChatError();
 
         currentConversationId =
@@ -1588,7 +1701,9 @@
             );
 
         headerName.innerHTML = "";
-        headerMembers.textContent = "";
+
+        headerMembers.textContent =
+            "";
 
         if (group) {
             headerName.textContent =
@@ -1646,7 +1761,6 @@
                         )
                     );
                 };
-
         } else {
             const profile =
                 await getOtherUser(
@@ -1654,14 +1768,18 @@
                 );
 
             const name =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             name.textContent =
                 profile?.display_name ||
                 profile?.username ||
                 "Unknown User";
 
-            headerName.appendChild(name);
+            headerName.appendChild(
+                name
+            );
 
             appendVerifiedBadge(
                 headerName,
@@ -1673,7 +1791,8 @@
                     ? `@${profile.username}`
                     : "Rip_Dead Account";
 
-            headerAvatar.innerHTML = "";
+            headerAvatar.innerHTML =
+                "";
 
             groupAvatar.style.display =
                 "none";
@@ -1686,7 +1805,9 @@
                     );
 
                 const image =
-                    avatar.querySelector("img");
+                    avatar.querySelector(
+                        "img"
+                    );
 
                 if (image) {
                     headerAvatar.appendChild(
@@ -1710,7 +1831,9 @@
                 "composer"
             );
 
-        composer.classList.add("visible");
+        composer.classList.add(
+            "visible"
+        );
 
         document.getElementById(
             "message-input"
@@ -1781,6 +1904,9 @@
 
         clearChatError();
 
+        messagesContainer.innerHTML =
+            "";
+
         if (!data || !data.length) {
             messagesContainer.innerHTML = `
                 <div class="empty-chat">
@@ -1791,16 +1917,21 @@
             return;
         }
 
-        messagesContainer.innerHTML = "";
-
-        for (const message of data) {
-            await renderMessage(message);
+        for (
+            const message
+            of data
+        ) {
+            await renderMessage(
+                message
+            );
         }
 
         scrollMessagesToBottom();
     }
 
-    async function getMessageProfile(userId) {
+    async function getMessageProfile(
+        userId
+    ) {
         if (profiles[userId]) {
             return profiles[userId];
         }
@@ -1834,11 +1965,30 @@
         return data;
     }
 
-    async function renderMessage(message) {
+    async function renderMessage(
+        message
+    ) {
         const container =
             document.getElementById(
                 "messages"
             );
+
+        if (
+            container.querySelector(
+                `[data-message-id="${message.id}"]`
+            )
+        ) {
+            return;
+        }
+
+        const empty =
+            container.querySelector(
+                ".empty-chat"
+            );
+
+        if (empty) {
+            empty.remove();
+        }
 
         const profile =
             await getMessageProfile(
@@ -1851,16 +2001,24 @@
 
         const group =
             isGroupConversation(
-                currentConversationId
+                message.conversation_id
             );
 
         const row =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        row.className = "message-row";
+        row.className =
+            "message-row";
+
+        row.dataset.messageId =
+            message.id;
 
         if (mine) {
-            row.classList.add("mine");
+            row.classList.add(
+                "mine"
+            );
         }
 
         const avatar =
@@ -1870,26 +2028,37 @@
             );
 
         const contentWrapper =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        contentWrapper.style.minWidth = "0";
-        contentWrapper.style.maxWidth = "100%";
+        contentWrapper.style.minWidth =
+            "0";
+
+        contentWrapper.style.maxWidth =
+            "100%";
 
         const bubble =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         bubble.className =
             "message-bubble";
 
         if (group || !mine) {
             const author =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             author.className =
                 "message-author";
 
             const authorName =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             authorName.textContent =
                 mine
@@ -1911,11 +2080,15 @@
                 );
             }
 
-            bubble.appendChild(author);
+            bubble.appendChild(
+                author
+            );
         }
 
         const content =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         content.className =
             "message-content";
@@ -1924,7 +2097,9 @@
             message.content;
 
         const time =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         time.className =
             "message-time";
@@ -1934,14 +2109,23 @@
                 message.created_at
             );
 
-        bubble.appendChild(content);
-        bubble.appendChild(time);
+        bubble.appendChild(
+            content
+        );
+
+        bubble.appendChild(
+            time
+        );
 
         if (mine) {
             const deleteButton =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
-            deleteButton.type = "button";
+            deleteButton.type =
+                "button";
+
             deleteButton.className =
                 "message-delete";
 
@@ -1962,15 +2146,26 @@
             );
         }
 
-        contentWrapper.appendChild(bubble);
+        contentWrapper.appendChild(
+            bubble
+        );
 
-        row.appendChild(avatar);
-        row.appendChild(contentWrapper);
+        row.appendChild(
+            avatar
+        );
 
-        container.appendChild(row);
+        row.appendChild(
+            contentWrapper
+        );
+
+        container.appendChild(
+            row
+        );
     }
 
-    function formatMessageTime(timestamp) {
+    function formatMessageTime(
+        timestamp
+    ) {
         const date =
             new Date(timestamp);
 
@@ -1983,6 +2178,19 @@
                 day: "numeric"
             }
         );
+    }
+
+    function isNearBottom() {
+        const container =
+            document.getElementById(
+                "messages"
+            );
+
+        return (
+            container.scrollHeight -
+            container.scrollTop -
+            container.clientHeight
+        ) < 150;
     }
 
     function scrollMessagesToBottom() {
@@ -2029,8 +2237,11 @@
                 return;
             }
 
-            input.disabled = true;
-            button.disabled = true;
+            input.disabled =
+                true;
+
+            button.disabled =
+                true;
 
             const {
                 data,
@@ -2040,8 +2251,10 @@
                 .insert({
                     conversation_id:
                         currentConversationId,
+
                     sender_id:
                         currentSession.user.id,
+
                     content:
                         content
                 })
@@ -2059,17 +2272,30 @@
                 );
             } else {
                 console.log(
-                    "[Chat] Message sent:",
+                    "[Chat] Message inserted:",
                     data
                 );
 
                 input.value = "";
 
-                await loadMessages();
+                /*
+                 * Realtime normally renders this automatically.
+                 * We also render it immediately so your own
+                 * message appears without waiting for the
+                 * Realtime round-trip.
+                 */
+                await renderMessage(
+                    data
+                );
+
+                scrollMessagesToBottom();
             }
 
-            input.disabled = false;
-            button.disabled = false;
+            input.disabled =
+                false;
+
+            button.disabled =
+                false;
 
             input.focus();
         }
@@ -2079,7 +2305,9 @@
        DELETE MESSAGE
     ------------------------- */
 
-    async function deleteMessage(messageId) {
+    async function deleteMessage(
+        messageId
+    ) {
         clearChatError();
 
         const {
@@ -2109,11 +2337,44 @@
             return;
         }
 
-        await loadMessages();
+        removeMessageElement(
+            messageId
+        );
+    }
+
+    function removeMessageElement(
+        messageId
+    ) {
+        const element =
+            document.querySelector(
+                `[data-message-id="${messageId}"]`
+            );
+
+        if (element) {
+            element.remove();
+        }
+
+        const container =
+            document.getElementById(
+                "messages"
+            );
+
+        if (
+            container &&
+            !container.querySelector(
+                ".message-row"
+            )
+        ) {
+            container.innerHTML = `
+                <div class="empty-chat">
+                    No messages yet. Say hello!
+                </div>
+            `;
+        }
     }
 
     /* -------------------------
-       DELETE 1-ON-1 CHAT
+       DELETE DIRECT CHAT
     ------------------------- */
 
     async function deleteConversation(
@@ -2244,7 +2505,8 @@
             return;
         }
 
-        currentConversationId = null;
+        currentConversationId =
+            null;
 
         document.getElementById(
             "chat-header-name"
@@ -2258,7 +2520,8 @@
 
         document.getElementById(
             "chat-header-members"
-        ).textContent = "";
+        ).textContent =
+            "";
 
         document.getElementById(
             "chat-header-avatar"
@@ -2281,7 +2544,7 @@
             <div class="empty-chat">
                 <h3>Your chats</h3>
                 <p>
-                    Select a conversation or start a new one.
+                    Select a conversation or start chatting.
                 </p>
             </div>
         `;
@@ -2294,15 +2557,17 @@
 
         document.getElementById(
             "message-input"
-        ).disabled = true;
+        ).disabled =
+            true;
 
         document.getElementById(
             "send-button"
-        ).disabled = true;
+        ).disabled =
+            true;
     }
 
     /* -------------------------
-       NEW 1-ON-1 CHAT
+       NEW DIRECT CHAT
     ------------------------- */
 
     document.getElementById(
@@ -2354,11 +2619,13 @@
 
         document.getElementById(
             "user-search"
-        ).value = "";
+        ).value =
+            "";
 
         document.getElementById(
             "user-results"
-        ).innerHTML = "";
+        ).innerHTML =
+            "";
     }
 
     /* -------------------------
@@ -2370,7 +2637,9 @@
     ).addEventListener(
         "input",
         () => {
-            clearTimeout(searchTimeout);
+            clearTimeout(
+                searchTimeout
+            );
 
             searchTimeout =
                 setTimeout(
@@ -2395,7 +2664,9 @@
             input.value.trim();
 
         if (!query) {
-            results.innerHTML = "";
+            results.innerHTML =
+                "";
+
             return;
         }
 
@@ -2435,9 +2706,13 @@
             return;
         }
 
-        results.innerHTML = "";
+        results.innerHTML =
+            "";
 
-        if (!data || !data.length) {
+        if (
+            !data ||
+            !data.length
+        ) {
             results.innerHTML = `
                 <div class="empty-chat">
                     No users found.
@@ -2447,9 +2722,13 @@
             return;
         }
 
-        for (const profile of data) {
-            profiles[profile.id] =
-                profile;
+        for (
+            const profile
+            of data
+        ) {
+            profiles[
+                profile.id
+            ] = profile;
 
             const button =
                 createUserResultButton(
@@ -2466,12 +2745,14 @@
                 }
             );
 
-            results.appendChild(button);
+            results.appendChild(
+                button
+            );
         }
     }
 
     /* -------------------------
-       USER RESULT BUTTON
+       USER RESULT
     ------------------------- */
 
     function createUserResultButton(
@@ -2479,13 +2760,20 @@
         selected
     ) {
         const button =
-            document.createElement("button");
+            document.createElement(
+                "button"
+            );
 
-        button.type = "button";
-        button.className = "user-result";
+        button.type =
+            "button";
+
+        button.className =
+            "user-result";
 
         if (selected) {
-            button.classList.add("selected");
+            button.classList.add(
+                "selected"
+            );
         }
 
         const avatar =
@@ -2495,19 +2783,28 @@
             );
 
         const info =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         info.className =
             "user-result-info";
 
         const nameRow =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        nameRow.style.display = "flex";
-        nameRow.style.alignItems = "center";
+        nameRow.style.display =
+            "flex";
+
+        nameRow.style.alignItems =
+            "center";
 
         const name =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         name.className =
             "user-result-name";
@@ -2517,7 +2814,9 @@
             profile.username ||
             "User";
 
-        nameRow.appendChild(name);
+        nameRow.appendChild(
+            name
+        );
 
         appendVerifiedBadge(
             nameRow,
@@ -2525,7 +2824,9 @@
         );
 
         const username =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         username.className =
             "user-result-username";
@@ -2535,23 +2836,34 @@
                 ? `@${profile.username}`
                 : "";
 
-        info.appendChild(nameRow);
-        info.appendChild(username);
+        info.appendChild(
+            nameRow
+        );
 
-        button.appendChild(avatar);
-        button.appendChild(info);
+        info.appendChild(
+            username
+        );
+
+        button.appendChild(
+            avatar
+        );
+
+        button.appendChild(
+            info
+        );
 
         return button;
     }
 
     /* -------------------------
-       START 1-ON-1 CONVERSATION
+       START DIRECT CHAT
     ------------------------- */
 
     async function startConversation(
         otherUserId
     ) {
         closeNewChat();
+
         clearChatError();
 
         const {
@@ -2616,7 +2928,7 @@
     }
 
     /* -------------------------
-       GROUP CHAT CREATION
+       GROUP CHAT
     ------------------------- */
 
     document.getElementById(
@@ -2626,21 +2938,25 @@
         () => {
             clearChatError();
 
-            selectedGroupUsers = [];
+            selectedGroupUsers =
+                [];
 
             document.getElementById(
                 "group-name"
-            ).value = "";
+            ).value =
+                "";
 
             document.getElementById(
                 "group-user-search"
-            ).value = "";
+            ).value =
+                "";
 
             renderSelectedGroupUsers();
 
             document.getElementById(
                 "group-user-results"
-            ).innerHTML = "";
+            ).innerHTML =
+                "";
 
             document.getElementById(
                 "group-chat-panel"
@@ -2682,26 +2998,26 @@
             "open"
         );
 
-        selectedGroupUsers = [];
+        selectedGroupUsers =
+            [];
 
         document.getElementById(
             "group-name"
-        ).value = "";
+        ).value =
+            "";
 
         document.getElementById(
             "group-user-search"
-        ).value = "";
+        ).value =
+            "";
 
         document.getElementById(
             "group-user-results"
-        ).innerHTML = "";
+        ).innerHTML =
+            "";
 
         renderSelectedGroupUsers();
     }
-
-    /* -------------------------
-       GROUP USER SEARCH
-    ------------------------- */
 
     document.getElementById(
         "group-user-search"
@@ -2735,7 +3051,9 @@
             input.value.trim();
 
         if (!query) {
-            results.innerHTML = "";
+            results.innerHTML =
+                "";
+
             return;
         }
 
@@ -2775,11 +3093,16 @@
             return;
         }
 
-        results.innerHTML = "";
+        results.innerHTML =
+            "";
 
-        for (const profile of data || []) {
-            profiles[profile.id] =
-                profile;
+        for (
+            const profile
+            of data || []
+        ) {
+            profiles[
+                profile.id
+            ] = profile;
 
             const selected =
                 selectedGroupUsers.some(
@@ -2803,10 +3126,15 @@
                 }
             );
 
-            results.appendChild(button);
+            results.appendChild(
+                button
+            );
         }
 
-        if (!data || !data.length) {
+        if (
+            !data ||
+            !data.length
+        ) {
             results.innerHTML = `
                 <div class="empty-chat">
                     No users found.
@@ -2815,11 +3143,9 @@
         }
     }
 
-    /* -------------------------
-       SELECT GROUP USERS
-    ------------------------- */
-
-    function toggleGroupUser(profile) {
+    function toggleGroupUser(
+        profile
+    ) {
         const index =
             selectedGroupUsers.findIndex(
                 user =>
@@ -2839,6 +3165,7 @@
         }
 
         renderSelectedGroupUsers();
+
         searchGroupUsers();
     }
 
@@ -2848,17 +3175,25 @@
                 "group-selected"
             );
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
-        for (const profile of selectedGroupUsers) {
+        for (
+            const profile
+            of selectedGroupUsers
+        ) {
             const chip =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             chip.className =
                 "selected-user";
 
             const name =
-                document.createElement("span");
+                document.createElement(
+                    "span"
+                );
 
             name.textContent =
                 profile.display_name ||
@@ -2866,11 +3201,18 @@
                 "User";
 
             const remove =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
-            remove.type = "button";
-            remove.textContent = "×";
-            remove.title = "Remove";
+            remove.type =
+                "button";
+
+            remove.textContent =
+                "×";
+
+            remove.title =
+                "Remove";
 
             remove.addEventListener(
                 "click",
@@ -2881,16 +3223,19 @@
                 }
             );
 
-            chip.appendChild(name);
-            chip.appendChild(remove);
+            chip.appendChild(
+                name
+            );
 
-            container.appendChild(chip);
+            chip.appendChild(
+                remove
+            );
+
+            container.appendChild(
+                chip
+            );
         }
     }
-
-    /* -------------------------
-       CREATE GROUP
-    ------------------------- */
 
     document.getElementById(
         "create-group-button"
@@ -2920,7 +3265,10 @@
             return;
         }
 
-        if (selectedGroupUsers.length < 1) {
+        if (
+            selectedGroupUsers.length <
+            1
+        ) {
             showChatError(
                 "Select at least one other user."
             );
@@ -2933,8 +3281,11 @@
                 "create-group-button"
             );
 
-        button.disabled = true;
-        button.textContent = "Creating...";
+        button.disabled =
+            true;
+
+        button.textContent =
+            "Creating...";
 
         const memberIds =
             selectedGroupUsers.map(
@@ -2949,13 +3300,17 @@
             {
                 group_name:
                     groupName,
+
                 member_ids:
                     memberIds
             }
         );
 
-        button.disabled = false;
-        button.textContent = "Create Group";
+        button.disabled =
+            false;
+
+        button.textContent =
+            "Create Group";
 
         if (error) {
             console.error(
@@ -2991,31 +3346,62 @@
        REALTIME
     ------------------------- */
 
-    function setupRealtime() {
-        conversationChannel =
-            db
-                .channel(
-                    "chat-conversations"
-                )
-                .on(
-                    "postgres_changes",
-                    {
-                        event: "*",
-                        schema: "public",
-                        table: "conversation_members"
-                    },
-                    async () => {
-                        conversationMembers = {};
+    function removeRealtimeChannels() {
+        if (messageChannel) {
+            db.removeChannel(
+                messageChannel
+            );
 
-                        await loadConversations();
-                    }
-                )
-                .subscribe();
+            messageChannel =
+                null;
+        }
+
+        if (conversationChannel) {
+            db.removeChannel(
+                conversationChannel
+            );
+
+            conversationChannel =
+                null;
+        }
+
+        if (profileChannel) {
+            db.removeChannel(
+                profileChannel
+            );
+
+            profileChannel =
+                null;
+        }
+
+        if (attachmentChannel) {
+            db.removeChannel(
+                attachmentChannel
+            );
+
+            attachmentChannel =
+                null;
+        }
+
+        realtimeReady =
+            false;
+    }
+
+    function setupRealtime() {
+        removeRealtimeChannels();
+
+        console.log(
+            "[Realtime] Starting realtime..."
+        );
+
+        /* -------------------------
+           MESSAGES
+        ------------------------- */
 
         messageChannel =
             db
                 .channel(
-                    "chat-messages"
+                    "ripdead-chat-messages"
                 )
                 .on(
                     "postgres_changes",
@@ -3025,13 +3411,44 @@
                         table: "messages"
                     },
                     async payload => {
+                        const message =
+                            payload.new;
+
+                        console.log(
+                            "[Realtime] New message:",
+                            message
+                        );
+
+                        if (!message) {
+                            return;
+                        }
+
                         if (
-                            payload.new &&
-                            payload.new.conversation_id ===
+                            message.conversation_id ===
                             currentConversationId
                         ) {
-                            await loadMessages();
+                            const wasNearBottom =
+                                isNearBottom();
+
+                            await renderMessage(
+                                message
+                            );
+
+                            if (
+                                wasNearBottom ||
+                                message.sender_id ===
+                                currentSession.user.id
+                            ) {
+                                scrollMessagesToBottom();
+                            }
                         }
+
+                        /*
+                         * A new message should move the
+                         * conversation visually to the
+                         * top of the sidebar.
+                         */
+                        await refreshConversationOrdering();
                     }
                 )
                 .on(
@@ -3042,16 +3459,416 @@
                         table: "messages"
                     },
                     async payload => {
+                        const message =
+                            payload.old;
+
+                        console.log(
+                            "[Realtime] Deleted message:",
+                            message
+                        );
+
                         if (
-                            payload.old &&
-                            payload.old.conversation_id ===
-                            currentConversationId
+                            message?.id
                         ) {
-                            await loadMessages();
+                            removeMessageElement(
+                                message.id
+                            );
                         }
                     }
                 )
-                .subscribe();
+                .subscribe(
+                    status => {
+                        console.log(
+                            "[Realtime] Message channel:",
+                            status
+                        );
+
+                        if (
+                            status ===
+                            "SUBSCRIBED"
+                        ) {
+                            console.log(
+                                "[Realtime] Messages are LIVE."
+                            );
+
+                            realtimeReady =
+                                true;
+                        }
+
+                        if (
+                            status ===
+                            "CHANNEL_ERROR"
+                        ) {
+                            console.error(
+                                "[Realtime] Message channel error."
+                            );
+                        }
+
+                        if (
+                            status ===
+                            "TIMED_OUT"
+                        ) {
+                            console.error(
+                                "[Realtime] Message channel timed out."
+                            );
+                        }
+                    }
+                );
+
+        /* -------------------------
+           CONVERSATIONS
+        ------------------------- */
+
+        conversationChannel =
+            db
+                .channel(
+                    "ripdead-chat-conversations"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "conversation_members"
+                    },
+                    async payload => {
+                        console.log(
+                            "[Realtime] Membership changed:",
+                            payload
+                        );
+
+                        conversationMembers =
+                            {};
+
+                        await loadConversations();
+
+                        if (
+                            currentConversationId &&
+                            !conversations.some(
+                                conversation =>
+                                    conversation.conversation_id ===
+                                    currentConversationId
+                            )
+                        ) {
+                            resetCurrentConversation(
+                                currentConversationId
+                            );
+                        }
+                    }
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "conversations"
+                    },
+                    async payload => {
+                        console.log(
+                            "[Realtime] Conversation changed:",
+                            payload
+                        );
+
+                        if (
+                            payload.new?.id
+                        ) {
+                            conversationDetails[
+                                payload.new.id
+                            ] =
+                                payload.new;
+                        }
+
+                        if (
+                            payload.old?.id
+                        ) {
+                            delete conversationDetails[
+                                payload.old.id
+                            ];
+                        }
+
+                        await loadConversations();
+
+                        if (
+                            currentConversationId
+                        ) {
+                            await updateCurrentConversationHeader();
+                        }
+                    }
+                )
+                .subscribe(
+                    status => {
+                        console.log(
+                            "[Realtime] Conversation channel:",
+                            status
+                        );
+                    }
+                );
+
+        /* -------------------------
+           PROFILES
+        ------------------------- */
+
+        profileChannel =
+            db
+                .channel(
+                    "ripdead-account-profiles"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "UPDATE",
+                        schema: "public",
+                        table: "profiles"
+                    },
+                    async payload => {
+                        const profile =
+                            payload.new;
+
+                        console.log(
+                            "[Realtime] Profile changed:",
+                            profile
+                        );
+
+                        if (
+                            profile?.id
+                        ) {
+                            profiles[
+                                profile.id
+                            ] =
+                                profile;
+                        }
+
+                        await loadConversations();
+
+                        if (
+                            currentConversationId
+                        ) {
+                            await updateCurrentConversationHeader();
+
+                            await refreshVisibleMessageProfiles(
+                                profile?.id
+                            );
+                        }
+                    }
+                )
+                .subscribe(
+                    status => {
+                        console.log(
+                            "[Realtime] Profile channel:",
+                            status
+                        );
+                    }
+                );
+
+        /* -------------------------
+           ATTACHMENTS
+        ------------------------- */
+
+        attachmentChannel =
+            db
+                .channel(
+                    "ripdead-chat-attachments"
+                )
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "message_attachments"
+                    },
+                    payload => {
+                        console.log(
+                            "[Realtime] Attachment changed:",
+                            payload
+                        );
+
+                        /*
+                         * Attachment rendering will be
+                         * added when GCS upload/download
+                         * support is connected.
+                         */
+                    }
+                )
+                .subscribe(
+                    status => {
+                        console.log(
+                            "[Realtime] Attachment channel:",
+                            status
+                        );
+                    }
+                );
+    }
+
+    /* -------------------------
+       REALTIME HELPERS
+    ------------------------- */
+
+    async function refreshConversationOrdering() {
+        /*
+         * Reload membership ordering without destroying
+         * the currently open chat.
+         */
+        const {
+            data,
+            error
+        } = await db
+            .from("conversation_members")
+            .select(
+                "conversation_id, joined_at"
+            )
+            .eq(
+                "user_id",
+                currentSession.user.id
+            )
+            .order(
+                "joined_at",
+                {
+                    ascending: false
+                }
+            );
+
+        if (error) {
+            console.error(
+                "[Realtime] Conversation ordering error:",
+                error
+            );
+
+            return;
+        }
+
+        conversations =
+            data || [];
+
+        await loadConversationDetails();
+
+        await renderConversationList();
+    }
+
+    async function updateCurrentConversationHeader() {
+        if (!currentConversationId) {
+            return;
+        }
+
+        const group =
+            isGroupConversation(
+                currentConversationId
+            );
+
+        const headerName =
+            document.getElementById(
+                "chat-header-name"
+            );
+
+        const headerStatus =
+            document.getElementById(
+                "chat-header-status"
+            );
+
+        const headerMembers =
+            document.getElementById(
+                "chat-header-members"
+            );
+
+        if (group) {
+            headerName.textContent =
+                getConversationName(
+                    currentConversationId
+                ) ||
+                "Group Chat";
+
+            headerStatus.textContent =
+                "Group chat";
+
+            const members =
+                await getConversationMembers(
+                    currentConversationId
+                );
+
+            await getProfilesForMembers(
+                members
+            );
+
+            headerMembers.textContent =
+                members
+                    .map(
+                        member =>
+                            profiles[
+                                member.user_id
+                            ]?.display_name ||
+                            profiles[
+                                member.user_id
+                            ]?.username
+                    )
+                    .filter(Boolean)
+                    .join(", ");
+
+            return;
+        }
+
+        const profile =
+            await getOtherUser(
+                currentConversationId
+            );
+
+        headerName.innerHTML =
+            "";
+
+        const name =
+            document.createElement(
+                "span"
+            );
+
+        name.textContent =
+            profile?.display_name ||
+            profile?.username ||
+            "Unknown User";
+
+        headerName.appendChild(
+            name
+        );
+
+        appendVerifiedBadge(
+            headerName,
+            profile
+        );
+
+        headerStatus.textContent =
+            profile?.username
+                ? `@${profile.username}`
+                : "Rip_Dead Account";
+    }
+
+    async function refreshVisibleMessageProfiles(
+        userId
+    ) {
+        if (!userId) {
+            return;
+        }
+
+        const rows =
+            document.querySelectorAll(
+                ".message-row"
+            );
+
+        for (const row of rows) {
+            const messageId =
+                row.dataset.messageId;
+
+            if (!messageId) {
+                continue;
+            }
+
+            /*
+             * Re-rendering the entire message list here
+             * would be wasteful. The next message load
+             * will use the updated profile cache.
+             *
+             * For the currently visible profile,
+             * reload the current conversation once.
+             */
+        }
+
+        await loadMessages();
     }
 
     /* -------------------------
@@ -3087,6 +3904,54 @@
                 document.getElementById(
                     "composer"
                 ).requestSubmit();
+            }
+        }
+    );
+
+    /* -------------------------
+       CLEANUP
+    ------------------------- */
+
+    window.addEventListener(
+        "beforeunload",
+        () => {
+            removeRealtimeChannels();
+        }
+    );
+
+    /* -------------------------
+       AUTH STATE
+    ------------------------- */
+
+    db.auth.onAuthStateChange(
+        async (event, session) => {
+            console.log(
+                "[Chat] Auth event:",
+                event
+            );
+
+            if (
+                event ===
+                "SIGNED_OUT"
+            ) {
+                removeRealtimeChannels();
+
+                window.location.href =
+                    "/login/";
+            }
+
+            if (
+                event ===
+                "SIGNED_IN"
+            ) {
+                currentSession =
+                    session;
+
+                if (
+                    !realtimeReady
+                ) {
+                    setupRealtime();
+                }
             }
         }
     );
