@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -180,10 +181,7 @@
         </h2>
 
 
-        <p
-            class="card-description"
-            id="apps-description"
-        >
+        <p class="card-description">
             Applications you have authorized to access
             your Rip_Dead Account will appear here.
         </p>
@@ -192,8 +190,8 @@
         <div id="apps-list">
 
             <div
-                id="apps-loading"
                 class="card-description"
+                id="apps-loading"
             >
                 Loading authorized applications...
             </div>
@@ -245,68 +243,6 @@ function setAppsMessage(
 
 
 
-function formatAuthorizationDate(
-    dateString
-) {
-
-    if (!dateString) {
-        return "Unknown";
-    }
-
-
-    const date =
-        new Date(dateString);
-
-
-    if (Number.isNaN(date.getTime())) {
-        return "Unknown";
-    }
-
-
-    return date.toLocaleDateString(
-        undefined,
-        {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }
-    );
-
-}
-
-
-
-function formatRevokedDate(
-    dateString
-) {
-
-    if (!dateString) {
-        return "Unknown";
-    }
-
-
-    const date =
-        new Date(dateString);
-
-
-    if (Number.isNaN(date.getTime())) {
-        return "Unknown";
-    }
-
-
-    return date.toLocaleDateString(
-        undefined,
-        {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }
-    );
-
-}
-
-
-
 function createScopeElement(
     scope
 ) {
@@ -351,6 +287,37 @@ function createScopeElement(
 
 
 
+function formatAuthorizationDate(
+    dateString
+) {
+
+    if (!dateString) {
+        return "Unknown";
+    }
+
+
+    const date =
+        new Date(dateString);
+
+
+    if (Number.isNaN(date.getTime())) {
+        return "Unknown";
+    }
+
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+
 function createAppCard(
     app
 ) {
@@ -367,6 +334,7 @@ function createAppCard(
 
     card.style.marginTop =
         "14px";
+
 
 
     const header =
@@ -694,180 +662,153 @@ function createAppCard(
 
 
 
-    if (
-        app.revoked_at
-    ) {
-
-        const revoked =
-            document.createElement(
-                "div"
-            );
-
-
-        revoked.style.opacity =
-            "0.65";
-
-
-        revoked.style.fontSize =
-            "13px";
-
-
-        revoked.textContent =
-            "Access revoked on " +
-            formatRevokedDate(
-                app.revoked_at
-            );
-
-
-        actions.appendChild(
-            revoked
+    const revokeButton =
+        document.createElement(
+            "button"
         );
 
-    } else {
 
-        const revokeButton =
-            document.createElement(
-                "button"
-            );
+    revokeButton.type =
+        "button";
 
 
-        revokeButton.type =
-            "button";
-
-
-        revokeButton.textContent =
-            "Revoke Access";
+    revokeButton.textContent =
+        "Revoke Access";
 
 
 
-        revokeButton.addEventListener(
-            "click",
-            async () => {
+    revokeButton.addEventListener(
+        "click",
+        async () => {
 
-                const applicationName =
-                    app.name ||
-                    app.client_id ||
-                    "this application";
+            const applicationName =
+                app.name ||
+                app.client_id ||
+                "this application";
 
 
-                const confirmed =
-                    window.confirm(
-                        "Revoke access for " +
-                        applicationName +
-                        "?\n\n" +
-                        "The application will no longer " +
-                        "be authorized to use your " +
-                        "Rip_Dead Account."
+            const confirmed =
+                window.confirm(
+                    "Revoke access for " +
+                    applicationName +
+                    "?\n\n" +
+                    "The application will no longer " +
+                    "be authorized to use your " +
+                    "Rip_Dead Account."
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            revokeButton.disabled =
+                true;
+
+
+            revokeButton.textContent =
+                "Revoking...";
+
+
+            const {
+                data: revoked,
+                error
+            } =
+                await supabaseClient
+                    .rpc(
+                        "revoke_oauth_app_authorization",
+                        {
+                            requested_client_id:
+                                app.client_id
+                        }
                     );
 
 
-                if (!confirmed) {
-                    return;
-                }
+
+            if (
+                error ||
+                revoked !== true
+            ) {
+
+                console.error(
+                    "[Apps] Revoke error:",
+                    error
+                );
 
 
                 revokeButton.disabled =
-                    true;
+                    false;
 
 
                 revokeButton.textContent =
-                    "Revoking...";
+                    "Revoke Access";
 
 
-                const {
-                    data: revoked,
-                    error
-                } =
-                    await supabaseClient
-                        .rpc(
-                            "revoke_oauth_app_authorization",
-                            {
-                                requested_client_id:
-                                    app.client_id
-                            }
-                        );
+                setAppsMessage(
+                    "Could not revoke application access.",
+                    "error"
+                );
+
+
+                return;
+
+            }
 
 
 
-                if (
-                    error ||
-                    revoked !== true
-                ) {
-
-                    console.error(
-                        "[Apps] Revoke error:",
-                        error
-                    );
-
-
-                    revokeButton.disabled =
-                        false;
+            /*
+             * The authorization and its
+             * active site sessions have now
+             * been revoked.
+             *
+             * Remove the application from
+             * the visible list immediately.
+             */
+            card.remove();
 
 
-                    revokeButton.textContent =
-                        "Revoke Access";
+            setAppsMessage(
+                "Application access revoked.",
+                "success"
+            );
 
 
-                    setAppsMessage(
-                        "Could not revoke application access.",
-                        "error"
-                    );
+            /*
+             * If this was the last active
+             * application, show the empty state.
+             */
+            if (
+                appsList.children.length === 0
+            ) {
 
-
-                    return;
-
-                }
-
-
-
-                app.revoked_at =
-                    new Date().toISOString();
-
-
-                revokeButton.remove();
-
-
-
-                const revokedElement =
+                const empty =
                     document.createElement(
                         "div"
                     );
 
 
-                revokedElement.style.opacity =
-                    "0.65";
+                empty.className =
+                    "card-description";
 
 
-                revokedElement.style.fontSize =
-                    "13px";
+                empty.textContent =
+                    "You have not authorized any applications yet.";
 
 
-                revokedElement.textContent =
-                    "Access revoked on " +
-                    formatRevokedDate(
-                        app.revoked_at
-                    );
-
-
-                actions.appendChild(
-                    revokedElement
-                );
-
-
-                setAppsMessage(
-                    "Application access revoked.",
-                    "success"
+                appsList.appendChild(
+                    empty
                 );
 
             }
-        );
+
+        }
+    );
 
 
-        actions.appendChild(
-            revokeButton
-        );
-
-    }
+    actions.appendChild(
+        revokeButton
+    );
 
 
     card.appendChild(
@@ -1005,6 +946,18 @@ async function loadAuthorizedApps() {
     apps.forEach(
         app => {
 
+            /*
+             * The RPC already filters revoked
+             * authorizations, but keep this
+             * check as a second client-side guard.
+             */
+            if (
+                app.revoked_at
+            ) {
+                return;
+            }
+
+
             appsList.appendChild(
                 createAppCard(
                     app
@@ -1013,6 +966,31 @@ async function loadAuthorizedApps() {
 
         }
     );
+
+
+    if (
+        appsList.children.length === 0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.className =
+            "card-description";
+
+
+        empty.textContent =
+            "You have not authorized any applications yet.";
+
+
+        appsList.appendChild(
+            empty
+        );
+
+    }
 
 }
 
@@ -1046,3 +1024,4 @@ initializeApps();
 </body>
 
 </html>
+```
