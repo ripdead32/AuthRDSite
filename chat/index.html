@@ -305,11 +305,20 @@
             display: flex;
         }
 
+        .composer.locked {
+            opacity: 0.75;
+        }
+
         .composer textarea {
             flex: 1;
             min-height: 44px;
             max-height: 130px;
             resize: vertical;
+        }
+
+        .composer textarea:disabled {
+            cursor: not-allowed;
+            opacity: 0.75;
         }
 
         .attachment-button {
@@ -915,6 +924,86 @@
 
     let realtimeReady = false;
 
+    /*
+     * Message deletion is CLIENT-SIDE ONLY.
+     *
+     * Nothing is deleted from Supabase when the user
+     * clicks Delete.
+     *
+     * The IDs are stored locally so a refresh keeps
+     * the messages hidden for this user.
+     */
+    let locallyDeletedMessages = new Set();
+
+    /* -------------------------
+       LOCAL MESSAGE DELETIONS
+    ------------------------- */
+
+    function getDeletedMessagesStorageKey() {
+        if (!currentSession?.user?.id) {
+            return null;
+        }
+
+        return `ripdead_deleted_messages_${currentSession.user.id}`;
+    }
+
+    function loadLocalDeletedMessages() {
+        locallyDeletedMessages = new Set();
+
+        const key =
+            getDeletedMessagesStorageKey();
+
+        if (!key) {
+            return;
+        }
+
+        try {
+            const stored =
+                JSON.parse(
+                    localStorage.getItem(key) || "[]"
+                );
+
+            if (Array.isArray(stored)) {
+                locallyDeletedMessages =
+                    new Set(
+                        stored.map(
+                            id => String(id)
+                        )
+                    );
+            }
+        } catch (error) {
+            console.error(
+                "[Chat] Could not load local deleted messages:",
+                error
+            );
+        }
+    }
+
+    function saveLocalDeletedMessages() {
+        const key =
+            getDeletedMessagesStorageKey();
+
+        if (!key) {
+            return;
+        }
+
+        try {
+            localStorage.setItem(
+                key,
+                JSON.stringify(
+                    Array.from(
+                        locallyDeletedMessages
+                    )
+                )
+            );
+        } catch (error) {
+            console.error(
+                "[Chat] Could not save local deleted messages:",
+                error
+            );
+        }
+    }
+
     /* -------------------------
        ERROR HANDLING
     ------------------------- */
@@ -927,8 +1016,12 @@
             return;
         }
 
-        element.textContent = message || "";
-        element.classList.add("visible");
+        element.textContent =
+            message || "";
+
+        element.classList.add(
+            "visible"
+        );
     }
 
     function clearChatError() {
@@ -939,8 +1032,12 @@
             return;
         }
 
-        element.textContent = "";
-        element.classList.remove("visible");
+        element.textContent =
+            "";
+
+        element.classList.remove(
+            "visible"
+        );
     }
 
     /* -------------------------
@@ -978,11 +1075,18 @@
                     "confirm-ok"
                 );
 
-            titleElement.textContent = title;
-            messageElement.textContent = message;
-            confirmButton.textContent = confirmText;
+            titleElement.textContent =
+                title;
 
-            modal.classList.add("open");
+            messageElement.textContent =
+                message;
+
+            confirmButton.textContent =
+                confirmText;
+
+            modal.classList.add(
+                "open"
+            );
 
             let finished = false;
 
@@ -993,7 +1097,9 @@
 
                 finished = true;
 
-                modal.classList.remove("open");
+                modal.classList.remove(
+                    "open"
+                );
 
                 cancelButton.removeEventListener(
                     "click",
@@ -1027,13 +1133,19 @@
             }
 
             function outsideClick(event) {
-                if (event.target === modal) {
+                if (
+                    event.target ===
+                    modal
+                ) {
                     finish(false);
                 }
             }
 
             function escapeKey(event) {
-                if (event.key === "Escape") {
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
                     finish(false);
                 }
             }
@@ -1058,9 +1170,12 @@
                 escapeKey
             );
 
-            setTimeout(() => {
-                confirmButton.focus();
-            }, 0);
+            setTimeout(
+                () => {
+                    confirmButton.focus();
+                },
+                0
+            );
         });
     }
 
@@ -1070,13 +1185,18 @@
 
     function createVerifiedBadge() {
         const badge =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         badge.className =
             "verified-badge";
 
-        badge.textContent = "✓";
-        badge.title = "Verified";
+        badge.textContent =
+            "✓";
+
+        badge.title =
+            "Verified";
 
         return badge;
     }
@@ -1111,7 +1231,8 @@
         }
 
         return conversation.is_group
-            ? conversation.name || "Group Chat"
+            ? conversation.name ||
+              "Group Chat"
             : null;
     }
 
@@ -1144,7 +1265,10 @@
             .select(
                 "id, name, is_group, created_at"
             )
-            .in("id", ids);
+            .in(
+                "id",
+                ids
+            );
 
         if (error) {
             console.error(
@@ -1155,7 +1279,10 @@
             return;
         }
 
-        for (const conversation of data || []) {
+        for (
+            const conversation
+            of data || []
+        ) {
             conversationDetails[
                 conversation.id
             ] = conversation;
@@ -1163,9 +1290,11 @@
     }
 
     async function getConversationMembers(
-        conversationId
+        conversationId,
+        forceRefresh = false
     ) {
         if (
+            !forceRefresh &&
             conversationMembers[
                 conversationId
             ]
@@ -1207,7 +1336,10 @@
     ) {
         const ids =
             members
-                .map(member => member.user_id)
+                .map(
+                    member =>
+                        member.user_id
+                )
                 .filter(
                     id =>
                         id !==
@@ -1220,7 +1352,8 @@
 
         const missingIds =
             ids.filter(
-                id => !profiles[id]
+                id =>
+                    !profiles[id]
             );
 
         if (missingIds.length) {
@@ -1230,7 +1363,10 @@
             } = await db
                 .from("profiles")
                 .select("*")
-                .in("id", missingIds);
+                .in(
+                    "id",
+                    missingIds
+                );
 
             if (error) {
                 console.error(
@@ -1238,7 +1374,10 @@
                     error
                 );
             } else {
-                for (const profile of data || []) {
+                for (
+                    const profile
+                    of data || []
+                ) {
                     profiles[
                         profile.id
                     ] = profile;
@@ -1247,7 +1386,10 @@
         }
 
         return ids
-            .map(id => profiles[id])
+            .map(
+                id =>
+                    profiles[id]
+            )
             .filter(Boolean);
     }
 
@@ -1270,8 +1412,14 @@
             return null;
         }
 
-        if (profiles[other.user_id]) {
-            return profiles[other.user_id];
+        if (
+            profiles[
+                other.user_id
+            ]
+        ) {
+            return profiles[
+                other.user_id
+            ];
         }
 
         const {
@@ -1302,6 +1450,157 @@
         }
 
         return data;
+    }
+
+    /* -------------------------
+       DIRECT CHAT MEMBER STATUS
+    ------------------------- */
+
+    async function isOtherDirectUserPresent(
+        conversationId
+    ) {
+        if (
+            !conversationId ||
+            isGroupConversation(
+                conversationId
+            )
+        ) {
+            return true;
+        }
+
+        const members =
+            await getConversationMembers(
+                conversationId,
+                true
+            );
+
+        return members.some(
+            member =>
+                member.user_id !==
+                currentSession.user.id
+        );
+    }
+
+    function setDirectComposerLocked(
+        locked
+    ) {
+        const composer =
+            document.getElementById(
+                "composer"
+            );
+
+        const input =
+            document.getElementById(
+                "message-input"
+            );
+
+        const sendButton =
+            document.getElementById(
+                "send-button"
+            );
+
+        const attachmentButton =
+            document.getElementById(
+                "attachment-button"
+            );
+
+        if (
+            !composer ||
+            !input ||
+            !sendButton ||
+            !attachmentButton
+        ) {
+            return;
+        }
+
+        if (locked) {
+            composer.classList.add(
+                "locked"
+            );
+
+            input.disabled =
+                true;
+
+            input.value =
+                "";
+
+            input.placeholder =
+                "The user left the DM";
+
+            sendButton.disabled =
+                true;
+
+            attachmentButton.disabled =
+                true;
+
+            return;
+        }
+
+        composer.classList.remove(
+            "locked"
+        );
+
+        input.disabled =
+            false;
+
+        input.placeholder =
+            "Type a message...";
+
+        sendButton.disabled =
+            false;
+
+        attachmentButton.disabled =
+            false;
+    }
+
+    async function updateDirectChatStatus() {
+        if (
+            !currentConversationId ||
+            isGroupConversation(
+                currentConversationId
+            )
+        ) {
+            return;
+        }
+
+        const otherPresent =
+            await isOtherDirectUserPresent(
+                currentConversationId
+            );
+
+        const headerStatus =
+            document.getElementById(
+                "chat-header-status"
+            );
+
+        if (!otherPresent) {
+            if (headerStatus) {
+                headerStatus.textContent =
+                    "The user left the DM";
+            }
+
+            setDirectComposerLocked(
+                true
+            );
+
+            return;
+        }
+
+        const profile =
+            await getOtherUser(
+                currentConversationId
+            );
+
+        if (headerStatus) {
+            headerStatus.textContent =
+                profile?.username
+                    ? `@${profile.username}`
+                    : "Rip_Dead Account";
+        }
+
+        setDirectComposerLocked(
+            false
+        );
     }
 
     /* -------------------------
@@ -1341,7 +1640,8 @@
             }
 
             session =
-                data?.session || null;
+                data?.session ||
+                null;
 
             if (session) {
                 break;
@@ -1363,7 +1663,10 @@
             return;
         }
 
-        currentSession = session;
+        currentSession =
+            session;
+
+        loadLocalDeletedMessages();
 
         await initNavbar();
 
@@ -1448,7 +1751,8 @@
                 "conversation-list"
             );
 
-        list.innerHTML = "";
+        list.innerHTML =
+            "";
 
         for (
             const conversation
@@ -1462,7 +1766,8 @@
                     conversationId
                 );
 
-            let profile = null;
+            let profile =
+                null;
 
             if (!group) {
                 profile =
@@ -1485,7 +1790,8 @@
                     "button"
                 );
 
-            button.type = "button";
+            button.type =
+                "button";
 
             button.className =
                 "conversation-item";
@@ -1607,7 +1913,7 @@
             deleteButton.title =
                 group
                     ? "Leave group"
-                    : "Delete chat";
+                    : "Leave chat";
 
             deleteButton.addEventListener(
                 "click",
@@ -1622,7 +1928,7 @@
                             )
                         );
                     } else {
-                        await deleteConversation(
+                        await leaveDirectConversation(
                             conversationId,
                             profile?.display_name ||
                             profile?.username ||
@@ -1700,7 +2006,8 @@
                 "chat-header-action"
             );
 
-        headerName.innerHTML = "";
+        headerName.innerHTML =
+            "";
 
         headerMembers.textContent =
             "";
@@ -1717,7 +2024,8 @@
 
             const members =
                 await getConversationMembers(
-                    conversationId
+                    conversationId,
+                    true
                 );
 
             await getProfilesForMembers(
@@ -1761,6 +2069,10 @@
                         )
                     );
                 };
+
+            setDirectComposerLocked(
+                false
+            );
         } else {
             const profile =
                 await getOtherUser(
@@ -1824,6 +2136,8 @@
 
             headerAction.style.display =
                 "none";
+
+            await updateDirectChatStatus();
         }
 
         const composer =
@@ -1835,13 +2149,19 @@
             "visible"
         );
 
-        document.getElementById(
-            "message-input"
-        ).disabled = false;
+        if (group) {
+            document.getElementById(
+                "message-input"
+            ).disabled = false;
 
-        document.getElementById(
-            "send-button"
-        ).disabled = false;
+            document.getElementById(
+                "send-button"
+            ).disabled = false;
+
+            document.getElementById(
+                "attachment-button"
+            ).disabled = false;
+        }
 
         await loadMessages();
     }
@@ -1854,6 +2174,9 @@
         if (!currentConversationId) {
             return;
         }
+
+        const conversationBeingLoaded =
+            currentConversationId;
 
         const messagesContainer =
             document.getElementById(
@@ -1874,7 +2197,7 @@
             .select("*")
             .eq(
                 "conversation_id",
-                currentConversationId
+                conversationBeingLoaded
             )
             .order(
                 "created_at",
@@ -1882,6 +2205,13 @@
                     ascending: true
                 }
             );
+
+        if (
+            conversationBeingLoaded !==
+            currentConversationId
+        ) {
+            return;
+        }
 
         if (error) {
             console.error(
@@ -1917,13 +2247,34 @@
             return;
         }
 
+        let visibleMessages =
+            0;
+
         for (
             const message
             of data
         ) {
+            if (
+                locallyDeletedMessages.has(
+                    String(message.id)
+                )
+            ) {
+                continue;
+            }
+
             await renderMessage(
                 message
             );
+
+            visibleMessages++;
+        }
+
+        if (!visibleMessages) {
+            messagesContainer.innerHTML = `
+                <div class="empty-chat">
+                    No messages to display.
+                </div>
+            `;
         }
 
         scrollMessagesToBottom();
@@ -1968,6 +2319,14 @@
     async function renderMessage(
         message
     ) {
+        if (
+            locallyDeletedMessages.has(
+                String(message.id)
+            )
+        ) {
+            return;
+        }
+
         const container =
             document.getElementById(
                 "messages"
@@ -2117,6 +2476,11 @@
             time
         );
 
+        /*
+         * Delete is intentionally LOCAL ONLY.
+         *
+         * It does not touch Supabase.
+         */
         if (mine) {
             const deleteButton =
                 document.createElement(
@@ -2134,8 +2498,8 @@
 
             deleteButton.addEventListener(
                 "click",
-                async () => {
-                    await deleteMessage(
+                () => {
+                    deleteMessage(
                         message.id
                     );
                 }
@@ -2218,6 +2582,34 @@
                 return;
             }
 
+            /*
+             * Don't allow sending in a DM after
+             * the other person has left.
+             */
+            if (
+                !isGroupConversation(
+                    currentConversationId
+                )
+            ) {
+                const otherPresent =
+                    await isOtherDirectUserPresent(
+                        currentConversationId
+                    );
+
+                if (!otherPresent) {
+                    setDirectComposerLocked(
+                        true
+                    );
+
+                    document.getElementById(
+                        "chat-header-status"
+                    ).textContent =
+                        "The user left the DM";
+
+                    return;
+                }
+            }
+
             clearChatError();
 
             const input =
@@ -2279,10 +2671,8 @@
                 input.value = "";
 
                 /*
-                 * Realtime normally renders this automatically.
-                 * We also render it immediately so your own
-                 * message appears without waiting for the
-                 * Realtime round-trip.
+                 * Render immediately for the sender.
+                 * Realtime will still deliver it to everyone else.
                  */
                 await renderMessage(
                     data
@@ -2291,10 +2681,43 @@
                 scrollMessagesToBottom();
             }
 
+            /*
+             * Re-check the DM state before unlocking.
+             */
+            if (
+                currentConversationId &&
+                !isGroupConversation(
+                    currentConversationId
+                )
+            ) {
+                const otherPresent =
+                    await isOtherDirectUserPresent(
+                        currentConversationId
+                    );
+
+                if (!otherPresent) {
+                    setDirectComposerLocked(
+                        true
+                    );
+
+                    document.getElementById(
+                        "chat-header-status"
+                    ).textContent =
+                        "The user left the DM";
+
+                    return;
+                }
+            }
+
             input.disabled =
                 false;
 
             button.disabled =
+                false;
+
+            document.getElementById(
+                "attachment-button"
+            ).disabled =
                 false;
 
             input.focus();
@@ -2302,40 +2725,30 @@
     );
 
     /* -------------------------
-       DELETE MESSAGE
+       CLIENT-SIDE DELETE MESSAGE
     ------------------------- */
 
-    async function deleteMessage(
+    function deleteMessage(
         messageId
     ) {
         clearChatError();
 
-        const {
-            error
-        } = await db
-            .from("messages")
-            .delete()
-            .eq(
-                "id",
-                messageId
-            )
-            .eq(
-                "sender_id",
-                currentSession.user.id
-            );
+        const id =
+            String(messageId);
 
-        if (error) {
-            console.error(
-                "[Chat] Delete message error:",
-                error
-            );
+        /*
+         * ONLY modify local state.
+         *
+         * There is deliberately NO:
+         *
+         * db.from("messages").delete(...)
+         *
+         */
+        locallyDeletedMessages.add(
+            id
+        );
 
-            showChatError(
-                "Could not delete that message."
-            );
-
-            return;
-        }
+        saveLocalDeletedMessages();
 
         removeMessageElement(
             messageId
@@ -2367,25 +2780,25 @@
         ) {
             container.innerHTML = `
                 <div class="empty-chat">
-                    No messages yet. Say hello!
+                    No messages to display.
                 </div>
             `;
         }
     }
 
     /* -------------------------
-       DELETE DIRECT CHAT
+       LEAVE DIRECT CHAT
     ------------------------- */
 
-    async function deleteConversation(
+    async function leaveDirectConversation(
         conversationId,
         conversationName
     ) {
         const confirmed =
             await showConfirmDialog(
-                "Delete Chat?",
-                `Delete ${conversationName}? This will permanently delete the conversation and its messages.`,
-                "Delete"
+                "Leave Chat?",
+                `Leave ${conversationName}? You will no longer be able to send messages in this DM.`,
+                "Leave"
             );
 
         if (!confirmed) {
@@ -2397,7 +2810,7 @@
         const {
             error
         } = await db.rpc(
-            "delete_conversation",
+            "leave_direct_conversation",
             {
                 target_conversation_id:
                     conversationId
@@ -2406,17 +2819,21 @@
 
         if (error) {
             console.error(
-                "[Chat] Delete conversation error:",
+                "[Chat] Leave direct conversation error:",
                 error
             );
 
             showChatError(
-                "Could not delete that chat."
+                "Could not leave that chat."
             );
 
             return;
         }
 
+        /*
+         * We intentionally do NOT delete the conversation
+         * or any messages.
+         */
         resetCurrentConversation(
             conversationId
         );
@@ -2556,14 +2973,30 @@
         );
 
         document.getElementById(
+            "composer"
+        ).classList.remove(
+            "locked"
+        );
+
+        document.getElementById(
             "message-input"
         ).disabled =
             true;
 
         document.getElementById(
+            "message-input"
+        ).placeholder =
+            "Type a message...";
+
+        document.getElementById(
             "send-button"
         ).disabled =
             true;
+
+        document.getElementById(
+            "attachment-button"
+        ).disabled =
+            false;
     }
 
     /* -------------------------
@@ -3289,7 +3722,8 @@
 
         const memberIds =
             selectedGroupUsers.map(
-                user => user.id
+                user =>
+                    user.id
             );
 
         const {
@@ -3423,6 +3857,18 @@
                             return;
                         }
 
+                        /*
+                         * If this user locally deleted
+                         * this message already, keep it hidden.
+                         */
+                        if (
+                            locallyDeletedMessages.has(
+                                String(message.id)
+                            )
+                        ) {
+                            return;
+                        }
+
                         if (
                             message.conversation_id ===
                             currentConversationId
@@ -3443,36 +3889,30 @@
                             }
                         }
 
-                        /*
-                         * A new message should move the
-                         * conversation visually to the
-                         * top of the sidebar.
-                         */
                         await refreshConversationOrdering();
                     }
                 )
                 .on(
                     "postgres_changes",
                     {
-                        event: "DELETE",
+                        event: "UPDATE",
                         schema: "public",
                         table: "messages"
                     },
                     async payload => {
                         const message =
-                            payload.old;
+                            payload.new;
 
                         console.log(
-                            "[Realtime] Deleted message:",
+                            "[Realtime] Updated message:",
                             message
                         );
 
                         if (
-                            message?.id
+                            message?.conversation_id ===
+                            currentConversationId
                         ) {
-                            removeMessageElement(
-                                message.id
-                            );
+                            await loadMessages();
                         }
                     }
                 )
@@ -3515,6 +3955,15 @@
                     }
                 );
 
+        /*
+         * IMPORTANT:
+         *
+         * There is deliberately NO DELETE listener here.
+         *
+         * Messages are not deleted from Supabase
+         * by the client anymore.
+         */
+
         /* -------------------------
            CONVERSATIONS
         ------------------------- */
@@ -3542,6 +3991,10 @@
 
                         await loadConversations();
 
+                        /*
+                         * If our own membership disappeared,
+                         * close the chat.
+                         */
                         if (
                             currentConversationId &&
                             !conversations.some(
@@ -3553,6 +4006,34 @@
                             resetCurrentConversation(
                                 currentConversationId
                             );
+
+                            return;
+                        }
+
+                        /*
+                         * If we're still a member of the DM,
+                         * check whether the other person left.
+                         */
+                        if (
+                            currentConversationId &&
+                            !isGroupConversation(
+                                currentConversationId
+                            )
+                        ) {
+                            await updateDirectChatStatus();
+                        }
+
+                        /*
+                         * Group membership changes update
+                         * the header.
+                         */
+                        if (
+                            currentConversationId &&
+                            isGroupConversation(
+                                currentConversationId
+                            )
+                        ) {
+                            await updateCurrentConversationHeader();
                         }
                     }
                 )
@@ -3704,10 +4185,6 @@
     ------------------------- */
 
     async function refreshConversationOrdering() {
-        /*
-         * Reload membership ordering without destroying
-         * the currently open chat.
-         */
         const {
             data,
             error
@@ -3781,7 +4258,8 @@
 
             const members =
                 await getConversationMembers(
-                    currentConversationId
+                    currentConversationId,
+                    true
                 );
 
             await getProfilesForMembers(
@@ -3832,10 +4310,7 @@
             profile
         );
 
-        headerStatus.textContent =
-            profile?.username
-                ? `@${profile.username}`
-                : "Rip_Dead Account";
+        await updateDirectChatStatus();
     }
 
     async function refreshVisibleMessageProfiles(
@@ -3843,29 +4318,6 @@
     ) {
         if (!userId) {
             return;
-        }
-
-        const rows =
-            document.querySelectorAll(
-                ".message-row"
-            );
-
-        for (const row of rows) {
-            const messageId =
-                row.dataset.messageId;
-
-            if (!messageId) {
-                continue;
-            }
-
-            /*
-             * Re-rendering the entire message list here
-             * would be wasteful. The next message load
-             * will use the updated profile cache.
-             *
-             * For the currently visible profile,
-             * reload the current conversation once.
-             */
         }
 
         await loadMessages();
@@ -3880,6 +4332,14 @@
     ).addEventListener(
         "click",
         () => {
+            if (
+                document.getElementById(
+                    "attachment-button"
+                ).disabled
+            ) {
+                return;
+            }
+
             showChatError(
                 "Attachments are coming soon. GCS storage is already prepared for them."
             );
@@ -3924,7 +4384,10 @@
     ------------------------- */
 
     db.auth.onAuthStateChange(
-        async (event, session) => {
+        async (
+            event,
+            session
+        ) => {
             console.log(
                 "[Chat] Auth event:",
                 event
@@ -3938,6 +4401,8 @@
 
                 window.location.href =
                     "/login/";
+
+                return;
             }
 
             if (
@@ -3946,6 +4411,8 @@
             ) {
                 currentSession =
                     session;
+
+                loadLocalDeletedMessages();
 
                 if (
                     !realtimeReady
