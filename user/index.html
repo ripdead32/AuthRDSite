@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
 
+<head>
     <meta charset="UTF-8">
 
     <meta
@@ -9,13 +9,12 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>User Profile — Rip_Dead ID</title>
+    <title>User Profile — Rip_Dead Account</title>
 
     <link
         rel="stylesheet"
         href="/css/auth.css"
     >
-
 </head>
 
 <body>
@@ -28,7 +27,7 @@
             href="/"
             class="navbar-brand"
         >
-            Rip_Dead ID
+            Rip_Dead Account
         </a>
 
 
@@ -52,6 +51,14 @@
                 hidden
             >
                 Friends
+            </a>
+
+            <a
+                href="/chat/"
+                class="auth-only"
+                hidden
+            >
+                Chat
             </a>
 
             <a
@@ -200,11 +207,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     function showError(text) {
 
         loading.hidden = true;
+
         card.hidden = true;
 
         errorBox.textContent = text;
-        errorBox.hidden = false;
 
+        errorBox.hidden = false;
     }
 
 
@@ -216,7 +224,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
         return params.get("id");
-
     }
 
 
@@ -286,8 +293,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             verified.textContent =
                 "✓ Verified";
 
-            name.appendChild(verified);
-
+            name.appendChild(
+                verified
+            );
         }
 
 
@@ -306,7 +314,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             bio.style.opacity =
                 "0.65";
-
         }
 
 
@@ -352,15 +359,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             actions.appendChild(
                 loginButton
             );
-
         }
 
 
         document.title =
-            `${displayName} — Rip_Dead ID`;
+            `${displayName} — Rip_Dead Account`;
 
 
         loading.hidden = true;
+
         card.hidden = false;
 
 
@@ -371,7 +378,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         showError(
             "Something went wrong while loading this profile."
         );
-
     }
 
 
@@ -479,6 +485,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             acceptButton.textContent =
                 "Accept Friend Request";
 
+
             acceptButton.addEventListener(
                 "click",
                 async () => {
@@ -504,11 +511,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         acceptButton.disabled =
                             false;
-
                     }
-
                 }
             );
+
 
             actions.appendChild(
                 acceptButton
@@ -527,6 +533,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             friendButton.textContent =
                 "Add Friend";
+
 
             friendButton.addEventListener(
                 "click",
@@ -553,24 +560,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         friendButton.disabled =
                             false;
-
                     }
-
                 }
             );
+
 
             actions.appendChild(
                 friendButton
             );
-
         }
 
 
         const followButton =
             document.createElement("button");
 
+
         followButton.type =
             "button";
+
 
         followButton.className =
             "button secondary";
@@ -580,6 +587,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             followButton.textContent =
                 "Unfollow";
+
 
             followButton.addEventListener(
                 "click",
@@ -606,9 +614,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         followButton.disabled =
                             false;
-
                     }
-
                 }
             );
 
@@ -616,6 +622,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             followButton.textContent =
                 "Follow";
+
 
             followButton.addEventListener(
                 "click",
@@ -642,19 +649,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         followButton.disabled =
                             false;
-
                     }
-
                 }
             );
-
         }
 
 
         actions.appendChild(
             followButton
         );
-
     }
 
 
@@ -688,7 +691,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         return data;
-
     }
 
 
@@ -720,7 +722,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         return !!data;
-
     }
 
 
@@ -748,7 +749,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (error) {
             throw error;
         }
-
     }
 
 
@@ -778,7 +778,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (error) {
             throw error;
         }
-
     }
 
 
@@ -803,7 +802,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (error) {
             throw error;
         }
-
     }
 
 
@@ -830,7 +828,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (error) {
             throw error;
         }
-
     }
 
 });
@@ -838,4 +835,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 </body>
+
 </html>
+```

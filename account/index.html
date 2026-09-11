@@ -1,11 +1,16 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account — Rip_Dead ID</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Account — Rip_Dead Account</title>
+
     <link rel="stylesheet" href="/css/auth.css">
 
     <style>
@@ -34,36 +39,70 @@
 <body>
 
 <nav class="site-navbar">
+
     <div class="navbar-inner">
 
         <a href="/" class="navbar-brand">
-            Rip_Dead ID
+            Rip_Dead Account
         </a>
 
         <div class="navbar-links">
-            <a href="/">Home</a>
 
-            <a href="/search/" class="auth-only" hidden>
+            <a href="/">
+                Home
+            </a>
+
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden
+            >
                 Search
             </a>
 
-            <a href="/friends/" class="auth-only" hidden>
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden
+            >
                 Friends
             </a>
 
-            <a href="/settings/" class="auth-only" hidden>
+            <a
+                href="/chat/"
+                class="auth-only"
+                hidden
+            >
+                Chat
+            </a>
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden
+            >
                 Settings
             </a>
 
-            <a href="/account/" class="auth-only" hidden>
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden
+            >
                 Account
             </a>
 
-            <a href="/login/" class="guest-only">
+            <a
+                href="/login/"
+                class="guest-only"
+            >
                 Log In
             </a>
 
-            <a href="/signup/" class="guest-only button-link">
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
@@ -75,27 +114,41 @@
             >
                 Log Out
             </button>
+
         </div>
 
     </div>
+
 </nav>
+
 
 <main class="page page-small">
 
     <section class="card">
 
         <div class="page-header">
+
             <div>
-                <h1>Your Account</h1>
-                <p>Manage your Rip_Dead ID profile.</p>
+
+                <h1>
+                    Your Account
+                </h1>
+
+                <p>
+                    Manage your Rip_Dead Account profile.
+                </p>
+
             </div>
+
         </div>
+
 
         <div
             id="account-message"
             class="message"
             hidden
         ></div>
+
 
         <div class="account-profile">
 
@@ -124,6 +177,7 @@
 
         </div>
 
+
         <div class="form-group">
 
             <label for="account-email">
@@ -138,6 +192,7 @@
             >
 
         </div>
+
 
         <div class="form-group">
 
@@ -154,6 +209,7 @@
 
         </div>
 
+
         <div class="form-group">
 
             <label for="account-display-name">
@@ -169,6 +225,7 @@
 
         </div>
 
+
         <div class="form-group">
 
             <label for="account-bio">
@@ -183,6 +240,7 @@
             ></textarea>
 
         </div>
+
 
         <div class="button-row">
 
@@ -207,10 +265,13 @@
 
 </main>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/auth.js"></script>
 
+
 <script>
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     const message =
@@ -237,18 +298,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const bioField =
         document.getElementById("account-bio");
 
+
     try {
 
         const session =
             await initNavbar();
 
+
         if (!session) {
-            window.location.href = "/login/";
+
+            window.location.href =
+                "/login/";
+
             return;
         }
 
+
         const profile =
             await getProfile(session.user.id);
+
 
         if (!profile) {
 
@@ -260,20 +328,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
+
         const displayName =
             profile.display_name ||
             profile.username ||
             "Rip_Dead User";
 
+
         const username =
             profile.username ||
             "unknown";
 
+
         accountName.textContent =
             displayName;
 
+
         accountUsername.textContent =
             "@" + username;
+
 
         if (profile.is_verified) {
 
@@ -327,82 +400,111 @@ document.addEventListener("DOMContentLoaded", async () => {
             badge.style.fontWeight =
                 "900";
 
-            accountName.appendChild(badge);
+
+            accountName.appendChild(
+                badge
+            );
         }
+
 
         emailField.value =
             session.user.email || "";
 
+
         usernameField.value =
             profile.username || "";
+
 
         displayNameField.value =
             profile.display_name || "";
 
+
         bioField.value =
             profile.bio || "";
+
 
         const avatarUrl =
             getAvatarUrl(profile);
 
+
         if (avatarUrl) {
 
-            accountAvatar.classList.remove("empty");
+            accountAvatar.classList.remove(
+                "empty"
+            );
+
 
             const image =
                 document.createElement("img");
 
+
             image.src =
                 avatarUrl;
+
 
             image.alt =
                 "Profile avatar";
 
+
             image.width =
                 96;
+
 
             image.height =
                 96;
 
+
             image.style.width =
                 "100%";
+
 
             image.style.height =
                 "100%";
 
+
             image.style.maxWidth =
                 "100%";
+
 
             image.style.maxHeight =
                 "100%";
 
+
             image.style.objectFit =
                 "cover";
+
 
             image.style.objectPosition =
                 "center";
 
+
             image.style.display =
                 "block";
+
 
             image.style.borderRadius =
                 "50%";
 
+
             accountAvatar.innerHTML =
                 "";
+
 
             accountAvatar.appendChild(
                 image
             );
         }
 
+
         document.title =
-            `${displayName} — Rip_Dead ID`;
+            `${displayName} — Rip_Dead Account`;
+
 
         const publicProfileButton =
             document.getElementById(
                 "view-profile-button"
             );
+
 
         publicProfileButton.href =
             `/user/?id=${encodeURIComponent(
@@ -413,13 +515,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         console.error(error);
 
+
         message.textContent =
             "Something went wrong while loading your account.";
+
 
         message.hidden = false;
     }
 
 });
+
 </script>
 
 </body>

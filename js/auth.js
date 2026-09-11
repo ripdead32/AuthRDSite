@@ -1,6 +1,4 @@
 const SUPABASE_URL = "https://vcwfgyikbvfzgqiljmry.supabase.co";
-
-// KEEP YOUR EXISTING SUPABASE PUBLISHABLE KEY HERE
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
 
 /* =========================================================

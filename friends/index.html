@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Friends - Rip_Dead ID</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Friends - Rip_Dead Account</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 
@@ -15,10 +20,11 @@
 <body>
 
 <nav class="site-navbar">
+
     <div class="navbar-inner">
 
         <a href="/" class="navbar-brand">
-            Rip_Dead ID
+            Rip_Dead Account
         </a>
 
         <div class="navbar-links">
@@ -30,40 +36,54 @@
             <a
                 href="/search/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Search
             </a>
 
             <a
                 href="/friends/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Friends
+            </a>
+
+            <a
+                href="/chat/"
+                class="auth-only"
+                hidden
+            >
+                Chat
             </a>
 
             <a
                 href="/settings/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Settings
             </a>
 
             <a
                 href="/account/"
                 class="auth-only"
-                hidden>
+                hidden
+            >
                 Account
             </a>
 
             <a
                 href="/login/"
-                class="guest-only">
+                class="guest-only"
+            >
                 Log In
             </a>
 
             <a
                 href="/signup/"
-                class="guest-only button-link">
+                class="guest-only button-link"
+            >
                 Create Account
             </a>
 
@@ -71,13 +91,15 @@
                 type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
-                hidden>
+                hidden
+            >
                 Log Out
             </button>
 
         </div>
 
     </div>
+
 </nav>
 
 
@@ -85,14 +107,16 @@
 
     <div class="page-header">
 
-        <span style="
-            display: block;
-            margin-bottom: 10px;
-            color: var(--purple-hover);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-        ">
+        <span
+            style="
+                display: block;
+                margin-bottom: 10px;
+                color: var(--purple-hover);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+            "
+        >
             RIP_DEAD SOCIAL
         </span>
 
@@ -110,8 +134,8 @@
     <div
         id="friends-message"
         class="message"
-        aria-live="polite">
-    </div>
+        aria-live="polite"
+    ></div>
 
 
     <section class="card">
@@ -172,9 +196,11 @@ async function initializeFriends() {
     friendsSession =
         await requireAuth();
 
+
     if (!friendsSession) {
         return;
     }
+
 
     await initNavbar();
 
@@ -216,17 +242,20 @@ async function loadFriendships() {
             error
         );
 
+
         setMessage(
             friendsMessage,
             error.message,
             "error"
         );
 
+
         return;
     }
 
 
     requestsContainer.innerHTML = "";
+
     friendsContainer.innerHTML = "";
 
 
@@ -284,10 +313,17 @@ async function loadFriendships() {
             const actions =
                 document.createElement("div");
 
-            actions.style.display = "flex";
-            actions.style.flexWrap = "wrap";
-            actions.style.gap = "7px";
-            actions.style.marginLeft = "auto";
+            actions.style.display =
+                "flex";
+
+            actions.style.flexWrap =
+                "wrap";
+
+            actions.style.gap =
+                "7px";
+
+            actions.style.marginLeft =
+                "auto";
 
 
             const view =
@@ -309,7 +345,8 @@ async function loadFriendships() {
             const accept =
                 document.createElement("button");
 
-            accept.type = "button";
+            accept.type =
+                "button";
 
             accept.textContent =
                 "Accept";
@@ -325,7 +362,8 @@ async function loadFriendships() {
             const decline =
                 document.createElement("button");
 
-            decline.type = "button";
+            decline.type =
+                "button";
 
             decline.className =
                 "danger";
@@ -342,7 +380,9 @@ async function loadFriendships() {
 
 
             actions.appendChild(view);
+
             actions.appendChild(accept);
+
             actions.appendChild(decline);
 
 
@@ -463,6 +503,7 @@ function createFriendCard(profile) {
 
 
     information.appendChild(name);
+
     information.appendChild(username);
 
 
@@ -492,11 +533,13 @@ function createFriendCard(profile) {
         badge.style.fontWeight =
             "700";
 
+
         information.appendChild(badge);
     }
 
 
     card.appendChild(avatar);
+
     card.appendChild(information);
 
 
@@ -531,6 +574,7 @@ async function updateFriendRequest(
             "error"
         );
 
+
         return;
     }
 
@@ -544,4 +588,6 @@ initializeFriends();
 </script>
 
 </body>
+
 </html>
+```

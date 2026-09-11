@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Search — Rip_Dead ID</title>
+    <title>Search — Rip_Dead Account</title>
 
     <link rel="stylesheet" href="/css/auth.css">
 </head>
@@ -19,7 +21,7 @@
     <div class="navbar-inner">
 
         <a href="/" class="navbar-brand">
-            Rip_Dead ID
+            Rip_Dead Account
         </a>
 
         <div class="navbar-links">
@@ -42,6 +44,14 @@
                 hidden
             >
                 Friends
+            </a>
+
+            <a
+                href="/chat/"
+                class="auth-only"
+                hidden
+            >
+                Chat
             </a>
 
             <a
@@ -98,10 +108,12 @@
 
             <div>
 
-                <h1>Find Users</h1>
+                <h1>
+                    Find Users
+                </h1>
 
                 <p>
-                    Search for Rip_Dead ID users.
+                    Search for Rip_Dead users.
                 </p>
 
             </div>
@@ -149,6 +161,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/auth.js"></script>
 
+
 <script>
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -171,7 +184,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     if (!session) {
-        window.location.href = "/login/";
+
+        window.location.href =
+            "/login/";
+
         return;
     }
 
@@ -183,6 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         results.innerHTML = "";
+
         message.hidden = true;
 
 
@@ -290,7 +307,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     verified.textContent =
                         "✓ Verified";
 
-                    name.appendChild(verified);
+                    name.appendChild(
+                        verified
+                    );
                 }
 
 
@@ -328,19 +347,36 @@ document.addEventListener("DOMContentLoaded", async () => {
                     `/user/?id=${encodeURIComponent(profile.id)}`;
 
 
-                actions.appendChild(viewButton);
+                actions.appendChild(
+                    viewButton
+                );
 
 
-                userInfo.appendChild(name);
-                userInfo.appendChild(username);
+                userInfo.appendChild(
+                    name
+                );
+
+                userInfo.appendChild(
+                    username
+                );
 
 
-                userCard.appendChild(avatar);
-                userCard.appendChild(userInfo);
-                userCard.appendChild(actions);
+                userCard.appendChild(
+                    avatar
+                );
+
+                userCard.appendChild(
+                    userInfo
+                );
+
+                userCard.appendChild(
+                    actions
+                );
 
 
-                results.appendChild(userCard);
+                results.appendChild(
+                    userCard
+                );
 
             });
 
@@ -356,10 +392,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         } finally {
 
             button.disabled = false;
-            button.textContent = "Search";
 
+            button.textContent =
+                "Search";
         }
-
     }
 
 
@@ -374,9 +410,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         event => {
 
             if (event.key === "Enter") {
+
                 performSearch();
             }
-
         }
     );
 
@@ -385,4 +421,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 </body>
+
 </html>
+```

@@ -4,15 +4,23 @@
 
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
 
-<title>Settings - Rip_Dead ID</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<link rel="stylesheet" href="/css/auth.css">
+    <title>Settings - Rip_Dead Account</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/auth.js"></script>
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="/js/auth.js"></script>
 
 </head>
 
@@ -20,184 +28,210 @@
 
 <nav class="site-navbar">
 
-<div class="navbar-inner">
-
-    <a href="/" class="navbar-brand">
-        Rip_Dead ID
-    </a>
-
-
-    <div class="navbar-links">
-
-        <a href="/">
-            Home
-        </a>
+    <div class="navbar-inner">
 
         <a
-            href="/search/"
-            class="auth-only"
-            hidden>
-            Search
+            href="/"
+            class="navbar-brand"
+        >
+            Rip_Dead Account
         </a>
 
-        <a
-            href="/friends/"
-            class="auth-only"
-            hidden>
-            Friends
-        </a>
 
-        <a
-            href="/settings/"
-            class="auth-only"
-            hidden>
-            Settings
-        </a>
+        <div class="navbar-links">
 
-        <a
-            href="/account/"
-            class="auth-only"
-            hidden>
-            Account
-        </a>
+            <a href="/">
+                Home
+            </a>
 
-        <a
-            href="/login/"
-            class="guest-only">
-            Log In
-        </a>
 
-        <a
-            href="/signup/"
-            class="guest-only button-link">
-            Create Account
-        </a>
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden
+            >
+                Search
+            </a>
 
-        <button
-            type="button"
-            id="navbar-logout"
-            class="auth-only navbar-logout"
-            hidden>
-            Log Out
-        </button>
+
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden
+            >
+                Friends
+            </a>
+
+
+            <a
+                href="/chat/"
+                class="auth-only"
+                hidden
+            >
+                Chat
+            </a>
+
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden
+            >
+                Settings
+            </a>
+
+
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden
+            >
+                Account
+            </a>
+
+
+            <a
+                href="/login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
+                Create Account
+            </a>
+
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden
+            >
+                Log Out
+            </button>
+
+        </div>
 
     </div>
-
-</div>
-```
 
 </nav>
 
+
 <main class="page page-small">
 
-```
-<div class="page-header">
+    <div class="page-header">
 
-    <span style="
-        display: block;
-        margin-bottom: 10px;
-        color: var(--purple-hover);
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-    ">
-        RIP_DEAD ACCOUNT
-    </span>
-
-
-    <h1>
-        Settings
-    </h1>
+        <span
+            style="
+                display: block;
+                margin-bottom: 10px;
+                color: var(--purple-hover);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+            "
+        >
+            RIP_DEAD ACCOUNT
+        </span>
 
 
-    <p>
-        Manage your account and profile.
-    </p>
-
-</div>
+        <h1>
+            Settings
+        </h1>
 
 
-
-<div
-    id="settings-message"
-    class="message"
-    aria-live="polite">
-</div>
-
-
-
-<section class="card">
-
-    <h2 class="card-title">
-        Profile
-    </h2>
-
-
-    <p class="card-description">
-        Change your username, display name,
-        biography and profile picture.
-    </p>
-
-
-    <a
-        href="/profile/"
-        class="button">
-        Edit Profile
-    </a>
-
-</section>
-
-
-
-<section class="card">
-
-    <h2 class="card-title">
-        Account
-    </h2>
-
-
-    <div class="form-group">
-
-        <label for="account-email">
-            Email
-        </label>
-
-
-        <input
-            type="email"
-            id="account-email"
-            class="account-field"
-            readonly
-            value="Loading...">
+        <p>
+            Manage your account and profile.
+        </p>
 
     </div>
 
-</section>
+
+    <div
+        id="settings-message"
+        class="message"
+        aria-live="polite"
+    ></div>
 
 
+    <section class="card">
 
-<section class="card">
-
-    <h2 class="card-title">
-        Session
-    </h2>
-
-
-    <p class="card-description">
-        Sign out of your Rip_Dead account on this device.
-    </p>
+        <h2 class="card-title">
+            Profile
+        </h2>
 
 
-    <button
-        type="button"
-        id="settings-logout">
-        Log Out
-    </button>
+        <p class="card-description">
+            Change your username, display name,
+            biography and profile picture.
+        </p>
 
-</section>
-```
+
+        <a
+            href="/profile/"
+            class="button"
+        >
+            Edit Profile
+        </a>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2 class="card-title">
+            Account
+        </h2>
+
+
+        <div class="form-group">
+
+            <label for="account-email">
+                Email
+            </label>
+
+
+            <input
+                type="email"
+                id="account-email"
+                class="account-field"
+                readonly
+                value="Loading..."
+            >
+
+        </div>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2 class="card-title">
+            Session
+        </h2>
+
+
+        <p class="card-description">
+            Sign out of your Rip_Dead account on this device.
+        </p>
+
+
+        <button
+            type="button"
+            id="settings-logout"
+        >
+            Log Out
+        </button>
+
+    </section>
 
 </main>
+
 
 <script>
 
@@ -208,7 +242,6 @@ const settingsMessage =
     document.getElementById(
         "settings-message"
     );
-
 
 
 async function initializeSettings() {
@@ -230,9 +263,7 @@ async function initializeSettings() {
     ).value =
         settingsSession.user.email ||
         "No email available";
-
 }
-
 
 
 document.getElementById(
@@ -260,7 +291,6 @@ document.getElementById(
 );
 
 
-
 initializeSettings();
 
 </script>
@@ -268,3 +298,4 @@ initializeSettings();
 </body>
 
 </html>
+```
