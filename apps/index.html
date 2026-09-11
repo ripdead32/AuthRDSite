@@ -1,0 +1,971 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Authorized Apps - Rip_Dead Account</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+
+</head>
+
+
+<body>
+
+
+<nav class="site-navbar">
+
+    <div class="navbar-inner">
+
+        <a
+            href="/"
+            class="navbar-brand"
+        >
+            Rip_Dead Account
+        </a>
+
+
+        <div class="navbar-links">
+
+            <a href="/">
+                Home
+            </a>
+
+
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden
+            >
+                Search
+            </a>
+
+
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden
+            >
+                Friends
+            </a>
+
+
+            <a
+                href="/chat/"
+                class="auth-only"
+                hidden
+            >
+                Chat
+            </a>
+
+
+            <a
+                href="/apps/"
+                class="auth-only"
+                hidden
+            >
+                Authorized Apps
+            </a>
+
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden
+            >
+                Settings
+            </a>
+
+
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden
+            >
+                Account
+            </a>
+
+
+            <a
+                href="/login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
+                Create Account
+            </a>
+
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden
+            >
+                Log Out
+            </button>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<main class="page page-small">
+
+
+    <div class="page-header">
+
+        <span
+            style="
+                display: block;
+                margin-bottom: 10px;
+                color: var(--purple-hover);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+            "
+        >
+            RIP_DEAD ACCOUNT
+        </span>
+
+
+        <h1>
+            Authorized Apps
+        </h1>
+
+
+        <p>
+            Manage applications that have access to your
+            Rip_Dead Account.
+        </p>
+
+    </div>
+
+
+
+    <div
+        id="apps-message"
+        class="message"
+        aria-live="polite"
+    ></div>
+
+
+
+    <section class="card">
+
+        <h2 class="card-title">
+            Connected Applications
+        </h2>
+
+
+        <p
+            class="card-description"
+            id="apps-description"
+        >
+            Applications you have authorized to access
+            your Rip_Dead Account will appear here.
+        </p>
+
+
+        <div id="apps-list">
+
+            <div
+                id="apps-loading"
+                class="card-description"
+            >
+                Loading authorized applications...
+            </div>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<script>
+
+let appsSession = null;
+
+
+const appsMessage =
+    document.getElementById(
+        "apps-message"
+    );
+
+
+const appsList =
+    document.getElementById(
+        "apps-list"
+    );
+
+
+function setAppsMessage(
+    message,
+    type = ""
+) {
+
+    appsMessage.textContent =
+        message || "";
+
+    appsMessage.className =
+        "message";
+
+
+    if (type) {
+        appsMessage.classList.add(type);
+    }
+
+}
+
+
+
+function formatAuthorizationDate(
+    dateString
+) {
+
+    if (!dateString) {
+        return "Unknown";
+    }
+
+
+    const date =
+        new Date(dateString);
+
+
+    if (Number.isNaN(date.getTime())) {
+        return "Unknown";
+    }
+
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+
+function createAppCard(app) {
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "card";
+
+
+    card.style.marginTop =
+        "14px";
+
+
+    const header =
+        document.createElement(
+            "div"
+        );
+
+
+    header.style.display =
+        "flex";
+
+
+    header.style.alignItems =
+        "center";
+
+
+    header.style.gap =
+        "14px";
+
+
+    header.style.marginBottom =
+        "14px";
+
+
+    if (
+        typeof app.icon_url === "string" &&
+        app.icon_url.trim() !== ""
+    ) {
+
+        const icon =
+            document.createElement(
+                "img"
+            );
+
+
+        icon.src =
+            app.icon_url;
+
+
+        icon.alt =
+            "";
+
+
+        icon.style.width =
+            "48px";
+
+
+        icon.style.height =
+            "48px";
+
+
+        icon.style.objectFit =
+            "cover";
+
+
+        icon.style.borderRadius =
+            "12px";
+
+
+        icon.style.flex =
+            "0 0 48px";
+
+
+        icon.addEventListener(
+            "error",
+            () => {
+                icon.remove();
+            }
+        );
+
+
+        header.appendChild(
+            icon
+        );
+
+    }
+
+
+    const titleContainer =
+        document.createElement(
+            "div"
+        );
+
+
+    titleContainer.style.minWidth =
+        "0";
+
+
+    const title =
+        document.createElement(
+            "h3"
+        );
+
+
+    title.textContent =
+        app.name ||
+        app.client_id ||
+        "Unknown Application";
+
+
+    title.style.margin =
+        "0";
+
+
+    const clientId =
+        document.createElement(
+            "div"
+        );
+
+
+    clientId.textContent =
+        app.client_id || "";
+
+
+    clientId.style.marginTop =
+        "4px";
+
+
+    clientId.style.fontSize =
+        "12px";
+
+
+    clientId.style.opacity =
+        "0.65";
+
+
+    titleContainer.appendChild(
+        title
+    );
+
+
+    titleContainer.appendChild(
+        clientId
+    );
+
+
+    header.appendChild(
+        titleContainer
+    );
+
+
+    card.appendChild(
+        header
+    );
+
+
+
+    if (
+        app.description
+    ) {
+
+        const description =
+            document.createElement(
+                "p"
+            );
+
+
+        description.className =
+            "card-description";
+
+
+        description.textContent =
+            app.description;
+
+
+        card.appendChild(
+            description
+        );
+
+    }
+
+
+
+    const accessTitle =
+        document.createElement(
+            "div"
+        );
+
+
+    accessTitle.textContent =
+        "Access";
+
+
+    accessTitle.style.fontWeight =
+        "700";
+
+
+    accessTitle.style.marginTop =
+        "14px";
+
+
+    accessTitle.style.marginBottom =
+        "8px";
+
+
+    card.appendChild(
+        accessTitle
+    );
+
+
+
+    const scopes =
+        document.createElement(
+            "div"
+        );
+
+
+    scopes.style.display =
+        "flex";
+
+
+    scopes.style.flexWrap =
+        "wrap";
+
+
+    scopes.style.gap =
+        "6px";
+
+
+    const scopeList =
+        Array.isArray(app.scopes)
+            ? app.scopes
+            : [];
+
+
+    if (
+        scopeList.length === 0
+    ) {
+
+        const noScopes =
+            document.createElement(
+                "span"
+            );
+
+
+        noScopes.textContent =
+            "No permissions";
+
+
+        noScopes.style.opacity =
+            "0.65";
+
+
+        scopes.appendChild(
+            noScopes
+        );
+
+    } else {
+
+        scopeList.forEach(
+            scope => {
+
+                const scopeElement =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                scopeElement.textContent =
+                    scope;
+
+
+                scopeElement.style.display =
+                    "inline-block";
+
+
+                scopeElement.style.padding =
+                    "5px 9px";
+
+
+                scopeElement.style.borderRadius =
+                    "7px";
+
+
+                scopeElement.style.background =
+                    "rgba(255, 255, 255, 0.06)";
+
+
+                scopeElement.style.fontSize =
+                    "12px";
+
+
+                scopeElement.style.fontWeight =
+                    "600";
+
+
+                scopes.appendChild(
+                    scopeElement
+                );
+
+            }
+        );
+
+    }
+
+
+    card.appendChild(
+        scopes
+    );
+
+
+
+    const authorizedDate =
+        document.createElement(
+            "p"
+        );
+
+
+    authorizedDate.className =
+        "card-description";
+
+
+    authorizedDate.style.marginTop =
+        "14px";
+
+
+    authorizedDate.textContent =
+        "Authorized: " +
+        formatAuthorizationDate(
+            app.created_at
+        );
+
+
+    card.appendChild(
+        authorizedDate
+    );
+
+
+
+    const actions =
+        document.createElement(
+            "div"
+        );
+
+
+    actions.style.display =
+        "flex";
+
+
+    actions.style.flexWrap =
+        "wrap";
+
+
+    actions.style.gap =
+        "10px";
+
+
+    actions.style.marginTop =
+        "14px";
+
+
+
+    if (
+        app.revoked_at
+    ) {
+
+        const revoked =
+            document.createElement(
+                "span"
+            );
+
+
+        revoked.textContent =
+            "Access revoked";
+
+
+        revoked.style.opacity =
+            "0.65";
+
+
+        revoked.style.fontSize =
+            "13px";
+
+
+        actions.appendChild(
+            revoked
+        );
+
+    } else {
+
+        const revokeButton =
+            document.createElement(
+                "button"
+            );
+
+
+        revokeButton.type =
+            "button";
+
+
+        revokeButton.textContent =
+            "Revoke Access";
+
+
+        revokeButton.addEventListener(
+            "click",
+            async () => {
+
+                const confirmed =
+                    window.confirm(
+                        "Revoke access for " +
+                        (app.name ||
+                            app.client_id ||
+                            "this application") +
+                        "?\n\n" +
+                        "The application will no longer be authorized " +
+                        "to use your Rip_Dead Account."
+                    );
+
+
+                if (!confirmed) {
+                    return;
+                }
+
+
+                revokeButton.disabled =
+                    true;
+
+
+                revokeButton.textContent =
+                    "Revoking...";
+
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .rpc(
+                            "revoke_oauth_app_authorization",
+                            {
+                                requested_client_id:
+                                    app.client_id
+                            }
+                        );
+
+
+                if (error) {
+
+                    console.error(
+                        "[Apps] Revoke error:",
+                        error
+                    );
+
+
+                    revokeButton.disabled =
+                        false;
+
+
+                    revokeButton.textContent =
+                        "Revoke Access";
+
+
+                    setAppsMessage(
+                        "Could not revoke application access.",
+                        "error"
+                    );
+
+
+                    return;
+                }
+
+
+                app.revoked_at =
+                    new Date().toISOString();
+
+
+                revokeButton.remove();
+
+
+                const revoked =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                revoked.textContent =
+                    "Access revoked";
+
+
+                revoked.style.opacity =
+                    "0.65";
+
+
+                revoked.style.fontSize =
+                    "13px";
+
+
+                actions.appendChild(
+                    revoked
+                );
+
+
+                setAppsMessage(
+                    "Application access revoked.",
+                    "success"
+                );
+
+            }
+        );
+
+
+        actions.appendChild(
+            revokeButton
+        );
+
+    }
+
+
+    card.appendChild(
+        actions
+    );
+
+
+    return card;
+
+}
+
+
+
+async function loadAuthorizedApps() {
+
+    appsList.innerHTML = "";
+
+
+    const loading =
+        document.createElement(
+            "div"
+        );
+
+
+    loading.className =
+        "card-description";
+
+
+    loading.textContent =
+        "Loading authorized applications...";
+
+
+    appsList.appendChild(
+        loading
+    );
+
+
+    const {
+    data,
+    error
+} =
+    await supabaseClient
+        .rpc(
+            "get_my_oauth_apps",
+            {
+                requested_user_id:
+                    appsSession.user.id
+            }
+        );
+        
+    if (error) {
+
+        console.error(
+            "[Apps] Failed to load applications:",
+            error
+        );
+
+
+        appsList.innerHTML = "";
+
+
+        const errorElement =
+            document.createElement(
+                "div"
+            );
+
+
+        errorElement.className =
+            "card-description";
+
+
+        errorElement.textContent =
+            "Could not load your authorized applications.";
+
+
+        appsList.appendChild(
+            errorElement
+        );
+
+
+        setAppsMessage(
+            "Could not load authorized applications.",
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    const apps =
+        Array.isArray(data)
+            ? data
+            : [];
+
+
+    appsList.innerHTML = "";
+
+
+    if (
+        apps.length === 0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.className =
+            "card-description";
+
+
+        empty.textContent =
+            "You have not authorized any applications yet.";
+
+
+        appsList.appendChild(
+            empty
+        );
+
+
+        return;
+
+    }
+
+
+    apps.forEach(
+        app => {
+
+            appsList.appendChild(
+                createAppCard(
+                    app
+                )
+            );
+
+        }
+    );
+
+}
+
+
+
+async function initializeApps() {
+
+    appsSession =
+        await requireAuth();
+
+
+    if (!appsSession) {
+        return;
+    }
+
+
+    await initNavbar();
+
+
+    await loadAuthorizedApps();
+
+}
+
+
+
+initializeApps();
+
+</script>
+
+
+</body>
+
+</html>
+```
