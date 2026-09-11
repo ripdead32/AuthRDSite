@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -224,6 +225,7 @@ const appsList =
     );
 
 
+
 function setAppsMessage(
     message,
     type = ""
@@ -275,7 +277,84 @@ function formatAuthorizationDate(
 
 
 
-function createAppCard(app) {
+function formatRevokedDate(
+    dateString
+) {
+
+    if (!dateString) {
+        return "Unknown";
+    }
+
+
+    const date =
+        new Date(dateString);
+
+
+    if (Number.isNaN(date.getTime())) {
+        return "Unknown";
+    }
+
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+
+function createScopeElement(
+    scope
+) {
+
+    const scopeElement =
+        document.createElement(
+            "span"
+        );
+
+
+    scopeElement.textContent =
+        scope;
+
+
+    scopeElement.style.display =
+        "inline-block";
+
+
+    scopeElement.style.padding =
+        "5px 9px";
+
+
+    scopeElement.style.borderRadius =
+        "7px";
+
+
+    scopeElement.style.background =
+        "rgba(255, 255, 255, 0.06)";
+
+
+    scopeElement.style.fontSize =
+        "12px";
+
+
+    scopeElement.style.fontWeight =
+        "600";
+
+
+    return scopeElement;
+
+}
+
+
+
+function createAppCard(
+    app
+) {
 
     const card =
         document.createElement(
@@ -311,6 +390,7 @@ function createAppCard(app) {
 
     header.style.marginBottom =
         "14px";
+
 
 
     if (
@@ -367,6 +447,7 @@ function createAppCard(app) {
     }
 
 
+
     const titleContainer =
         document.createElement(
             "div"
@@ -375,6 +456,7 @@ function createAppCard(app) {
 
     titleContainer.style.minWidth =
         "0";
+
 
 
     const title =
@@ -391,6 +473,7 @@ function createAppCard(app) {
 
     title.style.margin =
         "0";
+
 
 
     const clientId =
@@ -413,6 +496,7 @@ function createAppCard(app) {
 
     clientId.style.opacity =
         "0.65";
+
 
 
     titleContainer.appendChild(
@@ -508,10 +592,12 @@ function createAppCard(app) {
         "6px";
 
 
+
     const scopeList =
         Array.isArray(app.scopes)
             ? app.scopes
             : [];
+
 
 
     if (
@@ -541,42 +627,10 @@ function createAppCard(app) {
         scopeList.forEach(
             scope => {
 
-                const scopeElement =
-                    document.createElement(
-                        "span"
-                    );
-
-
-                scopeElement.textContent =
-                    scope;
-
-
-                scopeElement.style.display =
-                    "inline-block";
-
-
-                scopeElement.style.padding =
-                    "5px 9px";
-
-
-                scopeElement.style.borderRadius =
-                    "7px";
-
-
-                scopeElement.style.background =
-                    "rgba(255, 255, 255, 0.06)";
-
-
-                scopeElement.style.fontSize =
-                    "12px";
-
-
-                scopeElement.style.fontWeight =
-                    "600";
-
-
                 scopes.appendChild(
-                    scopeElement
+                    createScopeElement(
+                        scope
+                    )
                 );
 
             }
@@ -647,12 +701,8 @@ function createAppCard(app) {
 
         const revoked =
             document.createElement(
-                "span"
+                "div"
             );
-
-
-        revoked.textContent =
-            "Access revoked";
 
 
         revoked.style.opacity =
@@ -661,6 +711,13 @@ function createAppCard(app) {
 
         revoked.style.fontSize =
             "13px";
+
+
+        revoked.textContent =
+            "Access revoked on " +
+            formatRevokedDate(
+                app.revoked_at
+            );
 
 
         actions.appendChild(
@@ -683,19 +740,25 @@ function createAppCard(app) {
             "Revoke Access";
 
 
+
         revokeButton.addEventListener(
             "click",
             async () => {
 
+                const applicationName =
+                    app.name ||
+                    app.client_id ||
+                    "this application";
+
+
                 const confirmed =
                     window.confirm(
                         "Revoke access for " +
-                        (app.name ||
-                            app.client_id ||
-                            "this application") +
+                        applicationName +
                         "?\n\n" +
-                        "The application will no longer be authorized " +
-                        "to use your Rip_Dead Account."
+                        "The application will no longer " +
+                        "be authorized to use your " +
+                        "Rip_Dead Account."
                     );
 
 
@@ -713,6 +776,7 @@ function createAppCard(app) {
 
 
                 const {
+                    data: revoked,
                     error
                 } =
                     await supabaseClient
@@ -725,7 +789,11 @@ function createAppCard(app) {
                         );
 
 
-                if (error) {
+
+                if (
+                    error ||
+                    revoked !== true
+                ) {
 
                     console.error(
                         "[Apps] Revoke error:",
@@ -748,7 +816,9 @@ function createAppCard(app) {
 
 
                     return;
+
                 }
+
 
 
                 app.revoked_at =
@@ -758,26 +828,30 @@ function createAppCard(app) {
                 revokeButton.remove();
 
 
-                const revoked =
+
+                const revokedElement =
                     document.createElement(
-                        "span"
+                        "div"
                     );
 
 
-                revoked.textContent =
-                    "Access revoked";
-
-
-                revoked.style.opacity =
+                revokedElement.style.opacity =
                     "0.65";
 
 
-                revoked.style.fontSize =
+                revokedElement.style.fontSize =
                     "13px";
 
 
+                revokedElement.textContent =
+                    "Access revoked on " +
+                    formatRevokedDate(
+                        app.revoked_at
+                    );
+
+
                 actions.appendChild(
-                    revoked
+                    revokedElement
                 );
 
 
@@ -832,18 +906,21 @@ async function loadAuthorizedApps() {
     );
 
 
+
     const {
-    data,
-    error
-} =
-    await supabaseClient
-        .rpc(
-            "get_my_oauth_apps",
-            {
-                requested_user_id:
-                    appsSession.user.id
-            }
-        );
+        data,
+        error
+    } =
+        await supabaseClient
+            .rpc(
+                "get_my_oauth_apps",
+                {
+                    requested_user_id:
+                        appsSession.user.id
+                }
+            );
+
+
 
     if (error) {
 
@@ -886,6 +963,7 @@ async function loadAuthorizedApps() {
     }
 
 
+
     const apps =
         Array.isArray(data)
             ? data
@@ -893,6 +971,7 @@ async function loadAuthorizedApps() {
 
 
     appsList.innerHTML = "";
+
 
 
     if (
@@ -921,6 +1000,7 @@ async function loadAuthorizedApps() {
         return;
 
     }
+
 
 
     apps.forEach(
@@ -967,3 +1047,4 @@ initializeApps();
 </body>
 
 </html>
+```
