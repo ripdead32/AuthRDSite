@@ -11,21 +11,106 @@ const supabaseClient = window.supabase.createClient(
 );
 
 /* =========================================================
+   SITE DOWN DETECTION
+========================================================= */
+
+function isSupabaseUnavailableError(error) {
+    if (!error) {
+        return false;
+    }
+
+    const name =
+        String(error.name || "").toLowerCase();
+
+    const message =
+        String(error.message || "").toLowerCase();
+
+    /*
+     * Supabase Auth uses this error for retryable
+     * network/fetch failures.
+     */
+    if (name === "authretryablefetcherror") {
+        return true;
+    }
+
+    /*
+     * Browser/network failure messages.
+     */
+    const networkErrors = [
+        "failed to fetch",
+        "networkerror",
+        "network request failed",
+        "load failed",
+        "fetch failed",
+        "connection refused",
+        "connection reset",
+        "network is unreachable",
+        "offline"
+    ];
+
+    return networkErrors.some(text =>
+        message.includes(text)
+    );
+}
+
+function redirectToDownPage() {
+    /*
+     * Prevent an infinite redirect loop if the down page
+     * itself happens to load auth.js.
+     */
+    if (
+        window.location.pathname === "/down/" ||
+        window.location.pathname === "/down/index.html"
+    ) {
+        return;
+    }
+
+    window.location.href = "/down/";
+}
+
+function handleSupabaseError(error) {
+    if (isSupabaseUnavailableError(error)) {
+        redirectToDownPage();
+        return true;
+    }
+
+    return false;
+}
+
+/* =========================================================
    SESSION
 ========================================================= */
 
 async function getSession() {
-    const {
-        data,
-        error
-    } = await supabaseClient.auth.getSession();
+    try {
+        const {
+            data,
+            error
+        } = await supabaseClient.auth.getSession();
 
-    if (error) {
-        console.error("Session error:", error);
+        if (error) {
+            console.error(
+                "Session error:",
+                error
+            );
+
+            handleSupabaseError(error);
+
+            return null;
+        }
+
+        return data.session || null;
+
+    } catch (error) {
+        console.error(
+            "Session request failed:",
+            error
+        );
+
+        handleSupabaseError(error);
+
         return null;
     }
-
-    return data.session || null;
 }
 
 /* =========================================================
@@ -49,27 +134,48 @@ async function requireAuth() {
 
 async function getProfile(userId = null) {
     const session = await getSession();
-    const id = userId || session?.user?.id;
+
+    const id =
+        userId ||
+        session?.user?.id;
 
     if (!id) {
         return null;
     }
 
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("profiles")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+    try {
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("profiles")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
 
-    if (error) {
-        console.error("Profile error:", error);
+        if (error) {
+            console.error(
+                "Profile error:",
+                error
+            );
+
+            handleSupabaseError(error);
+
+            return null;
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error(
+            "Profile request failed:",
+            error
+        );
+
+        handleSupabaseError(error);
+
         return null;
     }
-
-    return data;
 }
 
 async function updateProfile(updates) {
@@ -82,29 +188,52 @@ async function updateProfile(updates) {
         };
     }
 
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("profiles")
-        .update(updates)
-        .eq("id", session.user.id)
-        .select()
-        .single();
+    try {
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("profiles")
+            .update(updates)
+            .eq("id", session.user.id)
+            .select()
+            .single();
 
-    if (error) {
-        console.error("Update profile error:", error);
+        if (error) {
+            console.error(
+                "Update profile error:",
+                error
+            );
+
+            handleSupabaseError(error);
+
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+
+        return {
+            success: true,
+            profile: data
+        };
+
+    } catch (error) {
+        console.error(
+            "Update profile request failed:",
+            error
+        );
+
+        handleSupabaseError(error);
 
         return {
             success: false,
-            error: error.message
+            error:
+                error instanceof Error
+                    ? error.message
+                    : "Unknown error"
         };
     }
-
-    return {
-        success: true,
-        profile: data
-    };
 }
 
 /* =========================================================
@@ -132,18 +261,23 @@ function getAvatarUrl(profile) {
 }
 
 function createAvatar(profile, className = "") {
-    const wrapper = document.createElement("div");
+    const wrapper =
+        document.createElement("div");
 
-    wrapper.className = className || "account-avatar";
+    wrapper.className =
+        className || "account-avatar";
+
     wrapper.classList.add("empty");
 
     wrapper.style.overflow = "hidden";
     wrapper.style.borderRadius = "50%";
 
-    const avatarUrl = getAvatarUrl(profile);
+    const avatarUrl =
+        getAvatarUrl(profile);
 
     if (avatarUrl) {
-        const image = document.createElement("img");
+        const image =
+            document.createElement("img");
 
         image.src = avatarUrl;
         image.alt = "";
@@ -157,9 +291,12 @@ function createAvatar(profile, className = "") {
         image.style.objectPosition = "center";
         image.style.borderRadius = "50%";
 
-        image.addEventListener("error", () => {
-            image.remove();
-        });
+        image.addEventListener(
+            "error",
+            () => {
+                image.remove();
+            }
+        );
 
         wrapper.appendChild(image);
     }
@@ -171,18 +308,27 @@ function createAvatar(profile, className = "") {
    MESSAGES
 ========================================================= */
 
-function setMessage(elementOrId, message, type = "") {
+function setMessage(
+    elementOrId,
+    message,
+    type = ""
+) {
     const element =
         typeof elementOrId === "string"
-            ? document.getElementById(elementOrId)
+            ? document.getElementById(
+                elementOrId
+            )
             : elementOrId;
 
     if (!element) {
         return;
     }
 
-    element.textContent = message || "";
-    element.className = "message";
+    element.textContent =
+        message || "";
+
+    element.className =
+        "message";
 
     if (type) {
         element.classList.add(type);
@@ -194,13 +340,18 @@ function setMessage(elementOrId, message, type = "") {
 ========================================================= */
 
 async function initNavbar() {
-    console.log("[Auth] Initializing navbar...");
+    console.log(
+        "[Auth] Initializing navbar..."
+    );
 
-    const session = await getSession();
+    const session =
+        await getSession();
 
     console.log(
         "[Auth] Navbar session:",
-        session ? "LOGGED IN" : "LOGGED OUT"
+        session
+            ? "LOGGED IN"
+            : "LOGGED OUT"
     );
 
     /* ---------------------------------------------------------
@@ -209,7 +360,9 @@ async function initNavbar() {
     --------------------------------------------------------- */
 
     const guestElements =
-        document.querySelectorAll(".guest-only");
+        document.querySelectorAll(
+            ".guest-only"
+        );
 
     /* ---------------------------------------------------------
        AUTH ELEMENTS
@@ -217,40 +370,74 @@ async function initNavbar() {
     --------------------------------------------------------- */
 
     const authElements =
-        document.querySelectorAll(".auth-only");
+        document.querySelectorAll(
+            ".auth-only"
+        );
 
     if (session) {
         console.log(
             "[Auth] Showing authenticated navbar."
         );
 
-        guestElements.forEach(element => {
-            element.hidden = true;
-            element.style.display = "none";
-            element.setAttribute("aria-hidden", "true");
-        });
+        guestElements.forEach(
+            element => {
+                element.hidden = true;
+                element.style.display =
+                    "none";
 
-        authElements.forEach(element => {
-            element.hidden = false;
-            element.style.removeProperty("display");
-            element.removeAttribute("aria-hidden");
-        });
+                element.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+            }
+        );
+
+        authElements.forEach(
+            element => {
+                element.hidden = false;
+
+                element.style.removeProperty(
+                    "display"
+                );
+
+                element.removeAttribute(
+                    "aria-hidden"
+                );
+            }
+        );
+
     } else {
         console.log(
             "[Auth] Showing guest navbar."
         );
 
-        guestElements.forEach(element => {
-            element.hidden = false;
-            element.style.removeProperty("display");
-            element.removeAttribute("aria-hidden");
-        });
+        guestElements.forEach(
+            element => {
+                element.hidden = false;
 
-        authElements.forEach(element => {
-            element.hidden = true;
-            element.style.display = "none";
-            element.setAttribute("aria-hidden", "true");
-        });
+                element.style.removeProperty(
+                    "display"
+                );
+
+                element.removeAttribute(
+                    "aria-hidden"
+                );
+            }
+        );
+
+        authElements.forEach(
+            element => {
+                element.hidden = true;
+
+                element.style.display =
+                    "none";
+
+                element.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+            }
+        );
     }
 
     /* =========================================================
@@ -258,14 +445,18 @@ async function initNavbar() {
     ========================================================= */
 
     const navbarUser =
-        document.getElementById("navbar-user");
+        document.getElementById(
+            "navbar-user"
+        );
 
     if (navbarUser) {
         navbarUser.innerHTML = "";
 
         if (session) {
             const profile =
-                await getProfile(session.user.id);
+                await getProfile(
+                    session.user.id
+                );
 
             if (profile) {
                 const avatar =
@@ -274,22 +465,39 @@ async function initNavbar() {
                         "navbar-avatar"
                     );
 
-                avatar.style.width = "28px";
-                avatar.style.height = "28px";
-                avatar.style.minWidth = "28px";
-                avatar.style.minHeight = "28px";
-                avatar.style.flex = "0 0 28px";
+                avatar.style.width =
+                    "28px";
+
+                avatar.style.height =
+                    "28px";
+
+                avatar.style.minWidth =
+                    "28px";
+
+                avatar.style.minHeight =
+                    "28px";
+
+                avatar.style.flex =
+                    "0 0 28px";
 
                 const name =
-                    document.createElement("span");
+                    document.createElement(
+                        "span"
+                    );
 
                 name.textContent =
                     profile.display_name ||
                     profile.username ||
                     "Account";
 
-                navbarUser.appendChild(avatar);
-                navbarUser.appendChild(name);
+                navbarUser.appendChild(
+                    avatar
+                );
+
+                navbarUser.appendChild(
+                    name
+                );
+
             } else {
                 navbarUser.textContent =
                     "Account";
@@ -302,29 +510,35 @@ async function initNavbar() {
     ========================================================= */
 
     const logoutButton =
-        document.getElementById("navbar-logout");
+        document.getElementById(
+            "navbar-logout"
+        );
 
     if (logoutButton) {
-        logoutButton.onclick = async () => {
-            if (logoutButton.disabled) {
-                return;
-            }
+        logoutButton.onclick =
+            async () => {
 
-            logoutButton.disabled = true;
+                if (logoutButton.disabled) {
+                    return;
+                }
 
-            logoutButton.textContent =
-                "Logging out...";
-
-            const success =
-                await signOut();
-
-            if (!success) {
-                logoutButton.disabled = false;
+                logoutButton.disabled =
+                    true;
 
                 logoutButton.textContent =
-                    "Log Out";
-            }
-        };
+                    "Logging out...";
+
+                const success =
+                    await signOut();
+
+                if (!success) {
+                    logoutButton.disabled =
+                        false;
+
+                    logoutButton.textContent =
+                        "Log Out";
+                }
+            };
     }
 
     return session;
@@ -335,22 +549,37 @@ async function initNavbar() {
 ========================================================= */
 
 async function signOut() {
-    const {
-        error
-    } = await supabaseClient.auth.signOut();
+    try {
+        const {
+            error
+        } = await supabaseClient.auth.signOut();
 
-    if (error) {
+        if (error) {
+            console.error(
+                "Sign out error:",
+                error
+            );
+
+            handleSupabaseError(error);
+
+            return false;
+        }
+
+        window.location.href =
+            "/login/";
+
+        return true;
+
+    } catch (error) {
         console.error(
-            "Sign out error:",
+            "Sign out request failed:",
             error
         );
 
+        handleSupabaseError(error);
+
         return false;
     }
-
-    window.location.href = "/login/";
-
-    return true;
 }
 
 /* =========================================================
