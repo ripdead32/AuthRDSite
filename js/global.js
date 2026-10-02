@@ -7,7 +7,7 @@
     "use strict";
 
     const SUPABASE_URL =
-        "totallyrealshit.supabase.co";
+        "https://totallyrealshit.supabase.co";
 
     const DOWN_PAGE =
         "/down/";
