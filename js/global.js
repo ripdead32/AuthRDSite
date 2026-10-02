@@ -1,83 +1,47 @@
 /* =========================================================
    RIP_DEAD ACCOUNT
-   GLOBAL SITE HANDLER
+   GLOBAL SUPABASE AVAILABILITY
 ========================================================= */
 
 (function () {
     "use strict";
 
-    const DOWN_PAGE = "/down/";
+    const SUPABASE_URL =
+        "https://vcwfgyikbvfzgqiljmry.supabase.co";
 
-    let siteDown = false;
+    const DOWN_PAGE =
+        "/down/";
+
+    let checking = false;
+    let siteDownShown = false;
 
     /* =========================================================
-       PAGE CHECK
+       DO NOT RUN ON DOWN PAGE
     ========================================================= */
 
     function isDownPage() {
+        const path =
+            window.location.pathname;
+
         return (
-            window.location.pathname === "/down/" ||
-            window.location.pathname === "/down/index.html"
+            path === "/down/" ||
+            path === "/down/index.html"
         );
     }
 
     /* =========================================================
-       ERROR CHECK
-    ========================================================= */
-
-    function isSupabaseUnavailableError(error) {
-        if (!error) {
-            return false;
-        }
-
-        const name =
-            String(error.name || "").toLowerCase();
-
-        const message =
-            String(error.message || "").toLowerCase();
-
-        if (
-            name === "authretryablefetcherror"
-        ) {
-            return true;
-        }
-
-        const networkErrors = [
-            "failed to fetch",
-            "networkerror",
-            "network request failed",
-            "load failed",
-            "fetch failed",
-            "connection refused",
-            "connection reset",
-            "network is unreachable",
-            "offline",
-            "timeout"
-        ];
-
-        return networkErrors.some(
-            text => message.includes(text)
-        );
-    }
-
-    /* =========================================================
-       SHOW SITE DOWN
+       CREATE DOWN SCREEN
     ========================================================= */
 
     function showSiteDown() {
-        if (siteDown || isDownPage()) {
-            return;
-        }
-
-        siteDown = true;
-
         if (
-            document.getElementById(
-                "ripdead-site-down"
-            )
+            siteDownShown ||
+            isDownPage()
         ) {
             return;
         }
+
+        siteDownShown = true;
 
         const overlay =
             document.createElement("div");
@@ -144,21 +108,27 @@
 
         addStyles();
 
-        document
-            .getElementById(
+        const retry =
+            document.getElementById(
                 "ripdead-down-retry"
-            )
-            .onclick = () => {
+            );
+
+        const home =
+            document.getElementById(
+                "ripdead-down-home"
+            );
+
+        if (retry) {
+            retry.onclick = () => {
                 window.location.reload();
             };
+        }
 
-        document
-            .getElementById(
-                "ripdead-down-home"
-            )
-            .onclick = () => {
+        if (home) {
+            home.onclick = () => {
                 window.location.href = "/";
             };
+        }
     }
 
     /* =========================================================
@@ -168,7 +138,7 @@
     function addStyles() {
         if (
             document.getElementById(
-                "ripdead-down-styles"
+                "ripdead-site-down-styles"
             )
         ) {
             return;
@@ -178,7 +148,7 @@
             document.createElement("style");
 
         style.id =
-            "ripdead-down-styles";
+            "ripdead-site-down-styles";
 
         style.textContent = `
             #ripdead-site-down {
@@ -192,8 +162,7 @@
 
                 padding: 24px;
 
-                background:
-                    rgba(9, 7, 15, 0.98);
+                background: #09070f;
 
                 color: #ffffff;
 
@@ -209,6 +178,7 @@
             .ripdead-down-card {
                 width: 100%;
                 max-width: 620px;
+
                 text-align: center;
             }
 
@@ -347,10 +317,6 @@
 
             #ripdead-down-retry {
                 background: #a855f7;
-
-                box-shadow:
-                    0 6px 20px
-                    rgba(168, 85, 247, 0.2);
             }
 
             #ripdead-down-retry:hover {
@@ -379,98 +345,141 @@
     }
 
     /* =========================================================
-       ACTUAL SUPABASE CHECK
+       CHECK SUPABASE
     ========================================================= */
 
     async function checkSupabase() {
-        if (isDownPage()) {
+        if (
+            checking ||
+            siteDownShown ||
+            isDownPage()
+        ) {
             return;
         }
 
-        /*
-         * Wait for auth.js to create the client.
-         */
-        if (!window.supabaseClient) {
-            setTimeout(
-                checkSupabase,
-                100
-            );
+        checking = true;
 
-            return;
-        }
+        console.log(
+            "[Global] Checking Rip_Dead Account..."
+        );
 
         try {
-            const {
-                data,
-                error
-            } =
-                await window.supabaseClient
-                    .auth
-                    .getSession();
+            const controller =
+                new AbortController();
 
-            if (error) {
-                console.error(
-                    "[Global] Supabase error:",
-                    error
+            const timeout =
+                setTimeout(
+                    () => {
+                        controller.abort();
+                    },
+                    5000
                 );
 
-                if (
-                    isSupabaseUnavailableError(
-                        error
-                    )
-                ) {
-                    showSiteDown();
-                }
+            const response =
+                await fetch(
+                    SUPABASE_URL +
+                    "/auth/v1/health",
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        signal:
+                            controller.signal
+                    }
+                );
+
+            clearTimeout(timeout);
+
+            console.log(
+                "[Global] Supabase response:",
+                response.status
+            );
+
+            /*
+             * HTTP 5xx means the backend is unavailable.
+             */
+            if (
+                response.status >= 500
+            ) {
+                console.error(
+                    "[Global] Supabase returned a server error."
+                );
+
+                showSiteDown();
 
                 return;
             }
 
+            /*
+             * 2xx / 3xx / 4xx means the server
+             * itself responded.
+             *
+             * The backend is therefore reachable.
+             */
             console.log(
-                "[Global] Supabase is available."
+                "[Global] Rip_Dead Account is reachable."
             );
 
         } catch (error) {
             console.error(
-                "[Global] Supabase request failed:",
+                "[Global] Supabase connection failed:",
                 error
             );
 
-            if (
-                isSupabaseUnavailableError(
-                    error
-                )
-            ) {
-                showSiteDown();
-            }
+            /*
+             * This catches:
+             *
+             * - network failure
+             * - DNS failure
+             * - timeout
+             * - connection failure
+             * - paused/unreachable project
+             */
+            showSiteDown();
+
+        } finally {
+            checking = false;
         }
     }
-
-    /* =========================================================
-       EXPORT
-    ========================================================= */
-
-    window.RipDeadGlobal = {
-        isSupabaseUnavailableError,
-        showSiteDown,
-        checkSupabase
-    };
 
     /* =========================================================
        START
     ========================================================= */
 
-    if (!isDownPage()) {
+    function start() {
+        if (isDownPage()) {
+            return;
+        }
+
+        /*
+         * Give the page a moment to create its DOM.
+         */
         if (
             document.readyState ===
             "loading"
         ) {
             document.addEventListener(
                 "DOMContentLoaded",
-                checkSupabase
+                () => {
+                    checkSupabase();
+                },
+                {
+                    once: true
+                }
             );
         } else {
             checkSupabase();
         }
     }
+
+    /* =========================================================
+       GLOBAL API
+    ========================================================= */
+
+    window.RipDeadGlobal = {
+        checkSupabase,
+        showSiteDown
+    };
+
+    start();
 
 })();
