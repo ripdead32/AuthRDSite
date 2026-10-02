@@ -7,7 +7,7 @@
     "use strict";
 
     const SUPABASE_URL =
-        "https://vcwfgyikbvfzgqiljmry.supabase.co";
+        "aaaaaaaaaaaaaaaa.supabase.co";
 
     let checking = false;
     let siteDownShown = false;
