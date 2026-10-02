@@ -7,13 +7,16 @@
     "use strict";
 
     const SUPABASE_URL =
-        "aaaaaaaaaaaaaaaa.supabase.co";
+        "https://totallyrealshit.supabase.co";
+
+    const DOWN_PAGE =
+        "/down/";
 
     let checking = false;
     let siteDownShown = false;
 
     /* =========================================================
-       HELPERS
+       DO NOT RUN ON DOWN PAGE
     ========================================================= */
 
     function isDownPage() {
@@ -26,30 +29,8 @@
         );
     }
 
-    function isSupabaseUnavailableError(error) {
-        if (!error) {
-            return false;
-        }
-
-        const message =
-            String(
-                error.message ||
-                error
-            ).toLowerCase();
-
-        return (
-            message.includes("failed to fetch") ||
-            message.includes("networkerror") ||
-            message.includes("network error") ||
-            message.includes("load failed") ||
-            message.includes("connection") ||
-            message.includes("timeout") ||
-            message.includes("aborted")
-        );
-    }
-
     /* =========================================================
-       SITE DOWN OVERLAY
+       CREATE DOWN SCREEN
     ========================================================= */
 
     function showSiteDown() {
@@ -61,15 +42,6 @@
         }
 
         siteDownShown = true;
-
-        const existing =
-            document.getElementById(
-                "ripdead-site-down"
-            );
-
-        if (existing) {
-            return;
-        }
 
         const overlay =
             document.createElement("div");
@@ -135,9 +107,20 @@
                 "ripdead-down-retry"
             );
 
+        const home =
+            document.getElementById(
+                "ripdead-down-home"
+            );
+
         if (retry) {
             retry.onclick = () => {
                 window.location.reload();
+            };
+        }
+
+        if (home) {
+            home.onclick = () => {
+                window.location.href = "/";
             };
         }
     }
@@ -301,6 +284,7 @@
             .ripdead-down-buttons {
                 display: flex;
                 justify-content: center;
+                gap: 12px;
 
                 margin-top: 28px;
             }
@@ -333,7 +317,16 @@
                 background: #9333ea;
             }
 
+            #ripdead-down-home:hover {
+                background:
+                    rgba(255, 255, 255, 0.1);
+            }
+
             @media (max-width: 520px) {
+                .ripdead-down-buttons {
+                    flex-direction: column;
+                }
+
                 .ripdead-down-buttons button {
                     width: 100%;
                 }
@@ -346,7 +339,7 @@
     }
 
     /* =========================================================
-       SUPABASE CHECK
+       CHECK SUPABASE
     ========================================================= */
 
     async function checkSupabase() {
@@ -395,6 +388,9 @@
                 response.status
             );
 
+            /*
+             * HTTP 5xx means the backend is unavailable.
+             */
             if (
                 response.status >= 500
             ) {
@@ -407,8 +403,14 @@
                 return;
             }
 
+            /*
+             * 2xx / 3xx / 4xx means the server
+             * itself responded.
+             *
+             * The backend is therefore reachable.
+             */
             console.log(
-                "[Global] Supabase is available."
+                "[Global] Rip_Dead Account is reachable."
             );
 
         } catch (error) {
@@ -417,13 +419,16 @@
                 error
             );
 
-            if (
-                isSupabaseUnavailableError(
-                    error
-                )
-            ) {
-                showSiteDown();
-            }
+            /*
+             * This catches:
+             *
+             * - network failure
+             * - DNS failure
+             * - timeout
+             * - connection failure
+             * - paused/unreachable project
+             */
+            showSiteDown();
 
         } finally {
             checking = false;
@@ -439,6 +444,9 @@
             return;
         }
 
+        /*
+         * Give the page a moment to create its DOM.
+         */
         if (
             document.readyState ===
             "loading"
@@ -458,13 +466,12 @@
     }
 
     /* =========================================================
-       GLOBAL EXPORTS
+       GLOBAL API
     ========================================================= */
 
     window.RipDeadGlobal = {
-        isSupabaseUnavailableError,
-        showSiteDown,
-        checkSupabase
+        checkSupabase,
+        showSiteDown
     };
 
     start();
