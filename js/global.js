@@ -6,16 +6,12 @@
 (function () {
     "use strict";
 
-    const SUPABASE_URL =
-        "https://vcwfgyikbvfzgqiljmry.supabase.co";
-
-    const DOWN_PAGE =
-        "/down/";
+    const DOWN_PAGE = "/down/";
 
     let siteDown = false;
 
     /* =========================================================
-       CHECK CURRENT PAGE
+       PAGE CHECK
     ========================================================= */
 
     function isDownPage() {
@@ -26,7 +22,7 @@
     }
 
     /* =========================================================
-       ERROR DETECTION
+       ERROR CHECK
     ========================================================= */
 
     function isSupabaseUnavailableError(error) {
@@ -41,8 +37,7 @@
             String(error.message || "").toLowerCase();
 
         if (
-            name ===
-            "authretryablefetcherror"
+            name === "authretryablefetcherror"
         ) {
             return true;
         }
@@ -56,7 +51,8 @@
             "connection refused",
             "connection reset",
             "network is unreachable",
-            "offline"
+            "offline",
+            "timeout"
         ];
 
         return networkErrors.some(
@@ -65,10 +61,16 @@
     }
 
     /* =========================================================
-       CREATE OVERLAY
+       SHOW SITE DOWN
     ========================================================= */
 
-    function createDownOverlay() {
+    function showSiteDown() {
+        if (siteDown || isDownPage()) {
+            return;
+        }
+
+        siteDown = true;
+
         if (
             document.getElementById(
                 "ripdead-site-down"
@@ -140,36 +142,30 @@
             overlay
         );
 
-        addOverlayStyles();
+        addStyles();
 
         document
             .getElementById(
                 "ripdead-down-retry"
             )
-            .addEventListener(
-                "click",
-                () => {
-                    window.location.reload();
-                }
-            );
+            .onclick = () => {
+                window.location.reload();
+            };
 
         document
             .getElementById(
                 "ripdead-down-home"
             )
-            .addEventListener(
-                "click",
-                () => {
-                    window.location.href = "/";
-                }
-            );
+            .onclick = () => {
+                window.location.href = "/";
+            };
     }
 
     /* =========================================================
-       OVERLAY STYLES
+       STYLES
     ========================================================= */
 
-    function addOverlayStyles() {
+    function addStyles() {
         if (
             document.getElementById(
                 "ripdead-down-styles"
@@ -197,7 +193,7 @@
                 padding: 24px;
 
                 background:
-                    rgba(9, 7, 15, 0.97);
+                    rgba(9, 7, 15, 0.98);
 
                 color: #ffffff;
 
@@ -213,7 +209,6 @@
             .ripdead-down-card {
                 width: 100%;
                 max-width: 620px;
-
                 text-align: center;
             }
 
@@ -286,7 +281,6 @@
                     clamp(34px, 7vw, 56px);
 
                 line-height: 1.05;
-
                 letter-spacing: -2px;
             }
 
@@ -336,9 +330,8 @@
 
                 padding: 12px 18px;
 
-                border-radius: 10px;
-
                 border: 0;
+                border-radius: 10px;
 
                 background:
                     rgba(255, 255, 255, 0.05);
@@ -346,7 +339,6 @@
                 color: #ffffff;
 
                 font: inherit;
-
                 font-size: 14px;
                 font-weight: 700;
 
@@ -378,14 +370,6 @@
                 .ripdead-down-buttons button {
                     width: 100%;
                 }
-
-                .ripdead-down-card h1 {
-                    letter-spacing: -1.5px;
-                }
-
-                .ripdead-down-card p {
-                    font-size: 15px;
-                }
             }
         `;
 
@@ -395,70 +379,74 @@
     }
 
     /* =========================================================
-       SHOW DOWN STATE
-    ========================================================= */
-
-    function showSiteDown() {
-        if (siteDown) {
-            return;
-        }
-
-        if (isDownPage()) {
-            return;
-        }
-
-        siteDown = true;
-
-        createDownOverlay();
-    }
-
-    /* =========================================================
-       CHECK SUPABASE
+       ACTUAL SUPABASE CHECK
     ========================================================= */
 
     async function checkSupabase() {
         if (isDownPage()) {
-            return true;
+            return;
+        }
+
+        /*
+         * Wait for auth.js to create the client.
+         */
+        if (!window.supabaseClient) {
+            setTimeout(
+                checkSupabase,
+                100
+            );
+
+            return;
         }
 
         try {
-            const response =
-                await fetch(
-                    SUPABASE_URL +
-                    "/auth/v1/health",
-                    {
-                        method: "GET",
-                        cache: "no-store"
-                    }
+            const {
+                data,
+                error
+            } =
+                await window.supabaseClient
+                    .auth
+                    .getSession();
+
+            if (error) {
+                console.error(
+                    "[Global] Supabase error:",
+                    error
                 );
 
-            /*
-             * A response means Supabase is reachable.
-             *
-             * We don't care about the exact health
-             * response here. Network reachability is
-             * what matters.
-             */
-            if (response) {
-                return true;
+                if (
+                    isSupabaseUnavailableError(
+                        error
+                    )
+                ) {
+                    showSiteDown();
+                }
+
+                return;
             }
+
+            console.log(
+                "[Global] Supabase is available."
+            );
 
         } catch (error) {
             console.error(
-                "[Global] Supabase unavailable:",
+                "[Global] Supabase request failed:",
                 error
             );
 
-            showSiteDown();
-
-            return false;
+            if (
+                isSupabaseUnavailableError(
+                    error
+                )
+            ) {
+                showSiteDown();
+            }
         }
-
-        return true;
     }
 
     /* =========================================================
-       PUBLIC API
+       EXPORT
     ========================================================= */
 
     window.RipDeadGlobal = {
@@ -468,7 +456,7 @@
     };
 
     /* =========================================================
-       INITIAL CHECK
+       START
     ========================================================= */
 
     if (!isDownPage()) {
