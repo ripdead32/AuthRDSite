@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,9 +12,11 @@
 
     <title>Friends - Rip_Dead Account</title>
 
-    <link rel="stylesheet" href="/css/auth.css">
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -55,7 +58,7 @@
             >
                 Chat
             </a>
-            
+
             <a
                 href="/apps/"
                 class="auth-only"
@@ -142,6 +145,7 @@
         id="friends-message"
         class="message"
         aria-live="polite"
+        hidden
     ></div>
 
 
@@ -181,37 +185,85 @@
 </main>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/global.js"></script>
+
 <script>
 
 let friendsSession = null;
 
 
 const requestsContainer =
-    document.getElementById("requests");
+    document.getElementById(
+        "requests"
+    );
 
 
 const friendsContainer =
-    document.getElementById("friends-list");
+    document.getElementById(
+        "friends-list"
+    );
 
 
 const friendsMessage =
-    document.getElementById("friends-message");
+    document.getElementById(
+        "friends-message"
+    );
+
+
+function showFriendsMessage(
+    message,
+    type = "info"
+) {
+
+    friendsMessage.textContent =
+        message || "";
+
+    friendsMessage.className =
+        "message";
+
+    if (type) {
+        friendsMessage.classList.add(
+            type
+        );
+    }
+
+    friendsMessage.hidden =
+        !message;
+}
 
 
 async function initializeFriends() {
 
-    friendsSession =
-        await requireAuth();
+    try {
+
+        friendsSession =
+            await window.requireAuth();
 
 
-    if (!friendsSession) {
-        return;
+        if (!friendsSession) {
+            return;
+        }
+
+
+        await window.initNavbar();
+
+
+        await loadFriendships();
+
+    } catch (error) {
+
+        console.error(
+            "[Friends] Initialization error:",
+            error
+        );
+
+        showFriendsMessage(
+            "Could not load your friends.",
+            "error"
+        );
     }
-
-
-    await initNavbar();
-
-    await loadFriendships();
 }
 
 
@@ -228,7 +280,7 @@ async function loadFriendships() {
         data,
         error
     } =
-        await supabaseClient
+        await window.supabaseClient
             .from("friendships")
             .select("*")
             .or(
@@ -245,13 +297,12 @@ async function loadFriendships() {
     if (error) {
 
         console.error(
-            "Friendships error:",
+            "[Friends] Friendships error:",
             error
         );
 
 
-        setMessage(
-            friendsMessage,
+        showFriendsMessage(
             error.message,
             "error"
         );
@@ -261,9 +312,11 @@ async function loadFriendships() {
     }
 
 
-    requestsContainer.innerHTML = "";
+    requestsContainer.innerHTML =
+        "";
 
-    friendsContainer.innerHTML = "";
+    friendsContainer.innerHTML =
+        "";
 
 
     const requests =
@@ -303,7 +356,7 @@ async function loadFriendships() {
         ) {
 
             const profile =
-                await getProfile(
+                await window.getProfile(
                     friendship.requester_id
                 );
 
@@ -314,11 +367,15 @@ async function loadFriendships() {
 
 
             const card =
-                createFriendCard(profile);
+                createFriendCard(
+                    profile
+                );
 
 
             const actions =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             actions.style.display =
                 "flex";
@@ -334,7 +391,9 @@ async function loadFriendships() {
 
 
             const view =
-                document.createElement("a");
+                document.createElement(
+                    "a"
+                );
 
             view.href =
                 "/user/?id=" +
@@ -350,7 +409,9 @@ async function loadFriendships() {
 
 
             const accept =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             accept.type =
                 "button";
@@ -367,7 +428,9 @@ async function loadFriendships() {
 
 
             const decline =
-                document.createElement("button");
+                document.createElement(
+                    "button"
+                );
 
             decline.type =
                 "button";
@@ -386,16 +449,26 @@ async function loadFriendships() {
                     );
 
 
-            actions.appendChild(view);
+            actions.appendChild(
+                view
+            );
 
-            actions.appendChild(accept);
+            actions.appendChild(
+                accept
+            );
 
-            actions.appendChild(decline);
+            actions.appendChild(
+                decline
+            );
 
 
-            card.appendChild(actions);
+            card.appendChild(
+                actions
+            );
 
-            requestsContainer.appendChild(card);
+            requestsContainer.appendChild(
+                card
+            );
         }
     }
 
@@ -426,7 +499,9 @@ async function loadFriendships() {
 
 
             const profile =
-                await getProfile(friendId);
+                await window.getProfile(
+                    friendId
+                );
 
 
             if (!profile) {
@@ -435,11 +510,15 @@ async function loadFriendships() {
 
 
             const card =
-                createFriendCard(profile);
+                createFriendCard(
+                    profile
+                );
 
 
             const view =
-                document.createElement("a");
+                document.createElement(
+                    "a"
+                );
 
             view.href =
                 "/user/?id=" +
@@ -454,39 +533,59 @@ async function loadFriendships() {
                 "View Profile";
 
 
-            card.appendChild(view);
+            card.appendChild(
+                view
+            );
 
-            friendsContainer.appendChild(card);
+            friendsContainer.appendChild(
+                card
+            );
         }
     }
 }
 
 
-function createFriendCard(profile) {
+function createFriendCard(
+    profile
+) {
 
     const card =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     card.className =
         "user-card";
 
 
     const avatar =
-        createAvatar(
-            profile,
-            "user-avatar"
+        document.createElement(
+            "div"
         );
+
+    avatar.className =
+        "user-avatar";
+
+
+    window.createAvatar(
+        profile,
+        avatar
+    );
 
 
     const information =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     information.className =
         "user-info";
 
 
     const name =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     name.className =
         "user-name";
@@ -498,7 +597,9 @@ function createFriendCard(profile) {
 
 
     const username =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     username.className =
         "user-username";
@@ -509,15 +610,21 @@ function createFriendCard(profile) {
             : "";
 
 
-    information.appendChild(name);
+    information.appendChild(
+        name
+    );
 
-    information.appendChild(username);
+    information.appendChild(
+        username
+    );
 
 
     if (profile.is_verified) {
 
         const badge =
-            document.createElement("span");
+            document.createElement(
+                "span"
+            );
 
         badge.className =
             "verified-badge";
@@ -541,13 +648,19 @@ function createFriendCard(profile) {
             "700";
 
 
-        information.appendChild(badge);
+        information.appendChild(
+            badge
+        );
     }
 
 
-    card.appendChild(avatar);
+    card.appendChild(
+        avatar
+    );
 
-    card.appendChild(information);
+    card.appendChild(
+        information
+    );
 
 
     return card;
@@ -562,7 +675,7 @@ async function updateFriendRequest(
     const {
         error
     } =
-        await supabaseClient
+        await window.supabaseClient
             .from("friendships")
             .update({
                 status
@@ -575,8 +688,7 @@ async function updateFriendRequest(
 
     if (error) {
 
-        setMessage(
-            friendsMessage,
+        showFriendsMessage(
             error.message,
             "error"
         );
@@ -593,7 +705,6 @@ async function updateFriendRequest(
 initializeFriends();
 
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
+
 </body>
 </html>

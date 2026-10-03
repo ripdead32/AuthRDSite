@@ -83,7 +83,7 @@
             >
                 Authorized Apps
             </a>
-            
+
             <a
                 href="/settings/"
                 class="auth-only"
@@ -275,265 +275,298 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="/js/auth.js"></script>
+<script src="/js/global.js"></script>
 
 <script>
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    const message =
-        document.getElementById("account-message");
+        const message =
+            document.getElementById(
+                "account-message"
+            );
 
-    const accountAvatar =
-        document.getElementById("account-avatar");
+        const accountAvatar =
+            document.getElementById(
+                "account-avatar"
+            );
 
-    const accountName =
-        document.getElementById("account-name");
+        const accountName =
+            document.getElementById(
+                "account-name"
+            );
 
-    const accountUsername =
-        document.getElementById("account-username");
+        const accountUsername =
+            document.getElementById(
+                "account-username"
+            );
 
-    const emailField =
-        document.getElementById("account-email");
+        const emailField =
+            document.getElementById(
+                "account-email"
+            );
 
-    const usernameField =
-        document.getElementById("account-username-field");
+        const usernameField =
+            document.getElementById(
+                "account-username-field"
+            );
 
-    const displayNameField =
-        document.getElementById("account-display-name");
+        const displayNameField =
+            document.getElementById(
+                "account-display-name"
+            );
 
-    const bioField =
-        document.getElementById("account-bio");
-
-
-    try {
-
-        const session =
-            await initNavbar();
-
-
-        if (!session) {
-
-            window.location.href =
-                "/login/";
-
-            return;
-        }
-
-
-        const profile =
-            await getProfile(session.user.id);
+        const bioField =
+            document.getElementById(
+                "account-bio"
+            );
 
 
-        if (!profile) {
+        try {
+
+            const session =
+                await window.getSession();
+
+
+            if (!session) {
+
+                window.location.href =
+                    "/login/";
+
+                return;
+            }
+
+
+            await window.initNavbar();
+
+
+            const profile =
+                await window.getProfile(
+                    session.user.id
+                );
+
+
+            if (!profile) {
+
+                message.textContent =
+                    "Could not load your profile.";
+
+                message.hidden = false;
+
+                return;
+            }
+
+
+            const displayName =
+                profile.display_name ||
+                profile.username ||
+                "Rip_Dead User";
+
+
+            const username =
+                profile.username ||
+                "unknown";
+
+
+            accountName.textContent =
+                displayName;
+
+
+            accountUsername.textContent =
+                "@" + username;
+
+
+            if (profile.is_verified) {
+
+                const badge =
+                    document.createElement(
+                        "span"
+                    );
+
+                badge.className =
+                    "verified-badge";
+
+                badge.textContent =
+                    "✓";
+
+                badge.title =
+                    "Verified account";
+
+                badge.setAttribute(
+                    "aria-label",
+                    "Verified account"
+                );
+
+                badge.style.display =
+                    "inline-flex";
+
+                badge.style.alignItems =
+                    "center";
+
+                badge.style.justifyContent =
+                    "center";
+
+                badge.style.marginLeft =
+                    "8px";
+
+                badge.style.width =
+                    "20px";
+
+                badge.style.height =
+                    "20px";
+
+                badge.style.borderRadius =
+                    "50%";
+
+                badge.style.background =
+                    "var(--purple-hover)";
+
+                badge.style.color =
+                    "#ffffff";
+
+                badge.style.fontSize =
+                    "13px";
+
+                badge.style.fontWeight =
+                    "900";
+
+
+                accountName.appendChild(
+                    badge
+                );
+            }
+
+
+            emailField.value =
+                session.user.email || "";
+
+
+            usernameField.value =
+                profile.username || "";
+
+
+            displayNameField.value =
+                profile.display_name || "";
+
+
+            bioField.value =
+                profile.bio || "";
+
+
+            const avatarUrl =
+                window.getAvatarUrl(
+                    profile
+                );
+
+
+            if (avatarUrl) {
+
+                accountAvatar.classList.remove(
+                    "empty"
+                );
+
+
+                const image =
+                    document.createElement(
+                        "img"
+                    );
+
+
+                image.src =
+                    avatarUrl;
+
+
+                image.alt =
+                    "Profile avatar";
+
+
+                image.width =
+                    96;
+
+
+                image.height =
+                    96;
+
+
+                image.style.width =
+                    "100%";
+
+
+                image.style.height =
+                    "100%";
+
+
+                image.style.maxWidth =
+                    "100%";
+
+
+                image.style.maxHeight =
+                    "100%";
+
+
+                image.style.objectFit =
+                    "cover";
+
+
+                image.style.objectPosition =
+                    "center";
+
+
+                image.style.display =
+                    "block";
+
+
+                image.style.borderRadius =
+                    "50%";
+
+
+                accountAvatar.innerHTML =
+                    "";
+
+
+                accountAvatar.appendChild(
+                    image
+                );
+            }
+
+
+            document.title =
+                `${displayName} — Rip_Dead Account`;
+
+
+            const publicProfileButton =
+                document.getElementById(
+                    "view-profile-button"
+                );
+
+
+            publicProfileButton.href =
+                `/user/?id=${encodeURIComponent(
+                    session.user.id
+                )}`;
+
+        } catch (error) {
+
+            console.error(
+                "[Account] Error:",
+                error
+            );
+
 
             message.textContent =
-                "Could not load your profile.";
+                "Something went wrong while loading your account.";
+
 
             message.hidden = false;
-
-            return;
         }
 
-
-        const displayName =
-            profile.display_name ||
-            profile.username ||
-            "Rip_Dead User";
-
-
-        const username =
-            profile.username ||
-            "unknown";
-
-
-        accountName.textContent =
-            displayName;
-
-
-        accountUsername.textContent =
-            "@" + username;
-
-
-        if (profile.is_verified) {
-
-            const badge =
-                document.createElement("span");
-
-            badge.className =
-                "verified-badge";
-
-            badge.textContent =
-                "✓";
-
-            badge.title =
-                "Verified account";
-
-            badge.setAttribute(
-                "aria-label",
-                "Verified account"
-            );
-
-            badge.style.display =
-                "inline-flex";
-
-            badge.style.alignItems =
-                "center";
-
-            badge.style.justifyContent =
-                "center";
-
-            badge.style.marginLeft =
-                "8px";
-
-            badge.style.width =
-                "20px";
-
-            badge.style.height =
-                "20px";
-
-            badge.style.borderRadius =
-                "50%";
-
-            badge.style.background =
-                "var(--purple-hover)";
-
-            badge.style.color =
-                "#ffffff";
-
-            badge.style.fontSize =
-                "13px";
-
-            badge.style.fontWeight =
-                "900";
-
-
-            accountName.appendChild(
-                badge
-            );
-        }
-
-
-        emailField.value =
-            session.user.email || "";
-
-
-        usernameField.value =
-            profile.username || "";
-
-
-        displayNameField.value =
-            profile.display_name || "";
-
-
-        bioField.value =
-            profile.bio || "";
-
-
-        const avatarUrl =
-            getAvatarUrl(profile);
-
-
-        if (avatarUrl) {
-
-            accountAvatar.classList.remove(
-                "empty"
-            );
-
-
-            const image =
-                document.createElement("img");
-
-
-            image.src =
-                avatarUrl;
-
-
-            image.alt =
-                "Profile avatar";
-
-
-            image.width =
-                96;
-
-
-            image.height =
-                96;
-
-
-            image.style.width =
-                "100%";
-
-
-            image.style.height =
-                "100%";
-
-
-            image.style.maxWidth =
-                "100%";
-
-
-            image.style.maxHeight =
-                "100%";
-
-
-            image.style.objectFit =
-                "cover";
-
-
-            image.style.objectPosition =
-                "center";
-
-
-            image.style.display =
-                "block";
-
-
-            image.style.borderRadius =
-                "50%";
-
-
-            accountAvatar.innerHTML =
-                "";
-
-
-            accountAvatar.appendChild(
-                image
-            );
-        }
-
-
-        document.title =
-            `${displayName} — Rip_Dead Account`;
-
-
-        const publicProfileButton =
-            document.getElementById(
-                "view-profile-button"
-            );
-
-
-        publicProfileButton.href =
-            `/user/?id=${encodeURIComponent(
-                session.user.id
-            )}`;
-
-    } catch (error) {
-
-        console.error(error);
-
-
-        message.textContent =
-            "Something went wrong while loading your account.";
-
-
-        message.hidden = false;
     }
-
-});
+);
 
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
+
 </body>
 </html>
