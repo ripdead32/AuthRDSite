@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -10,192 +9,87 @@
 
     <title>Chat - Rip_Dead Account</title>
 
-    <link
-        rel="stylesheet"
-        href="/css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/global.js"></script>
 
     <style>
-        :root {
-            --rd-purple: #8b5cf6;
-            --rd-purple-dark: #6d28d9;
-            --rd-purple-light: #a78bfa;
-
-            --bg: #08080d;
-            --panel: #101017;
-            --panel-2: #15151e;
-            --panel-3: #1b1b26;
-
-            --border: rgba(255, 255, 255, 0.08);
-
-            --text: #f4f4f5;
-            --muted: #9696a5;
-
-            --danger: #ef4444;
-            --success: #22c55e;
-
-            --navbar-height: 54px;
-        }
-
         * {
             box-sizing: border-box;
         }
 
-        html,
         body {
             margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family:
-                Inter,
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
-        }
-
-        button,
-        input,
-        textarea {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
+            background: #09090d;
+            color: #eee;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         .chat-page {
-            width: 100%;
-            height: calc(100vh - var(--navbar-height));
+            height: calc(100vh - 64px);
             display: flex;
             overflow: hidden;
-            background: var(--bg);
         }
 
-        /* -------------------------------------------------- */
-        /* Left rail                                            */
-        /* -------------------------------------------------- */
+        /* =========================
+           SIDEBAR
+        ========================= */
 
-        .server-rail {
-            width: 72px;
-            min-width: 72px;
-
+        .chat-sidebar {
+            width: 320px;
+            min-width: 320px;
+            background: #101017;
+            border-right: 1px solid #24242f;
             display: flex;
             flex-direction: column;
-            align-items: center;
-
-            padding: 12px 0;
-
-            background: #09090e;
-            border-right: 1px solid var(--border);
-        }
-
-        .server-icon {
-            width: 46px;
-            height: 46px;
-
-            border: 0;
-            border-radius: 14px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            color: white;
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--rd-purple),
-                    #4c1d95
-                );
-
-            font-size: 17px;
-            font-weight: 800;
-
-            box-shadow:
-                0 8px 25px rgba(139, 92, 246, 0.18);
-        }
-
-        /* -------------------------------------------------- */
-        /* Conversation sidebar                                */
-        /* -------------------------------------------------- */
-
-        .conversation-sidebar {
-            width: 280px;
-            min-width: 280px;
-
-            display: flex;
-            flex-direction: column;
-
-            background: var(--panel);
-            border-right: 1px solid var(--border);
         }
 
         .sidebar-header {
-            height: 64px;
-            padding: 0 16px;
+            padding: 18px;
+            border-bottom: 1px solid #24242f;
+        }
 
+        .sidebar-title-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
         }
 
         .sidebar-title {
-            font-size: 17px;
-            font-weight: 700;
+            margin: 0;
+            font-size: 21px;
         }
 
         .new-chat-button {
-            width: 34px;
-            height: 34px;
-
+            width: 36px;
+            height: 36px;
             border: 0;
             border-radius: 9px;
-
+            background: #7c3aed;
             color: white;
-            background: var(--rd-purple);
-
-            font-size: 21px;
-            line-height: 1;
+            font-size: 24px;
+            cursor: pointer;
         }
 
         .new-chat-button:hover {
-            background: var(--rd-purple-dark);
+            background: #8b5cf6;
         }
 
         .conversation-search {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .search-box {
             width: 100%;
-            height: 38px;
-
-            border: 1px solid var(--border);
+            padding: 11px 13px;
+            border: 1px solid #30303c;
             border-radius: 9px;
-
             outline: none;
-
-            padding: 0 12px;
-
-            color: var(--text);
-            background: var(--panel-2);
+            background: #17171f;
+            color: white;
         }
 
-        .search-box:focus {
-            border-color: var(--rd-purple);
+        .conversation-search:focus {
+            border-color: #7c3aed;
         }
 
         .conversation-list {
@@ -204,31 +98,22 @@
             padding: 8px;
         }
 
-        .conversation-item {
-            width: 100%;
-            min-height: 62px;
-
+        .conversation {
             display: flex;
             align-items: center;
             gap: 11px;
-
-            padding: 8px 10px;
-
-            border: 0;
-            border-radius: 10px;
-
-            color: var(--text);
-            background: transparent;
-
-            text-align: left;
+            padding: 11px;
+            border-radius: 9px;
+            cursor: pointer;
+            margin-bottom: 3px;
         }
 
-        .conversation-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+        .conversation:hover {
+            background: #1b1b25;
         }
 
-        .conversation-item.active {
-            background: rgba(139, 92, 246, 0.17);
+        .conversation.active {
+            background: #29203b;
         }
 
         .conversation-info {
@@ -237,68 +122,62 @@
         }
 
         .conversation-name {
-            font-size: 14px;
-            font-weight: 650;
-
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .conversation-preview {
-            margin-top: 3px;
-
-            color: var(--muted);
-            font-size: 12px;
-
+            color: #888894;
+            font-size: 13px;
+            margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .empty-list {
-            padding: 30px 15px;
-
-            color: var(--muted);
-            font-size: 13px;
-            text-align: center;
+        .conversation-time {
+            color: #666673;
+            font-size: 11px;
+            align-self: flex-start;
+            white-space: nowrap;
         }
 
-        /* -------------------------------------------------- */
-        /* Avatar                                               */
-        /* -------------------------------------------------- */
+        .empty-conversations {
+            text-align: center;
+            color: #777783;
+            padding: 40px 20px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           AVATARS
+        ========================= */
 
         .avatar {
-            width: 42px;
-            height: 42px;
-            min-width: 42px;
-
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
             border-radius: 50%;
-
+            overflow: hidden;
+            background: #292933;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            overflow: hidden;
-
-            color: white;
-            background:
-                linear-gradient(
-                    135deg,
-                    #7c3aed,
-                    #4c1d95
-                );
-
-            font-size: 15px;
-            font-weight: 700;
+            color: #ddd;
+            font-weight: bold;
+            user-select: none;
         }
 
         .avatar.small {
-            width: 34px;
-            height: 34px;
-            min-width: 34px;
-
-            font-size: 12px;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: 13px;
         }
 
         .avatar.large {
@@ -313,581 +192,449 @@
             object-fit: cover;
         }
 
-        .group-avatar {
-            background:
-                linear-gradient(
-                    135deg,
-                    #27272a,
-                    #18181b
-                );
-
-            font-size: 18px;
-        }
-
-        /* -------------------------------------------------- */
-        /* Main chat                                            */
-        /* -------------------------------------------------- */
+        /* =========================
+           CHAT PANEL
+        ========================= */
 
         .chat-main {
-            min-width: 0;
             flex: 1;
-
+            min-width: 0;
             display: flex;
             flex-direction: column;
-
-            background: var(--bg);
+            background: #0c0c11;
         }
 
         .chat-header {
-            height: 64px;
-            min-height: 64px;
-
+            height: 70px;
+            min-height: 70px;
+            border-bottom: 1px solid #24242f;
+            background: #101017;
             display: flex;
             align-items: center;
+            padding: 10px 18px;
             gap: 12px;
-
-            padding: 0 18px;
-
-            background: var(--panel);
-            border-bottom: 1px solid var(--border);
         }
 
         .chat-header-info {
+            flex: 1;
             min-width: 0;
         }
 
         .chat-header-name {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
         }
 
         .chat-header-subtitle {
-            margin-top: 2px;
-
-            color: var(--muted);
+            color: #777783;
             font-size: 12px;
+            margin-top: 3px;
         }
 
-        .chat-header-actions {
-            margin-left: auto;
-
-            display: flex;
-            gap: 7px;
-        }
-
-        .header-button {
-            width: 34px;
-            height: 34px;
-
-            border: 1px solid var(--border);
+        .leave-button {
+            border: 1px solid #4a2630;
+            background: #241419;
+            color: #ff7b8e;
+            padding: 9px 14px;
             border-radius: 8px;
-
-            color: var(--muted);
-            background: var(--panel-2);
+            cursor: pointer;
         }
 
-        .header-button:hover {
-            color: white;
-            background: var(--panel-3);
+        .leave-button:hover {
+            background: #321923;
         }
-
-        /* -------------------------------------------------- */
-        /* Messages                                             */
-        /* -------------------------------------------------- */
 
         .messages {
             flex: 1;
-
             overflow-y: auto;
-
-            padding: 22px 22px 10px;
+            padding: 20px;
         }
 
-        .welcome {
+        .messages-empty {
             height: 100%;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
-            color: var(--muted);
+            color: #696974;
             text-align: center;
-        }
-
-        .welcome-inner {
-            max-width: 420px;
-        }
-
-        .welcome-logo {
-            width: 64px;
-            height: 64px;
-
-            margin: 0 auto 16px;
-
-            border-radius: 18px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--rd-purple),
-                    #4c1d95
-                );
-
-            font-weight: 800;
-            font-size: 20px;
-        }
-
-        .welcome h2 {
-            margin: 0 0 7px;
-            color: var(--text);
-        }
-
-        .welcome p {
-            margin: 0;
-            font-size: 14px;
         }
 
         .message-row {
             display: flex;
-            gap: 11px;
-
+            gap: 10px;
             margin-bottom: 17px;
         }
 
-        .message-content {
-            min-width: 0;
-            flex: 1;
+        .message-row.mine {
+            flex-direction: row-reverse;
+        }
+
+        .message-content-area {
+            max-width: min(720px, 75%);
         }
 
         .message-meta {
             display: flex;
-            align-items: baseline;
-            gap: 8px;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #777783;
+        }
 
-            margin-bottom: 3px;
+        .message-row.mine .message-meta {
+            justify-content: flex-end;
         }
 
         .message-author {
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .verified {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-
-            width: 15px;
-            height: 15px;
-
-            border-radius: 50%;
-
-            color: white;
-            background: var(--rd-purple);
-
-            font-size: 9px;
-            font-weight: 900;
+            color: #aaaab5;
+            font-weight: 600;
         }
 
         .message-time {
-            color: var(--muted);
-            font-size: 11px;
+            color: #5e5e69;
         }
 
-        .message-text {
-            color: #dedee5;
-            font-size: 14px;
-            line-height: 1.55;
-
+        .message-bubble {
+            background: #191922;
+            border: 1px solid #282833;
+            border-radius: 12px;
+            padding: 10px 13px;
             white-space: pre-wrap;
-            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-height: 1.45;
         }
 
-        .message-row.own .message-text {
-            color: #f2f2f7;
+        .message-row.mine .message-bubble {
+            background: #39205e;
+            border-color: #54317e;
         }
 
         .message-actions {
-            margin-top: 5px;
-
             display: flex;
-            gap: 6px;
-
+            gap: 5px;
+            margin-top: 4px;
             opacity: 0;
-            transition: opacity 0.12s ease;
+            transition: opacity 0.15s;
         }
 
         .message-row:hover .message-actions {
             opacity: 1;
         }
 
-        .message-action {
+        .message-row.mine .message-actions {
+            justify-content: flex-end;
+        }
+
+        .message-delete {
             border: 0;
-            padding: 3px 7px;
-
-            border-radius: 5px;
-
-            color: var(--muted);
             background: transparent;
-
+            color: #777783;
+            cursor: pointer;
             font-size: 11px;
         }
 
-        .message-action:hover {
-            color: white;
-            background: var(--panel-3);
+        .message-delete:hover {
+            color: #ff7185;
         }
 
-        .message-action.delete:hover {
-            color: white;
-            background: var(--danger);
+        .verified {
+            color: #8b5cf6;
+            font-size: 12px;
         }
 
-        /* -------------------------------------------------- */
-        /* Composer                                             */
-        /* -------------------------------------------------- */
+        /* =========================
+           MESSAGE FORM
+        ========================= */
 
-        .composer-area {
-            padding: 12px 18px 18px;
-        }
-
-        .composer {
-            min-height: 48px;
-
+        .message-form {
+            padding: 13px;
+            border-top: 1px solid #24242f;
+            background: #101017;
             display: flex;
-            align-items: flex-end;
-            gap: 8px;
-
-            padding: 7px 8px;
-
-            border: 1px solid var(--border);
-            border-radius: 12px;
-
-            background: var(--panel);
-
-            transition:
-                border-color 0.15s ease,
-                box-shadow 0.15s ease;
+            gap: 9px;
         }
 
-        .composer:focus-within {
-            border-color: rgba(139, 92, 246, 0.6);
-
-            box-shadow:
-                0 0 0 3px rgba(139, 92, 246, 0.08);
-        }
-
-        .composer textarea {
+        .message-input {
             flex: 1;
-
-            min-height: 32px;
-            max-height: 150px;
-
+            min-width: 0;
             resize: none;
-
-            border: 0;
+            height: 44px;
+            max-height: 130px;
+            padding: 12px;
+            border: 1px solid #30303c;
+            border-radius: 9px;
+            background: #17171f;
+            color: white;
             outline: none;
-
-            padding: 7px 6px;
-
-            color: var(--text);
-            background: transparent;
-
-            font-size: 14px;
-            line-height: 1.4;
+            font-family: inherit;
         }
 
-        .composer textarea::placeholder {
-            color: #6f6f7d;
+        .message-input:focus {
+            border-color: #7c3aed;
         }
 
         .send-button {
-            width: 36px;
-            height: 36px;
-
             border: 0;
             border-radius: 9px;
-
+            padding: 0 19px;
+            background: #7c3aed;
             color: white;
-            background: var(--rd-purple);
-
-            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .send-button:hover {
-            background: var(--rd-purple-dark);
+            background: #8b5cf6;
         }
 
         .send-button:disabled {
-            opacity: 0.45;
+            opacity: .5;
             cursor: default;
         }
 
-        /* -------------------------------------------------- */
-        /* Modal                                                */
-        /* -------------------------------------------------- */
+        /* =========================
+           MODAL
+        ========================= */
 
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            z-index: 1000;
-
-            display: flex;
+            background: rgba(0, 0, 0, .72);
+            display: none;
             align-items: center;
             justify-content: center;
-
-            padding: 20px;
-
-            background: rgba(0, 0, 0, 0.72);
-            backdrop-filter: blur(8px);
+            z-index: 9999;
         }
 
-        .modal-backdrop.hidden {
-            display: none;
+        .modal-backdrop.visible {
+            display: flex;
         }
 
-        .modal {
-            width: min(520px, 100%);
-            max-height: 85vh;
-
+        .chat-modal {
+            width: min(520px, calc(100vw - 30px));
+            max-height: min(720px, calc(100vh - 30px));
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-
-            overflow: hidden;
-
-            border: 1px solid var(--border);
-            border-radius: 16px;
-
-            background: var(--panel);
-
-            box-shadow:
-                0 25px 80px rgba(0, 0, 0, 0.5);
+            background: #111118;
+            border: 1px solid #30303c;
+            border-radius: 14px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, .55);
         }
 
         .modal-header {
-            padding: 18px;
-
+            padding: 17px;
+            border-bottom: 1px solid #292934;
             display: flex;
             align-items: center;
             justify-content: space-between;
-
-            border-bottom: 1px solid var(--border);
         }
 
-        .modal-title {
-            font-size: 17px;
-            font-weight: 700;
+        .modal-header h2 {
+            margin: 0;
+            font-size: 19px;
         }
 
         .modal-close {
-            width: 32px;
-            height: 32px;
-
             border: 0;
-            border-radius: 8px;
-
-            color: var(--muted);
             background: transparent;
-
-            font-size: 20px;
-        }
-
-        .modal-close:hover {
-            color: white;
-            background: var(--panel-3);
+            color: #888894;
+            font-size: 22px;
+            cursor: pointer;
         }
 
         .modal-body {
-            padding: 18px;
+            padding: 17px;
             overflow-y: auto;
         }
 
-        .modal-footer {
-            padding: 14px 18px;
-
+        .chat-mode-buttons {
             display: flex;
-            justify-content: flex-end;
             gap: 8px;
-
-            border-top: 1px solid var(--border);
+            margin-bottom: 13px;
         }
 
-        .modal-input {
-            width: 100%;
-            height: 42px;
-
-            margin-bottom: 12px;
-
-            padding: 0 12px;
-
-            border: 1px solid var(--border);
-            border-radius: 9px;
-
-            outline: none;
-
-            color: var(--text);
-            background: var(--panel-2);
-        }
-
-        .modal-input:focus {
-            border-color: var(--rd-purple);
-        }
-
-        .modal-button {
-            min-height: 38px;
-
-            padding: 0 15px;
-
-            border: 0;
+        .mode-button {
+            flex: 1;
+            padding: 10px;
             border-radius: 8px;
+            border: 1px solid #30303c;
+            background: #181820;
+            color: #aaaab5;
+            cursor: pointer;
+        }
 
+        .mode-button.active {
+            border-color: #7c3aed;
+            background: #291d3b;
             color: white;
-            background: var(--rd-purple);
         }
 
-        .modal-button.secondary {
-            color: var(--text);
-            background: var(--panel-3);
-        }
-
-        .modal-button.danger {
-            background: var(--danger);
-        }
-
-        .user-results {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .user-result {
+        .group-name {
+            display: none;
             width: 100%;
+            margin-bottom: 10px;
+            padding: 11px;
+            border: 1px solid #30303c;
+            border-radius: 8px;
+            background: #17171f;
+            color: white;
+            outline: none;
+        }
 
+        .group-name.visible {
+            display: block;
+        }
+
+        .user-search {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #30303c;
+            border-radius: 8px;
+            background: #17171f;
+            color: white;
+            outline: none;
+        }
+
+        .search-results {
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-result {
             display: flex;
             align-items: center;
             gap: 10px;
-
-            padding: 9px;
-
-            border: 1px solid transparent;
+            padding: 10px;
             border-radius: 9px;
-
-            color: var(--text);
-            background: transparent;
-
-            text-align: left;
+            cursor: pointer;
         }
 
-        .user-result:hover {
-            background: var(--panel-2);
+        .search-result:hover {
+            background: #1c1c25;
         }
 
-        .user-result.selected {
-            border-color: rgba(139, 92, 246, 0.45);
-            background: rgba(139, 92, 246, 0.12);
-        }
-
-        .user-result-info {
-            min-width: 0;
+        .search-result-info {
             flex: 1;
+            min-width: 0;
         }
 
-        .user-result-name {
-            font-size: 13px;
-            font-weight: 650;
+        .search-result-name {
+            font-weight: 600;
         }
 
-        .user-result-username {
+        .search-result-username {
+            color: #777783;
+            font-size: 12px;
             margin-top: 2px;
-
-            color: var(--muted);
-            font-size: 11px;
         }
 
-        .selected-check {
-            color: var(--rd-purple-light);
-            font-size: 18px;
+        .select-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #555563;
+        }
+
+        .select-indicator.selected {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            position: relative;
+        }
+
+        .select-indicator.selected::after {
+            content: "✓";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
         }
 
         .selected-users {
-            display: flex;
+            display: none;
             flex-wrap: wrap;
             gap: 6px;
+            margin: 10px 0;
+        }
 
-            margin-bottom: 12px;
+        .selected-users.visible {
+            display: flex;
         }
 
         .selected-user {
+            background: #29203b;
+            color: #ddd;
             padding: 5px 8px;
-
-            border-radius: 7px;
-
-            color: #ddd6fe;
-            background: rgba(139, 92, 246, 0.16);
-
+            border-radius: 6px;
             font-size: 12px;
         }
 
-        .status-message {
-            padding: 9px 11px;
+        .modal-footer {
+            padding: 13px 17px;
+            border-top: 1px solid #292934;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
 
+        .secondary-button,
+        .primary-button {
+            padding: 10px 15px;
             border-radius: 8px;
-
-            color: var(--muted);
-            background: var(--panel-2);
-
-            font-size: 12px;
+            cursor: pointer;
         }
 
-        .status-message.error {
-            color: #fecaca;
-            background: rgba(239, 68, 68, 0.12);
+        .secondary-button {
+            border: 1px solid #30303c;
+            background: #181820;
+            color: #ccc;
         }
 
-        /* -------------------------------------------------- */
-        /* Scrollbars                                           */
-        /* -------------------------------------------------- */
-
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #30303a transparent;
+        .primary-button {
+            border: 0;
+            background: #7c3aed;
+            color: white;
         }
 
-        *::-webkit-scrollbar {
-            width: 7px;
-            height: 7px;
+        .primary-button:disabled {
+            opacity: .5;
+            cursor: default;
         }
 
-        *::-webkit-scrollbar-track {
-            background: transparent;
+        .modal-status {
+            color: #ff7185;
+            font-size: 13px;
+            margin-top: 9px;
+            min-height: 18px;
         }
 
-        *::-webkit-scrollbar-thumb {
-            border-radius: 10px;
-            background: #30303a;
-        }
+        /* =========================
+           MOBILE
+        ========================= */
 
-        /* -------------------------------------------------- */
-        /* Mobile                                               */
-        /* -------------------------------------------------- */
-
-        @media (max-width: 800px) {
-            .server-rail {
-                display: none;
+        @media (max-width: 750px) {
+            .chat-sidebar {
+                width: 260px;
+                min-width: 260px;
             }
 
-            .conversation-sidebar {
-                width: 240px;
-                min-width: 240px;
+            .message-content-area {
+                max-width: 82%;
+            }
+
+            .leave-button {
+                font-size: 12px;
+                padding: 8px 9px;
             }
         }
 
         @media (max-width: 600px) {
-            .conversation-sidebar {
+            .chat-sidebar {
                 width: 100%;
                 min-width: 100%;
             }
@@ -896,111 +643,104 @@
                 display: none;
             }
 
-            .chat-page.mobile-chat-open .conversation-sidebar {
+            .chat-page.mobile-chat-open .chat-sidebar {
                 display: none;
             }
 
             .chat-page.mobile-chat-open .chat-main {
                 display: flex;
+                width: 100%;
             }
-
-            .mobile-back {
-                display: block !important;
-            }
-        }
-
-        .mobile-back {
-            display: none;
-
-            width: 32px;
-            height: 32px;
-
-            border: 0;
-            border-radius: 8px;
-
-            color: var(--muted);
-            background: transparent;
-        }
-
-        .mobile-back:hover {
-            color: white;
-            background: var(--panel-3);
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Existing Rip_Dead Account navbar -->
-    <nav id="navbar"></nav>
+    <!-- =========================
+         NAVBAR
+    ========================= -->
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Rip_Dead</a>
+
+        <div class="navbar-links">
+            <a href="/">Home</a>
+
+            <a href="/search/" class="auth-only">Search</a>
+            <a href="/friends/" class="auth-only">Friends</a>
+            <a href="/chat/" class="auth-only">Chat</a>
+            <a href="/apps/" class="auth-only">Authorized Apps</a>
+            <a href="/settings/" class="auth-only">Settings</a>
+            <a href="/account/" class="auth-only" id="navbar-user">
+                Account
+            </a>
+
+            <a href="/login/" class="guest-only">Log In</a>
+            <a href="/signup/" class="guest-only">Create Account</a>
+
+            <button
+                id="navbar-logout"
+                class="auth-only"
+                type="button"
+            >
+                Log Out
+            </button>
+        </div>
+    </nav>
+
+
+    <!-- =========================
+         CHAT
+    ========================= -->
 
     <main class="chat-page" id="chat-page">
 
-        <!-- Server / app rail -->
-        <aside class="server-rail">
-            <div class="server-icon">
-                RD
-            </div>
-        </aside>
-
-        <!-- Conversations -->
-        <aside class="conversation-sidebar">
+        <aside class="chat-sidebar">
 
             <div class="sidebar-header">
-                <div class="sidebar-title">
-                    Messages
+
+                <div class="sidebar-title-row">
+                    <h1 class="sidebar-title">Messages</h1>
+
+                    <button
+                        class="new-chat-button"
+                        id="new-chat-button"
+                        type="button"
+                        title="New chat"
+                    >
+                        +
+                    </button>
                 </div>
 
-                <button
-                    class="new-chat-button"
-                    id="new-chat-button"
-                    title="New conversation"
-                    type="button"
-                >
-                    +
-                </button>
-            </div>
-
-            <div class="conversation-search">
                 <input
+                    class="conversation-search"
                     id="conversation-search"
-                    class="search-box"
-                    type="text"
+                    type="search"
                     placeholder="Search conversations..."
                     autocomplete="off"
                 >
+
             </div>
 
             <div
                 class="conversation-list"
                 id="conversation-list"
-            >
-                <div class="empty-list">
-                    Loading conversations...
-                </div>
-            </div>
+            ></div>
 
         </aside>
 
-        <!-- Main chat -->
+
         <section class="chat-main">
 
             <header class="chat-header">
 
-                <button
-                    class="mobile-back"
-                    id="mobile-back"
-                    type="button"
-                    title="Back"
-                >
-                    ←
-                </button>
-
                 <div
-                    id="chat-header-avatar"
                     class="avatar large"
-                    style="display:none"
-                ></div>
+                    id="header-avatar"
+                >
+                    ?
+                </div>
 
                 <div class="chat-header-info">
                     <div
@@ -1014,213 +754,172 @@
                         class="chat-header-subtitle"
                         id="chat-header-subtitle"
                     >
-                        Your messages will appear here.
+                        Choose a conversation to start chatting
                     </div>
                 </div>
 
-                <div class="chat-header-actions">
-
-                    <button
-                        class="header-button"
-                        id="leave-button"
-                        type="button"
-                        title="Leave conversation"
-                        style="display:none"
-                    >
-                        ↪
-                    </button>
-
-                </div>
+                <button
+                    class="leave-button"
+                    id="leave-button"
+                    type="button"
+                    hidden
+                >
+                    Leave
+                </button>
 
             </header>
+
 
             <div
                 class="messages"
                 id="messages"
             >
-                <div class="welcome">
-                    <div class="welcome-inner">
-
-                        <div class="welcome-logo">
-                            RD
-                        </div>
-
-                        <h2>
-                            Rip_Dead Messaging
-                        </h2>
-
-                        <p>
-                            Select a conversation or start a new one.
-                        </p>
-
-                    </div>
+                <div class="messages-empty">
+                    Select a conversation to start chatting.
                 </div>
             </div>
 
-            <div class="composer-area">
 
-                <form
-                    class="composer"
-                    id="composer"
+            <form
+                class="message-form"
+                id="message-form"
+                hidden
+            >
+
+                <textarea
+                    class="message-input"
+                    id="message-input"
+                    placeholder="Type a message..."
+                    autocomplete="off"
+                    maxlength="4000"
+                ></textarea>
+
+                <button
+                    class="send-button"
+                    id="send-button"
+                    type="submit"
                 >
+                    Send
+                </button>
 
-                    <textarea
-                        id="message-input"
-                        placeholder="Select a conversation..."
-                        rows="1"
-                        disabled
-                    ></textarea>
-
-                    <button
-                        class="send-button"
-                        id="send-button"
-                        type="submit"
-                        disabled
-                        title="Send"
-                    >
-                        ➤
-                    </button>
-
-                </form>
-
-            </div>
+            </form>
 
         </section>
 
     </main>
 
-    <!-- New conversation modal -->
+
+    <!-- =========================
+         NEW CHAT MODAL
+    ========================= -->
+
     <div
-        class="modal-backdrop hidden"
-        id="new-chat-modal"
+        class="modal-backdrop"
+        id="modal-backdrop"
     >
-        <div class="modal">
+
+        <div
+            class="chat-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+        >
 
             <div class="modal-header">
-                <div class="modal-title">
-                    New Conversation
-                </div>
+
+                <h2 id="modal-title">
+                    New Chat
+                </h2>
 
                 <button
                     class="modal-close"
-                    id="new-chat-close"
+                    id="modal-close"
                     type="button"
                 >
                     ×
                 </button>
+
             </div>
+
 
             <div class="modal-body">
 
+                <div class="chat-mode-buttons">
+
+                    <button
+                        class="mode-button active"
+                        id="direct-mode-button"
+                        type="button"
+                    >
+                        Direct Message
+                    </button>
+
+                    <button
+                        class="mode-button"
+                        id="group-mode-button"
+                        type="button"
+                    >
+                        Group Chat
+                    </button>
+
+                </div>
+
+
                 <input
-                    class="modal-input"
-                    id="user-search"
+                    class="group-name"
+                    id="group-name"
                     type="text"
-                    placeholder="Search users..."
+                    maxlength="80"
+                    placeholder="Group name..."
                     autocomplete="off"
                 >
 
-                <div
-                    class="user-results"
-                    id="user-results"
-                >
-                    <div class="empty-list">
-                        Search for a user to start chatting.
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <button
-                    class="modal-button secondary"
-                    id="new-chat-cancel"
-                    type="button"
-                >
-                    Cancel
-                </button>
-
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Group modal -->
-    <div
-        class="modal-backdrop hidden"
-        id="group-modal"
-    >
-        <div class="modal">
-
-            <div class="modal-header">
-                <div class="modal-title">
-                    Create Group
-                </div>
-
-                <button
-                    class="modal-close"
-                    id="group-close"
-                    type="button"
-                >
-                    ×
-                </button>
-            </div>
-
-            <div class="modal-body">
-
-                <input
-                    class="modal-input"
-                    id="group-name"
-                    type="text"
-                    placeholder="Group name"
-                    maxlength="80"
-                >
 
                 <div
                     class="selected-users"
                     id="selected-users"
                 ></div>
 
+
                 <input
-                    class="modal-input"
-                    id="group-user-search"
-                    type="text"
-                    placeholder="Add people..."
+                    class="user-search"
+                    id="user-search"
+                    type="search"
+                    placeholder="Search users..."
                     autocomplete="off"
                 >
 
-                <div
-                    class="user-results"
-                    id="group-user-results"
-                >
-                    <div class="empty-list">
-                        Search for people to add.
-                    </div>
-                </div>
 
                 <div
-                    class="status-message"
-                    id="group-status"
-                    style="display:none"
+                    class="search-results"
+                    id="search-results"
+                ></div>
+
+
+                <div
+                    class="modal-status"
+                    id="modal-status"
                 ></div>
 
             </div>
 
+
             <div class="modal-footer">
 
                 <button
-                    class="modal-button secondary"
-                    id="group-cancel"
+                    class="secondary-button"
+                    id="modal-cancel"
                     type="button"
                 >
                     Cancel
                 </button>
 
                 <button
-                    class="modal-button"
-                    id="group-create"
+                    class="primary-button"
+                    id="create-group-button"
                     type="button"
+                    hidden
+                    disabled
                 >
                     Create Group
                 </button>
@@ -1228,948 +927,946 @@
             </div>
 
         </div>
+
     </div>
 
-    <script src="/js/auth.js"></script>
-    <script src="/js/global.js"></script>
 
     <script>
-        "use strict";
+        (() => {
+            "use strict";
 
-        const db = window.supabaseClient;
+            const db = window.supabaseClient;
 
-        let currentSession = null;
-        let currentConversationId = null;
+            let currentSession = null;
+            let currentUser = null;
 
-        let conversations = [];
-        let conversationMembers = {};
-        let profiles = {};
+            let conversations = [];
+            let conversationMembers = new Map();
+            let profiles = new Map();
+            let latestMessages = new Map();
 
-        let messageRealtimeChannel = null;
-        let conversationRealtimeChannel = null;
+            let currentConversationId = null;
 
-        let userSearchTimer = null;
-        let groupSearchTimer = null;
+            let realtimeMessagesChannel = null;
+            let realtimeConversationsChannel = null;
 
-        let selectedGroupUsers = [];
+            let modalMode = "direct";
+            let selectedGroupUsers = new Map();
 
-        /*
-         * --------------------------------------------------
-         * Helpers
-         * --------------------------------------------------
-         */
+            let searchTimer = null;
 
-        function $(id) {
-            return document.getElementById(id);
-        }
+            const chatPage =
+                document.getElementById("chat-page");
 
-        function escapeHtml(value) {
-            return String(value ?? "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
+            const conversationList =
+                document.getElementById("conversation-list");
 
-        function escapeIlike(value) {
-            return String(value ?? "")
-                .replace(/\\/g, "\\\\")
-                .replace(/%/g, "\\%")
-                .replace(/_/g, "\\_");
-        }
+            const conversationSearch =
+                document.getElementById("conversation-search");
 
-        function getDisplayName(profile) {
-            return (
-                profile?.display_name ||
-                profile?.username ||
-                "Unknown User"
-            );
-        }
+            const messagesElement =
+                document.getElementById("messages");
 
-        function getInitial(profile) {
-            const name = getDisplayName(profile).trim();
+            const messageForm =
+                document.getElementById("message-form");
 
-            return (
-                name.charAt(0).toUpperCase() ||
-                "?"
-            );
-        }
+            const messageInput =
+                document.getElementById("message-input");
 
-        function createLocalAvatar(
-            profile,
-            className = "avatar"
-        ) {
-            const element =
-                document.createElement("div");
+            const sendButton =
+                document.getElementById("send-button");
 
-            element.className = className;
+            const leaveButton =
+                document.getElementById("leave-button");
 
-            if (
-                profile &&
-                profile.avatar_url
-            ) {
-                const image =
-                    document.createElement("img");
+            const headerAvatar =
+                document.getElementById("header-avatar");
 
-                image.src =
-                    profile.avatar_url;
+            const headerName =
+                document.getElementById("chat-header-name");
 
-                image.alt =
-                    getDisplayName(profile);
+            const headerSubtitle =
+                document.getElementById("chat-header-subtitle");
 
-                image.loading = "lazy";
+            const modalBackdrop =
+                document.getElementById("modal-backdrop");
 
-                image.onerror = () => {
-                    image.remove();
+            const userSearch =
+                document.getElementById("user-search");
 
-                    element.textContent =
-                        getInitial(profile);
-                };
+            const searchResults =
+                document.getElementById("search-results");
 
-                element.appendChild(image);
-            } else {
-                element.textContent =
-                    getInitial(profile);
+            const modalStatus =
+                document.getElementById("modal-status");
+
+            const groupName =
+                document.getElementById("group-name");
+
+            const selectedUsers =
+                document.getElementById("selected-users");
+
+            const directModeButton =
+                document.getElementById("direct-mode-button");
+
+            const groupModeButton =
+                document.getElementById("group-mode-button");
+
+            const createGroupButton =
+                document.getElementById("create-group-button");
+
+
+            /* =========================
+               HELPERS
+            ========================= */
+
+            function escapeHTML(value) {
+                const div = document.createElement("div");
+                div.textContent = value ?? "";
+                return div.innerHTML;
             }
 
-            return element;
-        }
 
-        function formatMessageTime(dateString) {
-            const date =
-                new Date(dateString);
+            function getInitials(profileOrName) {
+                let value = "";
 
-            if (Number.isNaN(date.getTime())) {
-                return "";
-            }
-
-            return date.toLocaleString(
-                [],
-                {
-                    dateStyle: "short",
-                    timeStyle: "short"
+                if (typeof profileOrName === "string") {
+                    value = profileOrName;
+                } else {
+                    value =
+                        profileOrName?.display_name ||
+                        profileOrName?.username ||
+                        "";
                 }
-            );
-        }
 
-        function formatConversationTime(dateString) {
-            if (!dateString) {
-                return "";
+                const parts =
+                    value
+                        .trim()
+                        .split(/\s+/)
+                        .filter(Boolean);
+
+                if (!parts.length) {
+                    return "?";
+                }
+
+                if (parts.length === 1) {
+                    return parts[0]
+                        .substring(0, 2)
+                        .toUpperCase();
+                }
+
+                return (
+                    parts[0][0] +
+                    parts[parts.length - 1][0]
+                ).toUpperCase();
             }
 
-            const date =
-                new Date(dateString);
 
-            if (Number.isNaN(date.getTime())) {
-                return "";
+            function validAvatarURL(url) {
+                if (!url) {
+                    return null;
+                }
+
+                try {
+                    const parsed = new URL(url);
+
+                    if (
+                        parsed.protocol !== "https:" &&
+                        parsed.protocol !== "http:"
+                    ) {
+                        return null;
+                    }
+
+                    return parsed.href;
+                } catch {
+                    return null;
+                }
             }
 
-            const now = new Date();
 
-            if (
-                date.toDateString() ===
-                now.toDateString()
-            ) {
-                return date.toLocaleTimeString(
+            function renderAvatar(element, profile, fallbackName) {
+                if (!element) {
+                    return;
+                }
+
+                element.innerHTML = "";
+
+                const avatarURL =
+                    validAvatarURL(profile?.avatar_url);
+
+                if (avatarURL) {
+                    const img =
+                        document.createElement("img");
+
+                    img.src = avatarURL;
+                    img.alt = "";
+
+                    img.onerror = () => {
+                        element.innerHTML =
+                            escapeHTML(
+                                getInitials(
+                                    profile ||
+                                    fallbackName ||
+                                    "?"
+                                )
+                            );
+                    };
+
+                    element.appendChild(img);
+                    return;
+                }
+
+                element.textContent =
+                    getInitials(
+                        profile ||
+                        fallbackName ||
+                        "?"
+                    );
+            }
+
+
+            function formatTime(timestamp) {
+                if (!timestamp) {
+                    return "";
+                }
+
+                const date = new Date(timestamp);
+
+                if (Number.isNaN(date.getTime())) {
+                    return "";
+                }
+
+                const now = new Date();
+
+                if (
+                    date.toDateString() ===
+                    now.toDateString()
+                ) {
+                    return date.toLocaleTimeString(
+                        [],
+                        {
+                            hour: "numeric",
+                            minute: "2-digit"
+                        }
+                    );
+                }
+
+                return date.toLocaleDateString(
                     [],
                     {
-                        hour: "numeric",
-                        minute: "2-digit"
+                        month: "short",
+                        day: "numeric"
                     }
                 );
             }
 
-            return date.toLocaleDateString(
-                [],
-                {
-                    month: "short",
-                    day: "numeric"
-                }
-            );
-        }
 
-        /*
-         * Client-side numeric IDs.
-         *
-         * The supplied schema does not expose a default
-         * for the bigint IDs, so we generate collision-resistant
-         * positive bigint-compatible IDs here.
-         */
-        function generateNumericId() {
-            const time =
-                Date.now()
-                    .toString();
-
-            const random =
-                Math.floor(
-                    Math.random() * 1000
-                )
-                    .toString()
-                    .padStart(3, "0");
-
-            return Number(
-                time + random
-            );
-        }
-
-        function showModal(id) {
-            $(id).classList.remove(
-                "hidden"
-            );
-        }
-
-        function hideModal(id) {
-            $(id).classList.add(
-                "hidden"
-            );
-        }
-
-        function showStatus(
-            element,
-            message,
-            error = false
-        ) {
-            element.textContent =
-                message;
-
-            element.style.display =
-                "block";
-
-            element.classList.toggle(
-                "error",
-                error
-            );
-        }
-
-        /*
-         * --------------------------------------------------
-         * Authentication
-         * --------------------------------------------------
-         */
-
-        async function initializeChat() {
-            if (!db) {
-                showFatalError(
-                    "Supabase failed to initialize."
-                );
-
-                return;
+            function normalizeId(id) {
+                return String(id);
             }
 
-            let session = null;
 
-            for (
-                let attempt = 0;
-                attempt < 20;
-                attempt++
+            function generateNumericId() {
+                /*
+                 * Your conversations/messages tables use bigint IDs
+                 * without relying on a client-side UUID.
+                 *
+                 * This stays below JavaScript's safe integer limit.
+                 */
+                return (
+                    Date.now() * 1000 +
+                    Math.floor(Math.random() * 1000)
+                );
+            }
+
+
+            async function insertWithGeneratedId(
+                table,
+                payload,
+                attempts = 5
             ) {
-                const {
-                    data,
-                    error
-                } =
-                    await db.auth.getSession();
+                for (let attempt = 0; attempt < attempts; attempt++) {
 
-                if (error) {
-                    console.error(
-                        "[Chat] Session error:",
-                        error
+                    const id =
+                        generateNumericId();
+
+                    const { data, error } =
+                        await db
+                            .from(table)
+                            .insert({
+                                id,
+                                ...payload
+                            })
+                            .select()
+                            .single();
+
+                    if (!error) {
+                        return data;
+                    }
+
+                    if (error.code !== "23505") {
+                        throw error;
+                    }
+                }
+
+                throw new Error(
+                    "Could not generate a unique ID. Please try again."
+                );
+            }
+
+
+            function getConversationMembers(conversationId) {
+                return (
+                    conversationMembers.get(
+                        normalizeId(conversationId)
+                    ) || []
+                );
+            }
+
+
+            function getConversationName(conversation) {
+                if (conversation.is_group) {
+                    return (
+                        conversation.name ||
+                        "Group Chat"
                     );
                 }
 
-                session =
-                    data?.session || null;
+                const members =
+                    getConversationMembers(
+                        conversation.id
+                    );
 
-                if (session) {
-                    break;
+                const otherId =
+                    members.find(
+                        id =>
+                            normalizeId(id) !==
+                            normalizeId(currentUser.id)
+                    );
+
+                if (!otherId) {
+                    return "Unknown user";
                 }
 
-                await new Promise(
-                    resolve =>
-                        setTimeout(
-                            resolve,
-                            100
-                        )
+                const profile =
+                    profiles.get(
+                        normalizeId(otherId)
+                    );
+
+                return (
+                    profile?.display_name ||
+                    profile?.username ||
+                    "Unknown user"
                 );
             }
 
-            if (!session) {
-                window.location.href =
-                    "/login/";
 
-                return;
+            function getConversationProfile(conversation) {
+                if (conversation.is_group) {
+                    return null;
+                }
+
+                const members =
+                    getConversationMembers(
+                        conversation.id
+                    );
+
+                const otherId =
+                    members.find(
+                        id =>
+                            normalizeId(id) !==
+                            normalizeId(currentUser.id)
+                    );
+
+                return otherId
+                    ? profiles.get(normalizeId(otherId))
+                    : null;
             }
 
-            currentSession =
-                session;
 
-            if (
-                window.initNavbar
-            ) {
-                await window.initNavbar();
+            function setMessagesEmpty(text) {
+                messagesElement.innerHTML = "";
+
+                const empty =
+                    document.createElement("div");
+
+                empty.className = "messages-empty";
+                empty.textContent = text;
+
+                messagesElement.appendChild(empty);
             }
 
-            await loadConversations();
 
-            setupRealtime();
+            /* =========================
+               LOAD CONVERSATIONS
+            ========================= */
 
-            console.log(
-                "[Chat] Initialized."
-            );
-        }
+            async function loadConversations() {
+                if (!currentUser) {
+                    return;
+                }
 
-        function showFatalError(message) {
-            $("messages").innerHTML = `
-                <div class="welcome">
-                    <div class="welcome-inner">
-                        <div class="welcome-logo">
-                            !
-                        </div>
-                        <h2>Chat unavailable</h2>
-                        <p>${escapeHtml(message)}</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        /*
-         * --------------------------------------------------
-         * Profiles
-         * --------------------------------------------------
-         */
-
-        async function loadProfiles(ids) {
-            const uniqueIds =
-                [
-                    ...new Set(
-                        ids.filter(Boolean)
+                const {
+                    data: memberships,
+                    error: membershipError
+                } = await db
+                    .from("conversation_members")
+                    .select(
+                        "conversation_id,user_id,joined_at"
                     )
-                ];
-
-            const missingIds =
-                uniqueIds.filter(
-                    id => !profiles[id]
-                );
-
-            if (
-                missingIds.length === 0
-            ) {
-                return;
-            }
-
-            /*
-             * We intentionally fetch individually in chunks
-             * instead of using PostgREST .in() with an unknown
-             * number of IDs.
-             */
-            for (
-                let i = 0;
-                i < missingIds.length;
-                i += 50
-            ) {
-                const chunk =
-                    missingIds.slice(
-                        i,
-                        i + 50
+                    .eq(
+                        "user_id",
+                        currentUser.id
                     );
+
+                if (membershipError) {
+                    console.error(
+                        "[Chat] Membership error:",
+                        membershipError
+                    );
+
+                    conversationList.innerHTML =
+                        '<div class="empty-conversations">' +
+                        escapeHTML(
+                            membershipError.message
+                        ) +
+                        "</div>";
+
+                    return;
+                }
+
+
+                const conversationIds =
+                    [
+                        ...new Set(
+                            memberships.map(
+                                row =>
+                                    normalizeId(
+                                        row.conversation_id
+                                    )
+                            )
+                        )
+                    ];
+
+
+                conversations = [];
+                conversationMembers = new Map();
+                latestMessages = new Map();
+
+
+                if (!conversationIds.length) {
+                    renderConversationList();
+                    resetChat();
+                    return;
+                }
+
 
                 const {
-                    data,
-                    error
-                } =
-                    await db
-                        .from("profiles")
-                        .select(
-                            "id,username,display_name,avatar_url,bio,is_verified"
-                        )
-                        .in(
-                            "id",
-                            chunk
-                        );
-
-                if (error) {
-                    console.error(
-                        "[Chat] Profile load error:",
-                        error
-                    );
-
-                    continue;
-                }
-
-                for (
-                    const profile of
-                    data || []
-                ) {
-                    profiles[
-                        profile.id
-                    ] = profile;
-                }
-            }
-        }
-
-        /*
-         * --------------------------------------------------
-         * Conversations
-         * --------------------------------------------------
-         */
-
-        async function loadConversations() {
-            const {
-                data,
-                error
-            } =
-                await db
+                    data: conversationRows,
+                    error: conversationError
+                } = await db
                     .from("conversations")
                     .select(
                         "id,created_at,name,is_group"
+                    )
+                    .in(
+                        "id",
+                        conversationIds
+                    );
+
+
+                if (conversationError) {
+                    console.error(
+                        "[Chat] Conversation error:",
+                        conversationError
+                    );
+
+                    return;
+                }
+
+
+                conversations =
+                    conversationRows || [];
+
+
+                const {
+                    data: memberRows,
+                    error: memberError
+                } = await db
+                    .from("conversation_members")
+                    .select(
+                        "conversation_id,user_id,joined_at"
+                    )
+                    .in(
+                        "conversation_id",
+                        conversationIds
+                    );
+
+
+                if (memberError) {
+                    console.error(
+                        "[Chat] Member loading error:",
+                        memberError
+                    );
+
+                    return;
+                }
+
+
+                const profileIds = new Set();
+
+
+                for (const row of memberRows || []) {
+                    const conversationId =
+                        normalizeId(
+                            row.conversation_id
+                        );
+
+                    if (
+                        !conversationMembers.has(
+                            conversationId
+                        )
+                    ) {
+                        conversationMembers.set(
+                            conversationId,
+                            []
+                        );
+                    }
+
+                    conversationMembers
+                        .get(conversationId)
+                        .push(row.user_id);
+
+                    profileIds.add(
+                        normalizeId(row.user_id)
+                    );
+                }
+
+
+                if (profileIds.size) {
+                    const {
+                        data: profileRows,
+                        error: profileError
+                    } = await db
+                        .from("profiles")
+                        .select(
+                            "id,username,display_name,avatar_url,is_verified,bio"
+                        )
+                        .in(
+                            "id",
+                            [...profileIds]
+                        );
+
+                    if (!profileError) {
+                        profiles = new Map(
+                            (profileRows || []).map(
+                                profile => [
+                                    normalizeId(
+                                        profile.id
+                                    ),
+                                    profile
+                                ]
+                            )
+                        );
+                    }
+                }
+
+
+                const {
+                    data: recentMessages,
+                    error: recentMessageError
+                } = await db
+                    .from("messages")
+                    .select(
+                        "id,conversation_id,sender_id,content,created_at"
+                    )
+                    .in(
+                        "conversation_id",
+                        conversationIds
                     )
                     .order(
                         "created_at",
                         {
                             ascending: false
                         }
-                    );
+                    )
+                    .limit(300);
 
-            if (error) {
-                console.error(
-                    "[Chat] Conversation load error:",
-                    error
-                );
 
-                $("conversation-list").innerHTML = `
-                    <div class="empty-list">
-                        Failed to load conversations.
-                    </div>
-                `;
+                if (!recentMessageError) {
+                    for (
+                        const message
+                        of recentMessages || []
+                    ) {
+                        const key =
+                            normalizeId(
+                                message.conversation_id
+                            );
 
-                return;
-            }
+                        if (
+                            !latestMessages.has(key)
+                        ) {
+                            latestMessages.set(
+                                key,
+                                message
+                            );
+                        }
+                    }
+                }
 
-            conversations =
-                data || [];
 
-            const conversationIds =
-                conversations.map(
-                    conversation =>
-                        conversation.id
-                );
-
-            conversationMembers = {};
-
-            if (
-                conversationIds.length
-            ) {
-                const {
-                    data:
-                        members,
-                    error:
-                        memberError
-                } =
-                    await db
-                        .from(
-                            "conversation_members"
-                        )
-                        .select(
-                            "conversation_id,user_id,joined_at"
-                        )
-                        .in(
-                            "conversation_id",
-                            conversationIds
+                conversations.sort((a, b) => {
+                    const aLatest =
+                        latestMessages.get(
+                            normalizeId(a.id)
                         );
 
-                if (memberError) {
-                    console.error(
-                        "[Chat] Member load error:",
-                        memberError
-                    );
-                } else {
-                    for (
-                        const member of
-                        members || []
-                    ) {
-                        if (
-                            !conversationMembers[
-                                member.conversation_id
-                            ]
-                        ) {
-                            conversationMembers[
-                                member.conversation_id
-                            ] = [];
-                        }
+                    const bLatest =
+                        latestMessages.get(
+                            normalizeId(b.id)
+                        );
 
-                        conversationMembers[
-                            member.conversation_id
-                        ].push(member);
+                    const aTime =
+                        new Date(
+                            aLatest?.created_at ||
+                            a.created_at
+                        ).getTime();
+
+                    const bTime =
+                        new Date(
+                            bLatest?.created_at ||
+                            b.created_at
+                        ).getTime();
+
+                    return bTime - aTime;
+                });
+
+
+                renderConversationList();
+
+
+                if (currentConversationId) {
+                    const stillExists =
+                        conversations.some(
+                            conversation =>
+                                normalizeId(
+                                    conversation.id
+                                ) ===
+                                normalizeId(
+                                    currentConversationId
+                                )
+                        );
+
+                    if (!stillExists) {
+                        resetChat();
                     }
                 }
             }
 
-            const userIds = [];
 
-            for (
-                const members of
-                Object.values(
-                    conversationMembers
-                )
-            ) {
-                for (
-                    const member of members
-                ) {
-                    userIds.push(
-                        member.user_id
+            /* =========================
+               CONVERSATION LIST
+            ========================= */
+
+            function renderConversationList() {
+                conversationList.innerHTML = "";
+
+                const query =
+                    conversationSearch.value
+                        .trim()
+                        .toLowerCase();
+
+
+                const filtered =
+                    conversations.filter(
+                        conversation => {
+                            if (!query) {
+                                return true;
+                            }
+
+                            const name =
+                                getConversationName(
+                                    conversation
+                                ).toLowerCase();
+
+                            const latest =
+                                latestMessages.get(
+                                    normalizeId(
+                                        conversation.id
+                                    )
+                                );
+
+                            const preview =
+                                latest?.content
+                                    ?.toLowerCase() ||
+                                "";
+
+                            return (
+                                name.includes(query) ||
+                                preview.includes(query)
+                            );
+                        }
                     );
+
+
+                if (!filtered.length) {
+                    const empty =
+                        document.createElement("div");
+
+                    empty.className =
+                        "empty-conversations";
+
+                    empty.textContent =
+                        conversations.length
+                            ? "No conversations found."
+                            : "No conversations yet. Click + to start one.";
+
+                    conversationList.appendChild(empty);
+
+                    return;
                 }
-            }
 
-            await loadProfiles(
-                userIds
-            );
 
-            await loadConversationPreviews();
+                for (const conversation of filtered) {
+                    const item =
+                        document.createElement("div");
 
-            renderConversationList();
-        }
+                    item.className =
+                        "conversation";
 
-        async function loadConversationPreviews() {
-            for (
-                const conversation of
-                conversations
-            ) {
-                const {
-                    data,
-                    error
-                } =
-                    await db
-                        .from("messages")
-                        .select(
-                            "id,content,sender_id,created_at"
-                        )
-                        .eq(
-                            "conversation_id",
+                    if (
+                        currentConversationId &&
+                        normalizeId(
+                            currentConversationId
+                        ) ===
+                        normalizeId(
                             conversation.id
                         )
-                        .order(
-                            "created_at",
-                            {
-                                ascending: false
-                            }
-                        )
-                        .limit(1);
+                    ) {
+                        item.classList.add("active");
+                    }
 
-                if (!error) {
-                    conversation.lastMessage =
-                        data?.[0] || null;
-                }
-            }
-        }
 
-        function getConversationName(
-            conversation
-        ) {
-            if (
-                conversation.is_group
-            ) {
-                return (
-                    conversation.name ||
-                    "Group Chat"
-                );
-            }
+                    const avatar =
+                        document.createElement("div");
 
-            const members =
-                conversationMembers[
-                    conversation.id
-                ] || [];
+                    avatar.className =
+                        "avatar small";
 
-            const otherMember =
-                members.find(
-                    member =>
-                        member.user_id !==
-                        currentSession.user.id
-                );
 
-            if (!otherMember) {
-                return "Conversation";
-            }
+                    const profile =
+                        getConversationProfile(
+                            conversation
+                        );
 
-            const profile =
-                profiles[
-                    otherMember.user_id
-                ];
 
-            return getDisplayName(
-                profile
-            );
-        }
-
-        function getConversationAvatar(
-            conversation
-        ) {
-            if (
-                conversation.is_group
-            ) {
-                const avatar =
-                    document.createElement(
-                        "div"
-                    );
-
-                avatar.className =
-                    "avatar group-avatar";
-
-                avatar.textContent =
-                    "👥";
-
-                return avatar;
-            }
-
-            const members =
-                conversationMembers[
-                    conversation.id
-                ] || [];
-
-            const otherMember =
-                members.find(
-                    member =>
-                        member.user_id !==
-                        currentSession.user.id
-                );
-
-            if (!otherMember) {
-                return createLocalAvatar(
-                    null
-                );
-            }
-
-            return createLocalAvatar(
-                profiles[
-                    otherMember.user_id
-                ]
-            );
-        }
-
-        function renderConversationList() {
-            const list =
-                $("conversation-list");
-
-            const search =
-                $("conversation-search")
-                    .value
-                    .trim()
-                    .toLowerCase();
-
-            const visible =
-                conversations.filter(
-                    conversation => {
-                        if (!search) {
-                            return true;
-                        }
-
-                        const name =
+                    if (
+                        conversation.is_group
+                    ) {
+                        avatar.textContent = "👥";
+                    } else {
+                        renderAvatar(
+                            avatar,
+                            profile,
                             getConversationName(
                                 conversation
                             )
-                                .toLowerCase();
-
-                        const preview =
-                            conversation
-                                .lastMessage
-                                ?.content
-                                ?.toLowerCase() ||
-                            "";
-
-                        return (
-                            name.includes(
-                                search
-                            ) ||
-                            preview.includes(
-                                search
-                            )
                         );
                     }
-                );
 
-            if (!visible.length) {
-                list.innerHTML = `
-                    <div class="empty-list">
-                        ${
-                            search
-                                ? "No conversations found."
-                                : "No conversations yet."
+
+                    const info =
+                        document.createElement("div");
+
+                    info.className =
+                        "conversation-info";
+
+
+                    const name =
+                        document.createElement("div");
+
+                    name.className =
+                        "conversation-name";
+
+                    name.textContent =
+                        getConversationName(
+                            conversation
+                        );
+
+
+                    if (
+                        profile?.is_verified
+                    ) {
+                        const badge =
+                            document.createElement("span");
+
+                        badge.className =
+                            "verified";
+
+                        badge.textContent = "✓";
+
+                        name.appendChild(badge);
+                    }
+
+
+                    const latest =
+                        latestMessages.get(
+                            normalizeId(
+                                conversation.id
+                            )
+                        );
+
+
+                    const preview =
+                        document.createElement("div");
+
+                    preview.className =
+                        "conversation-preview";
+
+                    preview.textContent =
+                        latest
+                            ? latest.content
+                            : conversation.is_group
+                                ? "Group chat"
+                                : "No messages yet";
+
+
+                    info.appendChild(name);
+                    info.appendChild(preview);
+
+
+                    const time =
+                        document.createElement("div");
+
+                    time.className =
+                        "conversation-time";
+
+                    time.textContent =
+                        formatTime(
+                            latest?.created_at ||
+                            conversation.created_at
+                        );
+
+
+                    item.appendChild(avatar);
+                    item.appendChild(info);
+                    item.appendChild(time);
+
+
+                    item.addEventListener(
+                        "click",
+                        () => {
+                            openConversation(
+                                conversation.id
+                            );
                         }
-                    </div>
-                `;
+                    );
 
-                return;
+
+                    conversationList.appendChild(item);
+                }
             }
 
-            list.innerHTML = "";
 
-            for (
-                const conversation of
-                visible
+            /* =========================
+               OPEN CONVERSATION
+            ========================= */
+
+            async function openConversation(
+                conversationId
             ) {
-                const button =
-                    document.createElement(
-                        "button"
+                currentConversationId =
+                    normalizeId(
+                        conversationId
                     );
 
-                button.type =
-                    "button";
+                chatPage.classList.add(
+                    "mobile-chat-open"
+                );
 
-                button.className =
-                    "conversation-item";
 
-                if (
-                    String(
-                        conversation.id
-                    ) ===
-                    String(
-                        currentConversationId
-                    )
-                ) {
-                    button.classList.add(
-                        "active"
+                const conversation =
+                    conversations.find(
+                        item =>
+                            normalizeId(
+                                item.id
+                            ) ===
+                            currentConversationId
                     );
+
+
+                if (!conversation) {
+                    resetChat();
+                    return;
                 }
 
-                const avatar =
-                    getConversationAvatar(
+
+                const profile =
+                    getConversationProfile(
                         conversation
                     );
 
-                const info =
-                    document.createElement(
-                        "div"
-                    );
 
-                info.className =
-                    "conversation-info";
-
-                const name =
-                    document.createElement(
-                        "div"
-                    );
-
-                name.className =
-                    "conversation-name";
-
-                name.textContent =
+                headerName.textContent =
                     getConversationName(
                         conversation
                     );
 
-                const preview =
-                    document.createElement(
-                        "div"
-                    );
 
-                preview.className =
-                    "conversation-preview";
+                if (conversation.is_group) {
+                    headerAvatar.textContent =
+                        "👥";
 
-                preview.textContent =
-                    conversation
-                        .lastMessage
-                        ?.content ||
-                    (
-                        conversation.is_group
-                            ? "Group conversation"
-                            : "No messages yet"
-                    );
-
-                info.appendChild(
-                    name
-                );
-
-                info.appendChild(
-                    preview
-                );
-
-                button.appendChild(
-                    avatar
-                );
-
-                button.appendChild(
-                    info
-                );
-
-                button.addEventListener(
-                    "click",
-                    () =>
-                        openConversation(
+                    headerSubtitle.textContent =
+                        getConversationMembers(
                             conversation.id
-                        )
-                );
-
-                list.appendChild(
-                    button
-                );
-            }
-        }
-
-        /*
-         * --------------------------------------------------
-         * Open conversation
-         * --------------------------------------------------
-         */
-
-        async function openConversation(
-            conversationId
-        ) {
-            const conversation =
-                conversations.find(
-                    item =>
-                        String(
-                            item.id
-                        ) ===
-                        String(
-                            conversationId
-                        )
-                );
-
-            if (!conversation) {
-                return;
-            }
-
-            currentConversationId =
-                conversation.id;
-
-            renderConversationList();
-
-            $("messages").innerHTML = `
-                <div class="welcome">
-                    <div class="welcome-inner">
-                        Loading messages...
-                    </div>
-                </div>
-            `;
-
-            const headerName =
-                $("chat-header-name");
-
-            const headerSubtitle =
-                $("chat-header-subtitle");
-
-            const headerAvatar =
-                $("chat-header-avatar");
-
-            headerName.textContent =
-                getConversationName(
-                    conversation
-                );
-
-            if (
-                conversation.is_group
-            ) {
-                const members =
-                    conversationMembers[
-                        conversation.id
-                    ] || [];
-
-                headerSubtitle.textContent =
-                    `${members.length} member${
-                        members.length === 1
-                            ? ""
-                            : "s"
-                    }`;
-
-                headerAvatar.style.display =
-                    "flex";
-
-                headerAvatar.innerHTML =
-                    "";
-
-                headerAvatar.textContent =
-                    "👥";
-            } else {
-                const members =
-                    conversationMembers[
-                        conversation.id
-                    ] || [];
-
-                const other =
-                    members.find(
-                        member =>
-                            member.user_id !==
-                            currentSession
-                                .user
-                                .id
-                    );
-
-                const profile =
-                    other
-                        ? profiles[
-                              other.user_id
-                          ]
-                        : null;
-
-                headerSubtitle.textContent =
-                    profile?.username
-                        ? `@${profile.username}`
-                        : "Direct message";
-
-                headerAvatar.style.display =
-                    "flex";
-
-                headerAvatar.innerHTML =
-                    "";
-
-                const avatar =
-                    createLocalAvatar(
+                        ).length +
+                        " members";
+                } else {
+                    renderAvatar(
+                        headerAvatar,
                         profile,
-                        "avatar large"
+                        getConversationName(
+                            conversation
+                        )
                     );
 
-                headerAvatar.appendChild(
-                    avatar.querySelector(
-                        "img"
-                    )
-                        ? avatar.querySelector(
-                              "img"
-                          ).cloneNode(true)
-                        : document.createTextNode(
-                              avatar.textContent
-                          )
+                    headerSubtitle.textContent =
+                        profile?.username
+                            ? "@" +
+                              profile.username
+                            : "Direct message";
+                }
+
+
+                leaveButton.hidden = false;
+                messageForm.hidden = false;
+
+
+                renderConversationList();
+
+
+                await loadMessages(
+                    conversation.id
                 );
+
+
+                messageInput.focus();
             }
 
-            $("leave-button").style.display =
-                "block";
 
-            $("message-input").disabled =
-                false;
+            async function loadMessages(
+                conversationId
+            ) {
+                setMessagesEmpty(
+                    "Loading messages..."
+                );
 
-            $("send-button").disabled =
-                false;
 
-            $("message-input").placeholder =
-                `Message ${getConversationName(
-                    conversation
-                )}`;
-
-            await loadMessages(
-                conversation.id
-            );
-
-            $("chat-page").classList.add(
-                "mobile-chat-open"
-            );
-
-            $("message-input").focus();
-        }
-
-        /*
-         * --------------------------------------------------
-         * Messages
-         * --------------------------------------------------
-         */
-
-        async function loadMessages(
-            conversationId
-        ) {
-            const {
-                data,
-                error
-            } =
-                await db
+                const {
+                    data,
+                    error
+                } = await db
                     .from("messages")
                     .select(
                         "id,conversation_id,sender_id,content,created_at"
@@ -2183,397 +1880,437 @@
                         {
                             ascending: true
                         }
-                    );
-
-            if (error) {
-                console.error(
-                    "[Chat] Message load error:",
-                    error
-                );
-
-                $("messages").innerHTML = `
-                    <div class="welcome">
-                        <div class="welcome-inner">
-                            Failed to load messages.
-                        </div>
-                    </div>
-                `;
-
-                return;
-            }
-
-            await loadProfiles(
-                (data || []).map(
-                    message =>
-                        message.sender_id
-                )
-            );
-
-            renderMessages(
-                data || []
-            );
-        }
-
-        function renderMessages(
-            messages
-        ) {
-            const container =
-                $("messages");
-
-            container.innerHTML =
-                "";
-
-            if (!messages.length) {
-                container.innerHTML = `
-                    <div class="welcome">
-                        <div class="welcome-inner">
-                            <div class="welcome-logo">
-                                💬
-                            </div>
-
-                            <h2>
-                                Start the conversation
-                            </h2>
-
-                            <p>
-                                Send the first message.
-                            </p>
-                        </div>
-                    </div>
-                `;
-
-                return;
-            }
-
-            for (
-                const message of messages
-            ) {
-                container.appendChild(
-                    createMessageElement(
-                        message
                     )
-                );
-            }
+                    .limit(500);
 
-            scrollMessagesToBottom();
-        }
 
-        function createMessageElement(
-            message
-        ) {
-            const profile =
-                profiles[
-                    message.sender_id
-                ] || null;
-
-            const own =
-                message.sender_id ===
-                currentSession.user.id;
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-            row.className =
-                "message-row";
-
-            if (own) {
-                row.classList.add(
-                    "own"
-                );
-            }
-
-            const avatar =
-                createLocalAvatar(
-                    profile,
-                    "avatar"
-                );
-
-            const content =
-                document.createElement(
-                    "div"
-                );
-
-            content.className =
-                "message-content";
-
-            const meta =
-                document.createElement(
-                    "div"
-                );
-
-            meta.className =
-                "message-meta";
-
-            const author =
-                document.createElement(
-                    "span"
-                );
-
-            author.className =
-                "message-author";
-
-            author.textContent =
-                getDisplayName(
-                    profile
-                );
-
-            meta.appendChild(
-                author
-            );
-
-            if (
-                profile?.is_verified
-            ) {
-                const verified =
-                    document.createElement(
-                        "span"
+                if (error) {
+                    console.error(
+                        "[Chat] Message loading error:",
+                        error
                     );
 
-                verified.className =
-                    "verified";
-
-                verified.textContent =
-                    "✓";
-
-                verified.title =
-                    "Verified";
-
-                meta.appendChild(
-                    verified
-                );
-            }
-
-            const time =
-                document.createElement(
-                    "span"
-                );
-
-            time.className =
-                "message-time";
-
-            time.textContent =
-                formatMessageTime(
-                    message.created_at
-                );
-
-            meta.appendChild(
-                time
-            );
-
-            const text =
-                document.createElement(
-                    "div"
-                );
-
-            text.className =
-                "message-text";
-
-            text.textContent =
-                message.content;
-
-            content.appendChild(
-                meta
-            );
-
-            content.appendChild(
-                text
-            );
-
-            if (own) {
-                const actions =
-                    document.createElement(
-                        "div"
+                    setMessagesEmpty(
+                        error.message
                     );
 
-                actions.className =
-                    "message-actions";
-
-                const deleteButton =
-                    document.createElement(
-                        "button"
-                    );
-
-                deleteButton.type =
-                    "button";
-
-                deleteButton.className =
-                    "message-action delete";
-
-                deleteButton.textContent =
-                    "Delete";
-
-                deleteButton.addEventListener(
-                    "click",
-                    () =>
-                        deleteMessage(
-                            message.id
-                        )
-                );
-
-                actions.appendChild(
-                    deleteButton
-                );
-
-                content.appendChild(
-                    actions
-                );
-            }
-
-            row.appendChild(
-                avatar
-            );
-
-            row.appendChild(
-                content
-            );
-
-            return row;
-        }
-
-        function scrollMessagesToBottom() {
-            const container =
-                $("messages");
-
-            requestAnimationFrame(
-                () => {
-                    container.scrollTop =
-                        container.scrollHeight;
+                    return;
                 }
-            );
-        }
 
-        async function sendMessage() {
-            if (
-                !currentConversationId ||
-                !currentSession
+
+                messagesElement.innerHTML = "";
+
+
+                if (!data?.length) {
+                    setMessagesEmpty(
+                        "No messages yet. Say hello!"
+                    );
+
+                    return;
+                }
+
+
+                for (const message of data) {
+                    appendMessage(
+                        message,
+                        false
+                    );
+                }
+
+
+                scrollMessages();
+            }
+
+
+            /* =========================
+               MESSAGE RENDERING
+            ========================= */
+
+            const renderedMessageIds =
+                new Set();
+
+
+            function appendMessage(
+                message,
+                scroll = true
             ) {
-                return;
-            }
+                const messageId =
+                    normalizeId(message.id);
 
-            const input =
-                $("message-input");
 
-            const content =
-                input.value.trim();
-
-            if (!content) {
-                return;
-            }
-
-            input.disabled = true;
-            $("send-button").disabled =
-                true;
-
-            const messageId =
-                generateNumericId();
-
-            const {
-                data,
-                error
-            } =
-                await db
-                    .from("messages")
-                    .insert({
-                        id: messageId,
-                        conversation_id:
-                            currentConversationId,
-                        sender_id:
-                            currentSession
-                                .user
-                                .id,
-                        content
-                    })
-                    .select(
-                        "id,conversation_id,sender_id,content,created_at"
+                if (
+                    renderedMessageIds.has(
+                        messageId
                     )
-                    .single();
+                ) {
+                    return;
+                }
 
-            input.disabled = false;
-            $("send-button").disabled =
-                false;
 
-            if (error) {
-                console.error(
-                    "[Chat] Send error:",
-                    error
+                renderedMessageIds.add(
+                    messageId
                 );
 
-                alert(
-                    `Could not send message:\n${error.message}`
+
+                const empty =
+                    messagesElement.querySelector(
+                        ".messages-empty"
+                    );
+
+                if (empty) {
+                    empty.remove();
+                }
+
+
+                const mine =
+                    normalizeId(
+                        message.sender_id
+                    ) ===
+                    normalizeId(
+                        currentUser.id
+                    );
+
+
+                const senderProfile =
+                    profiles.get(
+                        normalizeId(
+                            message.sender_id
+                        )
+                    );
+
+
+                const row =
+                    document.createElement("div");
+
+                row.className =
+                    "message-row";
+
+                if (mine) {
+                    row.classList.add("mine");
+                }
+
+
+                const avatar =
+                    document.createElement("div");
+
+                avatar.className =
+                    "avatar small";
+
+                renderAvatar(
+                    avatar,
+                    senderProfile,
+                    mine
+                        ? currentUser.email
+                        : "User"
                 );
 
-                return;
-            }
 
-            input.value =
-                "";
+                const area =
+                    document.createElement("div");
 
-            resizeComposer();
+                area.className =
+                    "message-content-area";
 
-            await loadProfiles([
-                data.sender_id
-            ]);
 
-            /*
-             * Realtime will normally render this.
-             * This fallback makes the message appear
-             * immediately even if Realtime takes a moment.
-             */
-            const existing =
-                document.querySelector(
-                    `[data-message-id="${data.id}"]`
-                );
+                const meta =
+                    document.createElement("div");
 
-            if (!existing) {
-                const welcome =
-                    $("messages")
-                        .querySelector(
-                            ".welcome"
+                meta.className =
+                    "message-meta";
+
+
+                const author =
+                    document.createElement("span");
+
+                author.className =
+                    "message-author";
+
+                author.textContent =
+                    mine
+                        ? "You"
+                        : (
+                            senderProfile?.display_name ||
+                            senderProfile?.username ||
+                            "Unknown user"
                         );
 
-                if (welcome) {
-                    $("messages").innerHTML =
-                        "";
+
+                if (
+                    senderProfile?.is_verified
+                ) {
+                    const badge =
+                        document.createElement("span");
+
+                    badge.className =
+                        "verified";
+
+                    badge.textContent = "✓";
+
+                    author.appendChild(
+                        badge
+                    );
                 }
 
-                const element =
-                    createMessageElement(
-                        data
+
+                const time =
+                    document.createElement("span");
+
+                time.className =
+                    "message-time";
+
+                time.textContent =
+                    formatTime(
+                        message.created_at
                     );
 
-                element.dataset.messageId =
-                    data.id;
 
-                $("messages").appendChild(
-                    element
-                );
+                meta.appendChild(author);
+                meta.appendChild(time);
 
-                scrollMessagesToBottom();
+
+                const bubble =
+                    document.createElement("div");
+
+                bubble.className =
+                    "message-bubble";
+
+                bubble.textContent =
+                    message.content;
+
+
+                area.appendChild(meta);
+                area.appendChild(bubble);
+
+
+                if (mine) {
+                    const actions =
+                        document.createElement("div");
+
+                    actions.className =
+                        "message-actions";
+
+
+                    const deleteButton =
+                        document.createElement("button");
+
+                    deleteButton.type =
+                        "button";
+
+                    deleteButton.className =
+                        "message-delete";
+
+                    deleteButton.textContent =
+                        "Delete";
+
+
+                    deleteButton.addEventListener(
+                        "click",
+                        () => {
+                            deleteMessage(
+                                message.id,
+                                row
+                            );
+                        }
+                    );
+
+
+                    actions.appendChild(
+                        deleteButton
+                    );
+
+                    area.appendChild(
+                        actions
+                    );
+                }
+
+
+                row.appendChild(avatar);
+                row.appendChild(area);
+
+                messagesElement.appendChild(row);
+
+
+                if (scroll) {
+                    scrollMessages();
+                }
             }
 
-            await refreshConversationPreview(
-                currentConversationId
-            );
-        }
 
-        async function deleteMessage(
-            messageId
-        ) {
-            const confirmed =
-                window.confirm(
-                    "Delete this message?"
+            function removeRenderedMessage(
+                messageId
+            ) {
+                const rows =
+                    messagesElement.querySelectorAll(
+                        ".message-row"
+                    );
+
+                for (const row of rows) {
+                    const deleteButton =
+                        row.querySelector(
+                            ".message-delete"
+                        );
+
+                    /*
+                     * Message IDs are also stored directly
+                     * on each rendered row.
+                     */
+                    if (
+                        row.dataset.messageId ===
+                        normalizeId(messageId)
+                    ) {
+                        row.remove();
+                    }
+                }
+
+                renderedMessageIds.delete(
+                    normalizeId(messageId)
                 );
-
-            if (!confirmed) {
-                return;
             }
 
-            const {
-                error
-            } =
-                await db
+
+            function scrollMessages() {
+                messagesElement.scrollTop =
+                    messagesElement.scrollHeight;
+            }
+
+
+            /* =========================
+               SEND MESSAGE
+            ========================= */
+
+            async function sendMessage() {
+                const content =
+                    messageInput.value.trim();
+
+                if (
+                    !content ||
+                    !currentConversationId ||
+                    !currentUser
+                ) {
+                    return;
+                }
+
+
+                sendButton.disabled = true;
+
+
+                const {
+                    data,
+                    error
+                } = await insertMessageWithId({
+                    conversation_id:
+                        currentConversationId,
+                    sender_id:
+                        currentUser.id,
+                    content
+                });
+
+
+                if (error) {
+                    console.error(
+                        "[Chat] Send error:",
+                        error
+                    );
+
+                    alert(
+                        "Could not send message:\n" +
+                        error.message
+                    );
+
+                    sendButton.disabled = false;
+                    return;
+                }
+
+
+                messageInput.value = "";
+
+
+                if (data) {
+                    appendMessage(
+                        data,
+                        true
+                    );
+                }
+
+
+                await refreshConversationPreviews();
+
+
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+
+
+            async function insertMessageWithId(
+                payload
+            ) {
+                for (let attempt = 0; attempt < 5; attempt++) {
+
+                    const id =
+                        generateNumericId();
+
+                    const {
+                        data,
+                        error
+                    } = await db
+                        .from("messages")
+                        .insert({
+                            id,
+                            ...payload
+                        })
+                        .select()
+                        .single();
+
+
+                    if (!error) {
+                        return {
+                            data,
+                            error: null
+                        };
+                    }
+
+
+                    if (
+                        error.code !==
+                        "23505"
+                    ) {
+                        return {
+                            data: null,
+                            error
+                        };
+                    }
+                }
+
+
+                return {
+                    data: null,
+                    error: new Error(
+                        "Could not create a unique message ID."
+                    )
+                };
+            }
+
+
+            /* =========================
+               DELETE MESSAGE
+            ========================= */
+
+            async function deleteMessage(
+                messageId,
+                row
+            ) {
+                if (
+                    !confirm(
+                        "Delete this message?"
+                    )
+                ) {
+                    return;
+                }
+
+
+                const {
+                    error
+                } = await db
                     .from("messages")
                     .delete()
                     .eq(
@@ -2582,350 +2319,279 @@
                     )
                     .eq(
                         "sender_id",
-                        currentSession
-                            .user
-                            .id
+                        currentUser.id
                     );
 
-            if (error) {
-                console.error(
-                    "[Chat] Delete error:",
-                    error
-                );
 
-                alert(
-                    `Could not delete message:\n${error.message}`
-                );
-
-                return;
-            }
-
-            await loadMessages(
-                currentConversationId
-            );
-
-            await refreshConversationPreview(
-                currentConversationId
-            );
-        }
-
-        async function refreshConversationPreview(
-            conversationId
-        ) {
-            const conversation =
-                conversations.find(
-                    item =>
-                        String(
-                            item.id
-                        ) ===
-                        String(
-                            conversationId
-                        )
-                );
-
-            if (!conversation) {
-                return;
-            }
-
-            const {
-                data
-            } =
-                await db
-                    .from("messages")
-                    .select(
-                        "id,content,sender_id,created_at"
-                    )
-                    .eq(
-                        "conversation_id",
-                        conversationId
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: false
-                        }
-                    )
-                    .limit(1);
-
-            conversation.lastMessage =
-                data?.[0] || null;
-
-            renderConversationList();
-        }
-
-        /*
-         * --------------------------------------------------
-         * Direct messages
-         * --------------------------------------------------
-         */
-
-        async function findExistingDirectConversation(
-            targetUserId
-        ) {
-            const {
-                data,
-                error
-            } =
-                await db
-                    .from("conversation_members")
-                    .select(
-                        "conversation_id,user_id"
-                    )
-                    .eq(
-                        "user_id",
-                        currentSession
-                            .user
-                            .id
+                if (error) {
+                    console.error(
+                        "[Chat] Delete error:",
+                        error
                     );
 
-            if (error) {
-                console.error(
-                    "[Chat] Own conversation lookup error:",
-                    error
-                );
-
-                return null;
-            }
-
-            const ownConversationIds =
-                [
-                    ...new Set(
-                        (data || []).map(
-                            row =>
-                                row.conversation_id
-                        )
-                    )
-                ];
-
-            if (
-                !ownConversationIds.length
-            ) {
-                return null;
-            }
-
-            const {
-                data:
-                    targetMemberships,
-                error:
-                    targetError
-            } =
-                await db
-                    .from(
-                        "conversation_members"
-                    )
-                    .select(
-                        "conversation_id,user_id"
-                    )
-                    .eq(
-                        "user_id",
-                        targetUserId
-                    )
-                    .in(
-                        "conversation_id",
-                        ownConversationIds
+                    alert(
+                        "Could not delete message:\n" +
+                        error.message
                     );
 
-            if (targetError) {
-                console.error(
-                    "[Chat] Target conversation lookup error:",
-                    targetError
-                );
-
-                return null;
-            }
-
-            const targetIds =
-                new Set(
-                    (targetMemberships || [])
-                        .map(
-                            row =>
-                                row.conversation_id
-                        )
-                );
-
-            for (
-                const conversation of
-                conversations
-            ) {
-                if (
-                    !conversation.is_group &&
-                    targetIds.has(
-                        conversation.id
-                    )
-                ) {
-                    return conversation;
+                    return;
                 }
-            }
 
-            return null;
-        }
 
-        async function startDirectConversation(
-            targetProfile
-        ) {
-            hideModal(
-                "new-chat-modal"
-            );
+                row.remove();
 
-            /*
-             * Refresh first so conversations created
-             * elsewhere are known to the client.
-             */
-            await loadConversations();
-
-            const existing =
-                await findExistingDirectConversation(
-                    targetProfile.id
+                renderedMessageIds.delete(
+                    normalizeId(messageId)
                 );
 
-            if (existing) {
-                await openConversation(
-                    existing.id
-                );
 
-                return;
+                await refreshConversationPreviews();
             }
 
-            const conversationId =
-                generateNumericId();
 
-            const {
-                data:
-                    conversation,
-                error
-            } =
-                await db
-                    .from("conversations")
-                    .insert({
-                        id:
-                            conversationId,
-                        name: null,
-                        is_group: false
-                    })
-                    .select(
-                        "id,created_at,name,is_group"
-                    )
-                    .single();
+            /* =========================
+               LEAVE CONVERSATION
+            ========================= */
 
-            if (error) {
-                console.error(
-                    "[Chat] Conversation creation error:",
+            async function leaveConversation() {
+                if (
+                    !currentConversationId ||
+                    !currentUser
+                ) {
+                    return;
+                }
+
+
+                const conversation =
+                    conversations.find(
+                        item =>
+                            normalizeId(
+                                item.id
+                            ) ===
+                            normalizeId(
+                                currentConversationId
+                            )
+                    );
+
+
+                if (!conversation) {
+                    return;
+                }
+
+
+                const name =
+                    getConversationName(
+                        conversation
+                    );
+
+
+                const confirmed =
+                    confirm(
+                        `Leave "${name}"?`
+                    );
+
+
+                if (!confirmed) {
+                    return;
+                }
+
+
+                leaveButton.disabled = true;
+
+
+                const {
                     error
-                );
-
-                alert(
-                    `Could not create conversation:\n${error.message}`
-                );
-
-                return;
-            }
-
-            const {
-                error:
-                    memberError
-            } =
-                await db
-                    .from(
-                        "conversation_members"
-                    )
-                    .insert([
-                        {
-                            conversation_id:
-                                conversation.id,
-                            user_id:
-                                currentSession
-                                    .user
-                                    .id
-                        },
-                        {
-                            conversation_id:
-                                conversation.id,
-                            user_id:
-                                targetProfile.id
-                        }
-                    ]);
-
-            if (memberError) {
-                console.error(
-                    "[Chat] Member creation error:",
-                    memberError
-                );
-
-                /*
-                 * Try to clean up the empty conversation.
-                 * This may be blocked by RLS, so failure here
-                 * is harmless.
-                 */
-                await db
-                    .from("conversations")
+                } = await db
+                    .from("conversation_members")
                     .delete()
                     .eq(
-                        "id",
-                        conversation.id
+                        "conversation_id",
+                        currentConversationId
+                    )
+                    .eq(
+                        "user_id",
+                        currentUser.id
                     );
 
-                alert(
-                    `Could not add conversation members:\n${memberError.message}`
+
+                if (error) {
+                    console.error(
+                        "[Chat] Leave error:",
+                        error
+                    );
+
+                    alert(
+                        "Could not leave conversation:\n" +
+                        error.message
+                    );
+
+                    leaveButton.disabled = false;
+                    return;
+                }
+
+
+                currentConversationId = null;
+
+                resetChat();
+
+                await loadConversations();
+
+                leaveButton.disabled = false;
+            }
+
+
+            function resetChat() {
+                currentConversationId = null;
+
+                headerAvatar.textContent =
+                    "?";
+
+                headerName.textContent =
+                    "Select a conversation";
+
+                headerSubtitle.textContent =
+                    "Choose a conversation to start chatting";
+
+                leaveButton.hidden = true;
+                messageForm.hidden = true;
+
+                renderedMessageIds.clear();
+
+                setMessagesEmpty(
+                    "Select a conversation to start chatting."
                 );
 
-                return;
+                chatPage.classList.remove(
+                    "mobile-chat-open"
+                );
+
+                renderConversationList();
             }
 
-            await loadConversations();
 
-            await openConversation(
-                conversation.id
-            );
-        }
+            /* =========================
+               NEW CHAT MODAL
+            ========================= */
 
-        /*
-         * --------------------------------------------------
-         * User search
-         * --------------------------------------------------
-         */
+            function openModal() {
+                modalBackdrop.classList.add(
+                    "visible"
+                );
 
-        async function searchUsers(
-            input,
-            resultContainer,
-            selectionMode = false
-        ) {
-            const query =
-                input.value.trim();
+                modalStatus.textContent = "";
+                userSearch.value = "";
 
-            if (!query) {
-                resultContainer.innerHTML = `
-                    <div class="empty-list">
-                        Search for a user...
-                    </div>
-                `;
+                selectedGroupUsers.clear();
 
-                return;
+                renderSelectedUsers();
+
+                setModalMode("direct");
+
+                searchResults.innerHTML = "";
+
+                userSearch.focus();
             }
 
-            resultContainer.innerHTML = `
-                <div class="empty-list">
-                    Searching...
-                </div>
-            `;
 
-            const pattern =
-                `%${escapeIlike(
+            function closeModal() {
+                modalBackdrop.classList.remove(
+                    "visible"
+                );
+            }
+
+
+            function setModalMode(mode) {
+                modalMode = mode;
+
+                const isGroup =
+                    mode === "group";
+
+
+                directModeButton.classList.toggle(
+                    "active",
+                    !isGroup
+                );
+
+                groupModeButton.classList.toggle(
+                    "active",
+                    isGroup
+                );
+
+
+                groupName.classList.toggle(
+                    "visible",
+                    isGroup
+                );
+
+
+                selectedUsers.classList.toggle(
+                    "visible",
+                    isGroup
+                );
+
+
+                createGroupButton.hidden =
+                    !isGroup;
+
+
+                if (!isGroup) {
+                    selectedGroupUsers.clear();
+                    renderSelectedUsers();
+                }
+
+
+                modalStatus.textContent = "";
+            }
+
+
+            async function searchUsers() {
+                const query =
+                    userSearch.value.trim();
+
+
+                searchResults.innerHTML = "";
+
+
+                if (!query) {
+                    return;
+                }
+
+
+                if (!currentUser) {
+                    return;
+                }
+
+
+                const escaped =
                     query
-                )}%`;
+                        .replace(
+                            /\\/g,
+                            "\\\\"
+                        )
+                        .replace(
+                            /%/g,
+                            "\\%"
+                        )
+                        .replace(
+                            /_/g,
+                            "\\_"
+                        );
 
-            /*
-             * Avoid the problematic .or() expression
-             * from the old Chat implementation.
-             */
-            const [
-                usernameResult,
-                displayNameResult
-            ] =
-                await Promise.all([
+
+                const pattern =
+                    "%" +
+                    escaped +
+                    "%";
+
+
+                const [
+                    usernameResult,
+                    displayNameResult
+                ] = await Promise.all([
                     db
                         .from("profiles")
                         .select(
-                            "id,username,display_name,avatar_url,bio,is_verified"
+                            "id,username,display_name,avatar_url,is_verified,bio"
                         )
                         .ilike(
                             "username",
@@ -2933,16 +2599,14 @@
                         )
                         .neq(
                             "id",
-                            currentSession
-                                .user
-                                .id
+                            currentUser.id
                         )
                         .limit(20),
 
                     db
                         .from("profiles")
                         .select(
-                            "id,username,display_name,avatar_url,bio,is_verified"
+                            "id,username,display_name,avatar_url,is_verified,bio"
                         )
                         .ilike(
                             "display_name",
@@ -2950,966 +2614,1032 @@
                         )
                         .neq(
                             "id",
-                            currentSession
-                                .user
-                                .id
+                            currentUser.id
                         )
                         .limit(20)
                 ]);
 
-            if (
-                usernameResult.error ||
-                displayNameResult.error
-            ) {
-                console.error(
-                    "[Chat] User search error:",
+
+                if (
                     usernameResult.error ||
+                    displayNameResult.error
+                ) {
+                    console.error(
+                        "[Chat] User search error:",
+                        usernameResult.error ||
                         displayNameResult.error
-                );
-
-                resultContainer.innerHTML = `
-                    <div class="empty-list">
-                        Search failed.
-                    </div>
-                `;
-
-                return;
-            }
-
-            const merged =
-                new Map();
-
-            for (
-                const profile of
-                usernameResult.data || []
-            ) {
-                merged.set(
-                    profile.id,
-                    profile
-                );
-            }
-
-            for (
-                const profile of
-                displayNameResult.data || []
-            ) {
-                merged.set(
-                    profile.id,
-                    profile
-                );
-            }
-
-            const results =
-                [
-                    ...merged.values()
-                ];
-
-            if (!results.length) {
-                resultContainer.innerHTML = `
-                    <div class="empty-list">
-                        No users found.
-                    </div>
-                `;
-
-                return;
-            }
-
-            for (
-                const profile of results
-            ) {
-                profiles[
-                    profile.id
-                ] = profile;
-            }
-
-            resultContainer.innerHTML =
-                "";
-
-            for (
-                const profile of results
-            ) {
-                resultContainer.appendChild(
-                    createUserResult(
-                        profile,
-                        selectionMode
-                    )
-                );
-            }
-        }
-
-        function createUserResult(
-            profile,
-            selectionMode
-        ) {
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-            button.type =
-                "button";
-
-            button.className =
-                "user-result";
-
-            const avatar =
-                createLocalAvatar(
-                    profile,
-                    "avatar small"
-                );
-
-            const info =
-                document.createElement(
-                    "div"
-                );
-
-            info.className =
-                "user-result-info";
-
-            const name =
-                document.createElement(
-                    "div"
-                );
-
-            name.className =
-                "user-result-name";
-
-            name.textContent =
-                getDisplayName(
-                    profile
-                );
-
-            const username =
-                document.createElement(
-                    "div"
-                );
-
-            username.className =
-                "user-result-username";
-
-            username.textContent =
-                profile.username
-                    ? `@${profile.username}`
-                    : "";
-
-            info.appendChild(
-                name
-            );
-
-            info.appendChild(
-                username
-            );
-
-            button.appendChild(
-                avatar
-            );
-
-            button.appendChild(
-                info
-            );
-
-            if (
-                selectionMode
-            ) {
-                const selected =
-                    selectedGroupUsers.some(
-                        user =>
-                            user.id ===
-                            profile.id
                     );
 
-                if (selected) {
-                    button.classList.add(
-                        "selected"
-                    );
+                    modalStatus.textContent =
+                        "Could not search users.";
+
+                    return;
                 }
 
-                const check =
-                    document.createElement(
-                        "span"
-                    );
 
-                check.className =
-                    "selected-check";
+                const unique =
+                    new Map();
 
-                check.textContent =
-                    selected
-                        ? "✓"
-                        : "";
 
-                button.appendChild(
-                    check
-                );
-
-                button.addEventListener(
-                    "click",
-                    () =>
-                        toggleGroupUser(
-                            profile
-                        )
-                );
-            } else {
-                button.addEventListener(
-                    "click",
-                    () =>
-                        startDirectConversation(
-                            profile
-                        )
-                );
-            }
-
-            return button;
-        }
-
-        /*
-         * --------------------------------------------------
-         * Group creation
-         * --------------------------------------------------
-         */
-
-        function toggleGroupUser(
-            profile
-        ) {
-            const existingIndex =
-                selectedGroupUsers.findIndex(
-                    user =>
-                        user.id ===
-                        profile.id
-                );
-
-            if (
-                existingIndex >= 0
-            ) {
-                selectedGroupUsers.splice(
-                    existingIndex,
-                    1
-                );
-            } else {
-                selectedGroupUsers.push(
-                    profile
-                );
-            }
-
-            renderSelectedUsers();
-
-            if (
-                $("group-user-search")
-                    .value
-                    .trim()
-            ) {
-                searchUsers(
-                    $("group-user-search"),
-                    $("group-user-results"),
-                    true
-                );
-            }
-        }
-
-        function renderSelectedUsers() {
-            const container =
-                $("selected-users");
-
-            container.innerHTML =
-                "";
-
-            for (
-                const profile of
-                selectedGroupUsers
-            ) {
-                const element =
-                    document.createElement(
-                        "span"
-                    );
-
-                element.className =
-                    "selected-user";
-
-                element.textContent =
-                    getDisplayName(
+                for (
+                    const profile
+                    of [
+                        ...(usernameResult.data || []),
+                        ...(displayNameResult.data || [])
+                    ]
+                ) {
+                    unique.set(
+                        normalizeId(profile.id),
                         profile
                     );
+                }
 
-                container.appendChild(
-                    element
+
+                profiles = new Map([
+                    ...profiles,
+                    ...unique
+                ]);
+
+
+                renderSearchResults(
+                    [...unique.values()]
                 );
             }
-        }
 
-        async function createGroup() {
-            const name =
-                $("group-name")
-                    .value
-                    .trim();
 
-            const status =
-                $("group-status");
-
-            if (!name) {
-                showStatus(
-                    status,
-                    "Enter a group name.",
-                    true
-                );
-
-                return;
-            }
-
-            if (
-                selectedGroupUsers.length <
-                1
+            function renderSearchResults(
+                results
             ) {
-                showStatus(
-                    status,
-                    "Add at least one other person.",
-                    true
-                );
+                searchResults.innerHTML = "";
 
-                return;
-            }
 
-            const button =
-                $("group-create");
+                if (!results.length) {
+                    const empty =
+                        document.createElement("div");
 
-            button.disabled =
-                true;
+                    empty.className =
+                        "empty-conversations";
 
-            showStatus(
-                status,
-                "Creating group..."
-            );
+                    empty.textContent =
+                        "No users found.";
 
-            const conversationId =
-                generateNumericId();
-
-            const {
-                data:
-                    conversation,
-                error
-            } =
-                await db
-                    .from("conversations")
-                    .insert({
-                        id:
-                            conversationId,
-                        name,
-                        is_group: true
-                    })
-                    .select(
-                        "id,created_at,name,is_group"
-                    )
-                    .single();
-
-            if (error) {
-                console.error(
-                    "[Chat] Group creation error:",
-                    error
-                );
-
-                button.disabled =
-                    false;
-
-                showStatus(
-                    status,
-                    error.message,
-                    true
-                );
-
-                return;
-            }
-
-            const members = [
-                {
-                    conversation_id:
-                        conversation.id,
-                    user_id:
-                        currentSession
-                            .user
-                            .id
-                },
-
-                ...selectedGroupUsers.map(
-                    profile => ({
-                        conversation_id:
-                            conversation.id,
-                        user_id:
-                            profile.id
-                    })
-                )
-            ];
-
-            const {
-                error:
-                    memberError
-            } =
-                await db
-                    .from(
-                        "conversation_members"
-                    )
-                    .insert(
-                        members
+                    searchResults.appendChild(
+                        empty
                     );
 
-            if (memberError) {
-                console.error(
-                    "[Chat] Group member error:",
-                    memberError
-                );
+                    return;
+                }
 
-                button.disabled =
-                    false;
 
-                showStatus(
-                    status,
-                    memberError.message,
-                    true
-                );
+                for (const profile of results) {
+                    const result =
+                        document.createElement("div");
 
-                return;
-            }
+                    result.className =
+                        "search-result";
 
-            hideModal(
-                "group-modal"
-            );
 
-            resetGroupModal();
+                    const avatar =
+                        document.createElement("div");
 
-            await loadConversations();
+                    avatar.className =
+                        "avatar small";
 
-            await openConversation(
-                conversation.id
-            );
-
-            button.disabled =
-                false;
-        }
-
-        function resetGroupModal() {
-            $("group-name").value =
-                "";
-
-            $("group-user-search").value =
-                "";
-
-            $("group-user-results").innerHTML = `
-                <div class="empty-list">
-                    Search for people to add.
-                </div>
-            `;
-
-            $("group-status").style.display =
-                "none";
-
-            selectedGroupUsers =
-                [];
-
-            renderSelectedUsers();
-        }
-
-        /*
-         * --------------------------------------------------
-         * Leave conversation
-         * --------------------------------------------------
-         *
-         * The database currently does not expose a DELETE
-         * policy for conversation_members.
-         *
-         * Therefore we don't attempt an operation the RLS
-         * policies will reject.
-         *
-         * The button is kept hidden until this is enabled.
-         */
-
-        async function leaveConversation() {
-            /*
-             * Intentionally disabled because the supplied RLS
-             * does not permit DELETE on conversation_members.
-             */
-            alert(
-                "Leaving conversations is not enabled in the current database policies."
-            );
-        }
-
-        /*
-         * --------------------------------------------------
-         * Realtime
-         * --------------------------------------------------
-         */
-
-        function setupRealtime() {
-            cleanupRealtime();
-
-            conversationRealtimeChannel =
-                db
-                    .channel(
-                        "ripdead-chat-conversations"
-                    )
-                    .on(
-                        "postgres_changes",
-                        {
-                            event: "*",
-                            schema: "public",
-                            table: "conversation_members"
-                        },
-                        async () => {
-                            console.log(
-                                "[Chat] Conversation membership changed."
-                            );
-
-                            await loadConversations();
-                        }
-                    )
-                    .on(
-                        "postgres_changes",
-                        {
-                            event: "*",
-                            schema: "public",
-                            table: "conversations"
-                        },
-                        async () => {
-                            await loadConversations();
-                        }
-                    )
-                    .subscribe(
-                        status => {
-                            console.log(
-                                "[Chat] Conversation realtime:",
-                                status
-                            );
-                        }
+                    renderAvatar(
+                        avatar,
+                        profile,
+                        profile.display_name ||
+                        profile.username
                     );
 
-            messageRealtimeChannel =
-                db
-                    .channel(
-                        "ripdead-chat-messages"
-                    )
-                    .on(
-                        "postgres_changes",
-                        {
-                            event: "INSERT",
-                            schema: "public",
-                            table: "messages"
-                        },
-                        async payload => {
-                            const message =
-                                payload.new;
 
+                    const info =
+                        document.createElement("div");
+
+                    info.className =
+                        "search-result-info";
+
+
+                    const name =
+                        document.createElement("div");
+
+                    name.className =
+                        "search-result-name";
+
+                    name.textContent =
+                        profile.display_name ||
+                        profile.username ||
+                        "User";
+
+
+                    if (profile.is_verified) {
+                        const badge =
+                            document.createElement("span");
+
+                        badge.className =
+                            "verified";
+
+                        badge.textContent = " ✓";
+
+                        name.appendChild(
+                            badge
+                        );
+                    }
+
+
+                    const username =
+                        document.createElement("div");
+
+                    username.className =
+                        "search-result-username";
+
+                    username.textContent =
+                        profile.username
+                            ? "@" +
+                              profile.username
+                            : "";
+
+
+                    info.appendChild(name);
+                    info.appendChild(username);
+
+
+                    result.appendChild(
+                        avatar
+                    );
+
+                    result.appendChild(
+                        info
+                    );
+
+
+                    if (
+                        modalMode ===
+                        "group"
+                    ) {
+                        const indicator =
+                            document.createElement("div");
+
+                        indicator.className =
+                            "select-indicator";
+
+
+                        if (
+                            selectedGroupUsers.has(
+                                normalizeId(
+                                    profile.id
+                                )
+                            )
+                        ) {
+                            indicator.classList.add(
+                                "selected"
+                            );
+                        }
+
+
+                        result.appendChild(
+                            indicator
+                        );
+
+
+                        result.addEventListener(
+                            "click",
+                            () => {
+                                toggleGroupUser(
+                                    profile
+                                );
+
+                                renderSearchResults(
+                                    results
+                                );
+                            }
+                        );
+
+                    } else {
+                        result.addEventListener(
+                            "click",
+                            () => {
+                                createDirectConversation(
+                                    profile
+                                );
+                            }
+                        );
+                    }
+
+
+                    searchResults.appendChild(
+                        result
+                    );
+                }
+            }
+
+
+            function toggleGroupUser(
+                profile
+            ) {
+                const id =
+                    normalizeId(profile.id);
+
+
+                if (
+                    selectedGroupUsers.has(id)
+                ) {
+                    selectedGroupUsers.delete(
+                        id
+                    );
+                } else {
+                    selectedGroupUsers.set(
+                        id,
+                        profile
+                    );
+                }
+
+
+                renderSelectedUsers();
+
+                createGroupButton.disabled =
+                    selectedGroupUsers.size <
+                    1 ||
+                    !groupName.value.trim();
+            }
+
+
+            function renderSelectedUsers() {
+                selectedUsers.innerHTML = "";
+
+
+                for (
+                    const profile
+                    of selectedGroupUsers.values()
+                ) {
+                    const chip =
+                        document.createElement("div");
+
+                    chip.className =
+                        "selected-user";
+
+                    chip.textContent =
+                        profile.display_name ||
+                        profile.username ||
+                        "User";
+
+
+                    selectedUsers.appendChild(
+                        chip
+                    );
+                }
+
+
+                selectedUsers.classList.toggle(
+                    "visible",
+                    modalMode === "group" &&
+                    selectedGroupUsers.size > 0
+                );
+            }
+
+
+            /* =========================
+               CREATE DIRECT CHAT
+            ========================= */
+
+            async function createDirectConversation(
+                targetProfile
+            ) {
+                modalStatus.textContent =
+                    "Opening chat...";
+
+
+                /*
+                 * Refresh first so duplicate DMs
+                 * are less likely.
+                 */
+                await loadConversations();
+
+
+                const targetId =
+                    normalizeId(
+                        targetProfile.id
+                    );
+
+
+                const existing =
+                    conversations.find(
+                        conversation => {
                             if (
-                                !message ||
-                                String(
-                                    message.conversation_id
-                                ) !==
-                                    String(
+                                conversation.is_group
+                            ) {
+                                return false;
+                            }
+
+                            const members =
+                                getConversationMembers(
+                                    conversation.id
+                                ).map(
+                                    normalizeId
+                                );
+
+                            return (
+                                members.length === 2 &&
+                                members.includes(
+                                    normalizeId(
+                                        currentUser.id
+                                    )
+                                ) &&
+                                members.includes(
+                                    targetId
+                                )
+                            );
+                        }
+                    );
+
+
+                if (existing) {
+                    closeModal();
+
+                    await openConversation(
+                        existing.id
+                    );
+
+                    return;
+                }
+
+
+                try {
+                    const conversation =
+                        await insertWithGeneratedId(
+                            "conversations",
+                            {
+                                name: null,
+                                is_group: false
+                            }
+                        );
+
+
+                    /*
+                     * Add ourselves first.
+                     * The existing RLS policies allow
+                     * the creator to establish the membership.
+                     */
+                    const {
+                        error: ownMemberError
+                    } = await db
+                        .from(
+                            "conversation_members"
+                        )
+                        .insert({
+                            conversation_id:
+                                conversation.id,
+                            user_id:
+                                currentUser.id
+                        });
+
+
+                    if (ownMemberError) {
+                        throw ownMemberError;
+                    }
+
+
+                    const {
+                        error: targetMemberError
+                    } = await db
+                        .from(
+                            "conversation_members"
+                        )
+                        .insert({
+                            conversation_id:
+                                conversation.id,
+                            user_id:
+                                targetProfile.id
+                        });
+
+
+                    if (targetMemberError) {
+                        throw targetMemberError;
+                    }
+
+
+                    closeModal();
+
+                    await loadConversations();
+
+                    await openConversation(
+                        conversation.id
+                    );
+
+                } catch (error) {
+                    console.error(
+                        "[Chat] Create DM error:",
+                        error
+                    );
+
+                    modalStatus.textContent =
+                        error.message ||
+                        "Could not create chat.";
+                }
+            }
+
+
+            /* =========================
+               CREATE GROUP
+            ========================= */
+
+            async function createGroup() {
+                const name =
+                    groupName.value.trim();
+
+
+                if (!name) {
+                    modalStatus.textContent =
+                        "Enter a group name.";
+
+                    return;
+                }
+
+
+                if (
+                    selectedGroupUsers.size <
+                    1
+                ) {
+                    modalStatus.textContent =
+                        "Select at least one user.";
+
+                    return;
+                }
+
+
+                createGroupButton.disabled =
+                    true;
+
+                modalStatus.textContent =
+                    "Creating group...";
+
+
+                try {
+                    const conversation =
+                        await insertWithGeneratedId(
+                            "conversations",
+                            {
+                                name,
+                                is_group: true
+                            }
+                        );
+
+
+                    const {
+                        error: ownError
+                    } = await db
+                        .from(
+                            "conversation_members"
+                        )
+                        .insert({
+                            conversation_id:
+                                conversation.id,
+                            user_id:
+                                currentUser.id
+                        });
+
+
+                    if (ownError) {
+                        throw ownError;
+                    }
+
+
+                    for (
+                        const profile
+                        of selectedGroupUsers.values()
+                    ) {
+                        const {
+                            error
+                        } = await db
+                            .from(
+                                "conversation_members"
+                            )
+                            .insert({
+                                conversation_id:
+                                    conversation.id,
+                                user_id:
+                                    profile.id
+                            });
+
+
+                        if (error) {
+                            throw error;
+                        }
+                    }
+
+
+                    closeModal();
+
+                    await loadConversations();
+
+                    await openConversation(
+                        conversation.id
+                    );
+
+                } catch (error) {
+                    console.error(
+                        "[Chat] Create group error:",
+                        error
+                    );
+
+                    modalStatus.textContent =
+                        error.message ||
+                        "Could not create group.";
+
+                    createGroupButton.disabled =
+                        false;
+                }
+            }
+
+
+            /* =========================
+               REALTIME
+            ========================= */
+
+            function setupRealtime() {
+                if (!db) {
+                    return;
+                }
+
+
+                if (
+                    realtimeMessagesChannel
+                ) {
+                    db.removeChannel(
+                        realtimeMessagesChannel
+                    );
+                }
+
+
+                if (
+                    realtimeConversationsChannel
+                ) {
+                    db.removeChannel(
+                        realtimeConversationsChannel
+                    );
+                }
+
+
+                realtimeMessagesChannel =
+                    db
+                        .channel(
+                            "ripdead-chat-messages"
+                        )
+                        .on(
+                            "postgres_changes",
+                            {
+                                event: "INSERT",
+                                schema: "public",
+                                table: "messages"
+                            },
+                            async payload => {
+                                const message =
+                                    payload.new;
+
+
+                                if (
+                                    currentConversationId &&
+                                    normalizeId(
+                                        message.conversation_id
+                                    ) ===
+                                    normalizeId(
                                         currentConversationId
                                     )
-                            ) {
-                                await refreshConversationPreview(
-                                    message
-                                        ?.conversation_id
-                                );
-
-                                return;
-                            }
-
-                            await loadProfiles([
-                                message.sender_id
-                            ]);
-
-                            const alreadyRendered =
-                                document.querySelector(
-                                    `[data-message-id="${message.id}"]`
-                                );
-
-                            if (
-                                alreadyRendered
-                            ) {
-                                return;
-                            }
-
-                            const welcome =
-                                $("messages")
-                                    .querySelector(
-                                        ".welcome"
+                                ) {
+                                    /*
+                                     * The sender already renders
+                                     * its own returned message.
+                                     * appendMessage prevents duplicates.
+                                     */
+                                    appendMessage(
+                                        message,
+                                        true
                                     );
+                                }
 
-                            if (welcome) {
-                                $("messages").innerHTML =
-                                    "";
+
+                                await refreshConversationPreviews();
                             }
+                        )
+                        .on(
+                            "postgres_changes",
+                            {
+                                event: "DELETE",
+                                schema: "public",
+                                table: "messages"
+                            },
+                            async payload => {
+                                const deleted =
+                                    payload.old;
 
-                            const element =
-                                createMessageElement(
-                                    message
+
+                                removeRenderedMessage(
+                                    deleted.id
                                 );
 
-                            element.dataset.messageId =
-                                message.id;
 
-                            $("messages").appendChild(
-                                element
-                            );
+                                await refreshConversationPreviews();
+                            }
+                        )
+                        .subscribe();
 
-                            scrollMessagesToBottom();
 
-                            await refreshConversationPreview(
-                                message.conversation_id
-                            );
-                        }
+                realtimeConversationsChannel =
+                    db
+                        .channel(
+                            "ripdead-chat-members"
+                        )
+                        .on(
+                            "postgres_changes",
+                            {
+                                event: "*",
+                                schema: "public",
+                                table: "conversation_members"
+                            },
+                            async () => {
+                                await loadConversations();
+                            }
+                        )
+                        .on(
+                            "postgres_changes",
+                            {
+                                event: "*",
+                                schema: "public",
+                                table: "conversations"
+                            },
+                            async () => {
+                                await loadConversations();
+                            }
+                        )
+                        .subscribe();
+            }
+
+
+            async function refreshConversationPreviews() {
+                if (!conversations.length) {
+                    return;
+                }
+
+
+                const ids =
+                    conversations.map(
+                        conversation =>
+                            conversation.id
+                    );
+
+
+                const {
+                    data,
+                    error
+                } = await db
+                    .from("messages")
+                    .select(
+                        "id,conversation_id,sender_id,content,created_at"
                     )
-                    .on(
-                        "postgres_changes",
+                    .in(
+                        "conversation_id",
+                        ids
+                    )
+                    .order(
+                        "created_at",
                         {
-                            event: "DELETE",
-                            schema: "public",
-                            table: "messages"
-                        },
-                        async payload => {
-                            const deleted =
-                                payload.old;
-
-                            if (
-                                String(
-                                    deleted
-                                        ?.conversation_id
-                                ) ===
-                                String(
-                                    currentConversationId
-                                )
-                            ) {
-                                await loadMessages(
-                                    currentConversationId
-                                );
-                            }
-
-                            await refreshConversationPreview(
-                                deleted
-                                    ?.conversation_id
-                            );
+                            ascending: false
                         }
                     )
-                    .subscribe(
-                        status => {
-                            console.log(
-                                "[Chat] Message realtime:",
-                                status
-                            );
-                        }
-                    );
-        }
+                    .limit(300);
 
-        function cleanupRealtime() {
-            if (
-                conversationRealtimeChannel
-            ) {
-                db.removeChannel(
-                    conversationRealtimeChannel
-                );
 
-                conversationRealtimeChannel =
-                    null;
-            }
-
-            if (
-                messageRealtimeChannel
-            ) {
-                db.removeChannel(
-                    messageRealtimeChannel
-                );
-
-                messageRealtimeChannel =
-                    null;
-            }
-        }
-
-        /*
-         * --------------------------------------------------
-         * Composer
-         * --------------------------------------------------
-         */
-
-        function resizeComposer() {
-            const input =
-                $("message-input");
-
-            input.style.height =
-                "auto";
-
-            input.style.height =
-                Math.min(
-                    input.scrollHeight,
-                    150
-                ) + "px";
-        }
-
-        /*
-         * --------------------------------------------------
-         * Modal events
-         * --------------------------------------------------
-         */
-
-        $("new-chat-button")
-            .addEventListener(
-                "click",
-                () => {
-                    $("user-search")
-                        .value = "";
-
-                    $("user-results")
-                        .innerHTML = `
-                            <div class="empty-list">
-                                Search for a user to start chatting.
-                            </div>
-                        `;
-
-                    showModal(
-                        "new-chat-modal"
-                    );
-
-                    $("user-search")
-                        .focus();
+                if (error) {
+                    return;
                 }
-            );
 
-        $("new-chat-close")
-            .addEventListener(
-                "click",
-                () =>
-                    hideModal(
-                        "new-chat-modal"
-                    )
-            );
 
-        $("new-chat-cancel")
-            .addEventListener(
-                "click",
-                () =>
-                    hideModal(
-                        "new-chat-modal"
-                    )
-            );
+                latestMessages = new Map();
 
-        $("user-search")
-            .addEventListener(
-                "input",
-                () => {
-                    clearTimeout(
-                        userSearchTimer
-                    );
 
-                    userSearchTimer =
-                        setTimeout(
-                            () =>
-                                searchUsers(
-                                    $("user-search"),
-                                    $("user-results"),
-                                    false
-                                ),
-                            250
+                for (const message of data || []) {
+                    const id =
+                        normalizeId(
+                            message.conversation_id
                         );
+
+                    if (
+                        !latestMessages.has(id)
+                    ) {
+                        latestMessages.set(
+                            id,
+                            message
+                        );
+                    }
                 }
-            );
 
-        /*
-         * Double-clicking the + button opens group creation.
-         * This keeps the UI simple without adding another
-         * permanent button.
-         */
-        let newChatClickTimer =
-            null;
 
-        $("new-chat-button")
-            .addEventListener(
-                "dblclick",
+                conversations.sort((a, b) => {
+                    const aLatest =
+                        latestMessages.get(
+                            normalizeId(a.id)
+                        );
+
+                    const bLatest =
+                        latestMessages.get(
+                            normalizeId(b.id)
+                        );
+
+                    return (
+                        new Date(
+                            bLatest?.created_at ||
+                            b.created_at
+                        ).getTime() -
+                        new Date(
+                            aLatest?.created_at ||
+                            a.created_at
+                        ).getTime()
+                    );
+                });
+
+
+                renderConversationList();
+            }
+
+
+            /* =========================
+               EVENT HANDLERS
+            ========================= */
+
+            document
+                .getElementById(
+                    "new-chat-button"
+                )
+                .addEventListener(
+                    "click",
+                    openModal
+                );
+
+
+            document
+                .getElementById(
+                    "modal-close"
+                )
+                .addEventListener(
+                    "click",
+                    closeModal
+                );
+
+
+            document
+                .getElementById(
+                    "modal-cancel"
+                )
+                .addEventListener(
+                    "click",
+                    closeModal
+                );
+
+
+            modalBackdrop.addEventListener(
+                "click",
                 event => {
-                    event.preventDefault();
-
-                    clearTimeout(
-                        newChatClickTimer
-                    );
-
-                    hideModal(
-                        "new-chat-modal"
-                    );
-
-                    resetGroupModal();
-
-                    showModal(
-                        "group-modal"
-                    );
+                    if (
+                        event.target ===
+                        modalBackdrop
+                    ) {
+                        closeModal();
+                    }
                 }
             );
 
-        $("group-close")
-            .addEventListener(
-                "click",
-                () =>
-                    hideModal(
-                        "group-modal"
-                    )
-            );
 
-        $("group-cancel")
-            .addEventListener(
+            directModeButton.addEventListener(
                 "click",
                 () => {
-                    hideModal(
-                        "group-modal"
+                    setModalMode(
+                        "direct"
                     );
 
-                    resetGroupModal();
+                    searchResults.innerHTML = "";
+                    userSearch.value = "";
                 }
             );
 
-        $("group-user-search")
-            .addEventListener(
+
+            groupModeButton.addEventListener(
+                "click",
+                () => {
+                    setModalMode(
+                        "group"
+                    );
+
+                    searchResults.innerHTML = "";
+                    userSearch.value = "";
+                }
+            );
+
+
+            userSearch.addEventListener(
                 "input",
                 () => {
                     clearTimeout(
-                        groupSearchTimer
+                        searchTimer
                     );
 
-                    groupSearchTimer =
+                    searchTimer =
                         setTimeout(
-                            () =>
-                                searchUsers(
-                                    $("group-user-search"),
-                                    $("group-user-results"),
-                                    true
-                                ),
+                            searchUsers,
                             250
                         );
                 }
             );
 
-        $("group-create")
-            .addEventListener(
+
+            groupName.addEventListener(
+                "input",
+                () => {
+                    createGroupButton.disabled =
+                        !groupName.value.trim() ||
+                        selectedGroupUsers.size <
+                            1;
+                }
+            );
+
+
+            createGroupButton.addEventListener(
                 "click",
                 createGroup
             );
 
-        $("new-chat-modal")
-            .addEventListener(
-                "click",
-                event => {
-                    if (
-                        event.target ===
-                        $("new-chat-modal")
-                    ) {
-                        hideModal(
-                            "new-chat-modal"
-                        );
-                    }
-                }
-            );
 
-        $("group-modal")
-            .addEventListener(
-                "click",
-                event => {
-                    if (
-                        event.target ===
-                        $("group-modal")
-                    ) {
-                        hideModal(
-                            "group-modal"
-                        );
-                    }
-                }
-            );
-
-        /*
-         * --------------------------------------------------
-         * Conversation search
-         * --------------------------------------------------
-         */
-
-        $("conversation-search")
-            .addEventListener(
+            conversationSearch.addEventListener(
                 "input",
-                () =>
-                    renderConversationList()
+                renderConversationList
             );
 
-        /*
-         * --------------------------------------------------
-         * Composer events
-         * --------------------------------------------------
-         */
 
-        $("composer")
-            .addEventListener(
+            messageForm.addEventListener(
                 "submit",
                 event => {
                     event.preventDefault();
-
                     sendMessage();
                 }
             );
 
-        $("message-input")
-            .addEventListener(
-                "input",
-                resizeComposer
-            );
 
-        $("message-input")
-            .addEventListener(
+            messageInput.addEventListener(
                 "keydown",
                 event => {
                     if (
-                        event.key ===
-                            "Enter" &&
+                        event.key === "Enter" &&
                         !event.shiftKey
                     ) {
                         event.preventDefault();
-
                         sendMessage();
                     }
                 }
             );
 
-        $("mobile-back")
-            .addEventListener(
+
+            leaveButton.addEventListener(
                 "click",
-                () => {
-                    $("chat-page")
-                        .classList.remove(
-                            "mobile-chat-open"
-                        );
+                leaveConversation
+            );
+
+
+            document.addEventListener(
+                "keydown",
+                event => {
+                    if (
+                        event.key === "Escape" &&
+                        modalBackdrop.classList.contains(
+                            "visible"
+                        )
+                    ) {
+                        closeModal();
+                    }
                 }
             );
 
-        /*
-         * --------------------------------------------------
-         * Auth state changes
-         * --------------------------------------------------
-         */
 
-        db.auth.onAuthStateChange(
-            (event, session) => {
-                console.log(
-                    "[Chat] Auth event:",
-                    event
-                );
+            /* =========================
+               INITIALIZE
+            ========================= */
 
-                if (
-                    event ===
-                        "SIGNED_OUT" ||
-                    !session
+            async function initializeChat() {
+                if (!db) {
+                    console.error(
+                        "[Chat] Supabase client is missing."
+                    );
+
+                    return;
+                }
+
+
+                let session = null;
+
+
+                /*
+                 * Give auth.js a moment to restore
+                 * the Supabase session.
+                 */
+                for (
+                    let attempt = 0;
+                    attempt < 20;
+                    attempt++
                 ) {
+                    const {
+                        data,
+                        error
+                    } = await db.auth.getSession();
+
+
+                    if (error) {
+                        console.error(
+                            "[Chat] Session error:",
+                            error
+                        );
+                    }
+
+
+                    session =
+                        data?.session ||
+                        null;
+
+
+                    if (session) {
+                        break;
+                    }
+
+
+                    await new Promise(
+                        resolve =>
+                            setTimeout(
+                                resolve,
+                                100
+                            )
+                    );
+                }
+
+
+                if (!session) {
                     window.location.href =
                         "/login/";
+
+                    return;
                 }
+
+
+                currentSession =
+                    session;
+
+                currentUser =
+                    session.user;
+
+
+                if (
+                    typeof window.initNavbar ===
+                    "function"
+                ) {
+                    await window.initNavbar();
+                }
+
+
+                await loadConversations();
+
+                setupRealtime();
+
+
+                db.auth.onAuthStateChange(
+                    async (
+                        event,
+                        newSession
+                    ) => {
+                        if (
+                            event ===
+                            "SIGNED_OUT"
+                        ) {
+                            window.location.href =
+                                "/login/";
+
+                            return;
+                        }
+
+
+                        if (
+                            newSession &&
+                            newSession.user
+                        ) {
+                            currentSession =
+                                newSession;
+
+                            currentUser =
+                                newSession.user;
+                        }
+                    }
+                );
             }
-        );
 
-        /*
-         * --------------------------------------------------
-         * Start
-         * --------------------------------------------------
-         */
 
-        initializeChat();
+            initializeChat();
+
+        })();
     </script>
 
 </body>
