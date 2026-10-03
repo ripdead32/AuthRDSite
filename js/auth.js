@@ -4,38 +4,41 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
 
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
+/* =========================================================
+   SUPABASE
+========================================================= */
 
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
 
-// ============================================================
-// SUPABASE ERROR / SITE DOWN
-// ============================================================
+/* =========================================================
+   ERROR HANDLING
+========================================================= */
 
 function isSupabaseUnavailableError(error) {
     if (!error) {
         return false;
     }
 
-    if (error.name === "AuthRetryableFetchError") {
-        return true;
-    }
-
-    const message = String(error.message || "").toLowerCase();
+    const message = String(
+        error.message ||
+        error.name ||
+        error
+    ).toLowerCase();
 
     return (
+        error.name === "AuthRetryableFetchError" ||
         message.includes("failed to fetch") ||
         message.includes("networkerror") ||
         message.includes("network error") ||
         message.includes("fetch failed") ||
-        message.includes("connection refused") ||
-        message.includes("timeout")
+        message.includes("connection") ||
+        message.includes("timeout") ||
+        message.includes("timed out")
     );
 }
-
 
 function redirectToDownPage() {
     if (
@@ -51,10 +54,10 @@ function redirectToDownPage() {
     }
 }
 
-
 function handleSupabaseError(error) {
+    console.error("[Auth] Supabase error:", error);
+
     if (isSupabaseUnavailableError(error)) {
-        console.error("[Auth] Supabase unavailable:", error);
         redirectToDownPage();
         return true;
     }
@@ -62,10 +65,9 @@ function handleSupabaseError(error) {
     return false;
 }
 
-
-// ============================================================
-// SESSION
-// ============================================================
+/* =========================================================
+   SESSION
+========================================================= */
 
 async function getSession() {
     try {
@@ -75,17 +77,38 @@ async function getSession() {
         } = await supabaseClient.auth.getSession();
 
         if (error) {
-            handleSupabaseError(error);
+            console.error("[Auth] getSession error:", error);
+
+            if (handleSupabaseError(error)) {
+                return null;
+            }
+
             return null;
         }
 
-        return data.session;
+        if (data && data.session) {
+            console.log(
+                "[Auth] Logged in as:",
+                data.session.user.email
+            );
+        } else {
+            console.log("[Auth] No active session");
+        }
+
+        return data ? data.session : null;
+
     } catch (error) {
+        console.error("[Auth] getSession exception:", error);
+
         handleSupabaseError(error);
+
         return null;
     }
 }
 
+/* =========================================================
+   REQUIRE AUTH
+========================================================= */
 
 async function requireAuth() {
     const session = await getSession();
@@ -98,10 +121,9 @@ async function requireAuth() {
     return session;
 }
 
-
-// ============================================================
-// PROFILE
-// ============================================================
+/* =========================================================
+   PROFILE
+========================================================= */
 
 async function getProfile(userId = null) {
     try {
@@ -123,23 +145,29 @@ async function getProfile(userId = null) {
             .single();
 
         if (error) {
-            handleSupabaseError(error);
+            console.error("[Auth] getProfile error:", error);
 
-            console.error(
-                "[Auth] Failed to get profile:",
-                error
-            );
+            if (handleSupabaseError(error)) {
+                return null;
+            }
 
             return null;
         }
 
         return data;
+
     } catch (error) {
+        console.error("[Auth] getProfile exception:", error);
+
         handleSupabaseError(error);
+
         return null;
     }
 }
 
+/* =========================================================
+   UPDATE PROFILE
+========================================================= */
 
 async function updateProfile(updates) {
     try {
@@ -147,8 +175,8 @@ async function updateProfile(updates) {
 
         if (!session) {
             return {
-                success: false,
-                error: "Not logged in."
+                data: null,
+                error: new Error("Not authenticated")
             };
         }
 
@@ -163,32 +191,39 @@ async function updateProfile(updates) {
             .single();
 
         if (error) {
+            console.error("[Auth] updateProfile error:", error);
+
             handleSupabaseError(error);
 
             return {
-                success: false,
-                error: error.message
+                data: null,
+                error
             };
         }
 
         return {
-            success: true,
-            data
+            data,
+            error: null
         };
+
     } catch (error) {
+        console.error(
+            "[Auth] updateProfile exception:",
+            error
+        );
+
         handleSupabaseError(error);
 
         return {
-            success: false,
-            error: error.message
+            data: null,
+            error
         };
     }
 }
 
-
-// ============================================================
-// AVATAR
-// ============================================================
+/* =========================================================
+   AVATAR HELPERS
+========================================================= */
 
 function getAvatarLetter(profile) {
     if (!profile) {
@@ -203,62 +238,82 @@ function getAvatarLetter(profile) {
     return name.charAt(0).toUpperCase();
 }
 
-
 function getAvatarUrl(profile) {
-    if (!profile || !profile.avatar_url) {
-        return null;
+    if (
+        profile &&
+        profile.avatar_url &&
+        profile.avatar_url.trim() !== ""
+    ) {
+        return profile.avatar_url;
     }
 
-    return profile.avatar_url;
+    return null;
 }
 
-
-function createAvatar(element, profile) {
+function createAvatar(profile, element) {
     if (!element) {
         return;
     }
 
     const avatarUrl = getAvatarUrl(profile);
 
+    element.innerHTML = "";
+
     if (avatarUrl) {
-        element.style.backgroundImage =
-            `url("${avatarUrl}")`;
+        const image = document.createElement("img");
 
-        element.style.backgroundSize = "cover";
-        element.style.backgroundPosition = "center";
-        element.textContent = "";
-        return;
+        image.src = avatarUrl;
+        image.alt =
+            profile.display_name ||
+            profile.username ||
+            "Profile picture";
+
+        image.onerror = () => {
+            element.innerHTML = "";
+            element.textContent =
+                getAvatarLetter(profile);
+        };
+
+        element.appendChild(image);
+    } else {
+        element.textContent =
+            getAvatarLetter(profile);
     }
-
-    element.style.backgroundImage = "";
-    element.textContent = getAvatarLetter(profile);
 }
 
+/* =========================================================
+   MESSAGES
+========================================================= */
 
-// ============================================================
-// MESSAGE
-// ============================================================
+function setMessage(message, type = "info") {
+    const messageElement =
+        document.getElementById("message");
 
-function setMessage(element, message, type = "info") {
-    if (!element) {
+    if (!messageElement) {
+        console.warn(
+            "[Auth] #message element not found:",
+            message
+        );
         return;
     }
 
-    element.textContent = message;
+    messageElement.textContent = message;
 
-    element.classList.remove(
+    messageElement.classList.remove(
         "success",
         "error",
-        "info"
+        "info",
+        "warning"
     );
 
-    element.classList.add(type);
+    messageElement.classList.add(type);
+
+    messageElement.hidden = false;
 }
 
-
-// ============================================================
-// NAVBAR
-// ============================================================
+/* =========================================================
+   NAVBAR
+========================================================= */
 
 async function initNavbar() {
     console.trace("[Auth] initNavbar called");
@@ -275,14 +330,11 @@ async function initNavbar() {
     const logoutButton =
         document.getElementById("navbar-logout");
 
-
     const session = await getSession();
-
 
     if (session) {
         console.log(
-            "[Auth] Navbar: logged in as",
-            session.user.email
+            "[Auth] Navbar: logged in"
         );
 
         guestElements.forEach(element => {
@@ -300,7 +352,6 @@ async function initNavbar() {
             element.removeAttribute("aria-hidden");
         });
 
-
         if (navbarUser) {
             const profile =
                 await getProfile(session.user.id);
@@ -316,21 +367,14 @@ async function initNavbar() {
             }
         }
 
-
-        if (
-            logoutButton &&
-            !logoutButton.dataset.authBound
-        ) {
-            logoutButton.dataset.authBound = "true";
-
-            logoutButton.addEventListener(
-                "click",
-                signOut
-            );
+        if (logoutButton) {
+            logoutButton.onclick = signOut;
         }
 
     } else {
-        console.log("[Auth] Navbar: logged out");
+        console.log(
+            "[Auth] Navbar: logged out"
+        );
 
         guestElements.forEach(element => {
             element.hidden = false;
@@ -349,10 +393,9 @@ async function initNavbar() {
     }
 }
 
-
-// ============================================================
-// SIGN OUT
-// ============================================================
+/* =========================================================
+   SIGN OUT
+========================================================= */
 
 async function signOut() {
     try {
@@ -361,29 +404,38 @@ async function signOut() {
         } = await supabaseClient.auth.signOut();
 
         if (error) {
-            handleSupabaseError(error);
-
             console.error(
-                "[Auth] Sign out failed:",
+                "[Auth] Sign out error:",
                 error
             );
+
+            handleSupabaseError(error);
 
             return;
         }
 
+        console.log(
+            "[Auth] Signed out"
+        );
+
         window.location.href = "/";
+
     } catch (error) {
+        console.error(
+            "[Auth] Sign out exception:",
+            error
+        );
+
         handleSupabaseError(error);
     }
 }
 
-
-// ============================================================
-// AUTH STATE
-// ============================================================
+/* =========================================================
+   AUTH STATE
+========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
-    async (event, session) => {
+    (event, session) => {
         console.log(
             "[Auth] Auth event:",
             event
@@ -402,27 +454,42 @@ supabaseClient.auth.onAuthStateChange(
     }
 );
 
+/* =========================================================
+   GLOBAL EXPORTS
+========================================================= */
 
-// ============================================================
-// GLOBAL EXPORTS
-// ============================================================
+window.supabaseClient =
+    supabaseClient;
 
-window.supabaseClient = supabaseClient;
+window.getSession =
+    getSession;
 
-window.getSession = getSession;
-window.requireAuth = requireAuth;
+window.requireAuth =
+    requireAuth;
 
-window.getProfile = getProfile;
-window.updateProfile = updateProfile;
+window.getProfile =
+    getProfile;
 
-window.getAvatarLetter = getAvatarLetter;
-window.getAvatarUrl = getAvatarUrl;
-window.createAvatar = createAvatar;
+window.updateProfile =
+    updateProfile;
 
-window.setMessage = setMessage;
+window.getAvatarLetter =
+    getAvatarLetter;
 
-window.initNavbar = initNavbar;
-window.signOut = signOut;
+window.getAvatarUrl =
+    getAvatarUrl;
+
+window.createAvatar =
+    createAvatar;
+
+window.setMessage =
+    setMessage;
+
+window.initNavbar =
+    initNavbar;
+
+window.signOut =
+    signOut;
 
 window.isSupabaseUnavailableError =
     isSupabaseUnavailableError;
