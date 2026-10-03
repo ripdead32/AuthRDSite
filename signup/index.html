@@ -5,74 +5,101 @@
 <head>
     <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>Create Account — Rip_Dead Account</title>
+    <title>Create Account — Rip_Dead Account</title>
 
-<link rel="stylesheet" href="/css/auth.css">
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
 <nav class="site-navbar">
+
     <div class="navbar-inner">
 
-    <a href="/" class="navbar-brand">
-        Rip_Dead Account
-    </a>
-
-    <div class="navbar-links">
-
-        <a href="/">
-            Home
-        </a>
-
-        <a href="/search/" class="auth-only" hidden>
-            Search
-        </a>
-
-        <a href="/friends/" class="auth-only" hidden>
-            Friends
-        </a>
-
-        <a href="/settings/" class="auth-only" hidden>
-            Settings
-        </a>
-
-        <a href="/account/" class="auth-only" hidden>
-            Account
-        </a>
-
-        <a href="/login/" class="guest-only">
-            Log In
-        </a>
-
         <a
-            href="/signup/"
-            class="guest-only button-link"
+            href="/"
+            class="navbar-brand"
         >
-            Create Account
+            Rip_Dead Account
         </a>
 
-        <button
-            id="navbar-logout"
-            class="auth-only navbar-logout"
-            hidden
-        >
-            Log Out
-        </button>
+        <div class="navbar-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a
+                href="/search/"
+                class="auth-only"
+                hidden
+            >
+                Search
+            </a>
+
+            <a
+                href="/friends/"
+                class="auth-only"
+                hidden
+            >
+                Friends
+            </a>
+
+            <a
+                href="/settings/"
+                class="auth-only"
+                hidden
+            >
+                Settings
+            </a>
+
+            <a
+                href="/account/"
+                class="auth-only"
+                hidden
+            >
+                Account
+            </a>
+
+            <a
+                href="/login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only button-link"
+            >
+                Create Account
+            </a>
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden
+            >
+                Log Out
+            </button>
+
+        </div>
 
     </div>
 
-</div>
-
 </nav>
+
 
 <main class="center-page">
 
@@ -137,6 +164,7 @@
                 class="form-label"
             >
                 Bio
+
                 <span
                     style="
                         opacity:0.6;
@@ -169,6 +197,7 @@
                 class="form-label"
             >
                 Profile Picture
+
                 <span
                     style="
                         opacity:0.6;
@@ -296,9 +325,18 @@
 
 </main>
 
+
+<!-- Authentication must load BEFORE the page script -->
+<script src="/js/auth.js"></script>
+
+<!-- Global site availability -->
+<script src="/js/global.js"></script>
+
+
 <script>
 
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+const MAX_AVATAR_SIZE =
+    5 * 1024 * 1024;
 
 const ALLOWED_AVATAR_TYPES = [
     "image/png",
@@ -307,20 +345,32 @@ const ALLOWED_AVATAR_TYPES = [
 ];
 
 
+// ============================================================
+// PENDING AVATAR STORAGE
+// ============================================================
+
 function getPendingAvatarDatabase() {
 
     return new Promise((resolve, reject) => {
 
-        const request = indexedDB.open(
-            "ripdead_pending_signup",
-            1
-        );
+        const request =
+            indexedDB.open(
+                "ripdead_pending_signup",
+                1
+            );
+
 
         request.onupgradeneeded = () => {
 
-            const database = request.result;
+            const database =
+                request.result;
 
-            if (!database.objectStoreNames.contains("files")) {
+
+            if (
+                !database.objectStoreNames.contains(
+                    "files"
+                )
+            ) {
 
                 database.createObjectStore(
                     "files"
@@ -330,12 +380,22 @@ function getPendingAvatarDatabase() {
 
         };
 
+
         request.onsuccess = () => {
-            resolve(request.result);
+
+            resolve(
+                request.result
+            );
+
         };
 
+
         request.onerror = () => {
-            reject(request.error);
+
+            reject(
+                request.error
+            );
+
         };
 
     });
@@ -348,33 +408,50 @@ async function savePendingAvatar(file) {
     const database =
         await getPendingAvatarDatabase();
 
-    return new Promise((resolve, reject) => {
 
-        const transaction =
-            database.transaction(
-                "files",
-                "readwrite"
+    return new Promise(
+        (resolve, reject) => {
+
+            const transaction =
+                database.transaction(
+                    "files",
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    "files"
+                );
+
+
+            store.put(
+                file,
+                "profile-picture"
             );
 
-        const store =
-            transaction.objectStore("files");
 
-        store.put(
-            file,
-            "profile-picture"
-        );
+            transaction.oncomplete = () => {
 
-        transaction.oncomplete = () => {
-            database.close();
-            resolve();
-        };
+                database.close();
 
-        transaction.onerror = () => {
-            database.close();
-            reject(transaction.error);
-        };
+                resolve();
 
-    });
+            };
+
+
+            transaction.onerror = () => {
+
+                database.close();
+
+                reject(
+                    transaction.error
+                );
+
+            };
+
+        }
+    );
 
 }
 
@@ -386,29 +463,45 @@ async function clearPendingAvatar() {
         const database =
             await getPendingAvatarDatabase();
 
-        return new Promise((resolve, reject) => {
 
-            const transaction =
-                database.transaction(
-                    "files",
-                    "readwrite"
-                );
+        return new Promise(
+            (resolve, reject) => {
 
-            transaction
-                .objectStore("files")
-                .delete("profile-picture");
+                const transaction =
+                    database.transaction(
+                        "files",
+                        "readwrite"
+                    );
 
-            transaction.oncomplete = () => {
-                database.close();
-                resolve();
-            };
 
-            transaction.onerror = () => {
-                database.close();
-                reject(transaction.error);
-            };
+                transaction
+                    .objectStore("files")
+                    .delete(
+                        "profile-picture"
+                    );
 
-        });
+
+                transaction.oncomplete = () => {
+
+                    database.close();
+
+                    resolve();
+
+                };
+
+
+                transaction.onerror = () => {
+
+                    database.close();
+
+                    reject(
+                        transaction.error
+                    );
+
+                };
+
+            }
+        );
 
     } catch (error) {
 
@@ -422,13 +515,23 @@ async function clearPendingAvatar() {
 }
 
 
-async function uploadAvatar(file, userId) {
+// ============================================================
+// AVATAR UPLOAD
+// ============================================================
+
+async function uploadAvatar(
+    file,
+    userId
+) {
 
     if (!file || !userId) {
+
         return {
             success: false,
-            error: "Missing profile picture or user ID."
+            error:
+                "Missing profile picture or user ID."
         };
+
     }
 
 
@@ -444,106 +547,138 @@ async function uploadAvatar(file, userId) {
         `${userId}/profile.${extension}`;
 
 
-    const {
-        error: uploadError
-    } =
-        await supabaseClient
-            .storage
-            .from("avatars")
-            .upload(
-                path,
-                file,
-                {
-                    upsert: true,
-                    contentType: file.type
-                }
+    try {
+
+        const {
+            error: uploadError
+        } =
+            await window.supabaseClient
+                .storage
+                .from("avatars")
+                .upload(
+                    path,
+                    file,
+                    {
+                        upsert: true,
+                        contentType: file.type
+                    }
+                );
+
+
+        if (uploadError) {
+
+            console.error(
+                "[Signup] Avatar upload error:",
+                uploadError
             );
 
 
-    if (uploadError) {
+            return {
+                success: false,
+                error: uploadError.message
+            };
+
+        }
+
+
+        const {
+            data: publicUrlData
+        } =
+            window.supabaseClient
+                .storage
+                .from("avatars")
+                .getPublicUrl(path);
+
+
+        const avatarUrl =
+            publicUrlData?.publicUrl;
+
+
+        if (!avatarUrl) {
+
+            return {
+                success: false,
+                error:
+                    "Could not get avatar URL."
+            };
+
+        }
+
+
+        const {
+            error: profileError
+        } =
+            await window.supabaseClient
+                .from("profiles")
+                .update({
+                    avatar_url: avatarUrl
+                })
+                .eq("id", userId);
+
+
+        if (profileError) {
+
+            console.error(
+                "[Signup] Avatar profile update error:",
+                profileError
+            );
+
+
+            return {
+                success: false,
+                error:
+                    profileError.message
+            };
+
+        }
+
+
+        await clearPendingAvatar();
+
+
+        return {
+            success: true,
+            avatarUrl
+        };
+
+    } catch (error) {
 
         console.error(
-            "[Signup] Avatar upload error:",
-            uploadError
+            "[Signup] Avatar upload exception:",
+            error
         );
 
-        return {
-            success: false,
-            error: uploadError.message
-        };
-
-    }
-
-
-    const {
-        data: publicUrlData
-    } =
-        supabaseClient
-            .storage
-            .from("avatars")
-            .getPublicUrl(path);
-
-
-    const avatarUrl =
-        publicUrlData?.publicUrl;
-
-
-    if (!avatarUrl) {
 
         return {
             success: false,
-            error: "Could not get avatar URL."
+            error:
+                error.message ||
+                "Avatar upload failed."
         };
 
     }
-
-
-    const {
-        error: profileError
-    } =
-        await supabaseClient
-            .from("profiles")
-            .update({
-                avatar_url: avatarUrl
-            })
-            .eq("id", userId);
-
-
-    if (profileError) {
-
-        console.error(
-            "[Signup] Avatar profile update error:",
-            profileError
-        );
-
-        return {
-            success: false,
-            error: profileError.message
-        };
-
-    }
-
-
-    await clearPendingAvatar();
-
-
-    return {
-        success: true,
-        avatarUrl
-    };
 
 }
 
+
+// ============================================================
+// PAGE
+// ============================================================
 
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
         const session =
-            await getSession();
+            await window.getSession();
 
-        await initNavbar();
 
+        await window.initNavbar();
+
+
+        /*
+         * Already logged in?
+         */
 
         if (session) {
 
@@ -573,6 +708,10 @@ document.addEventListener(
             );
 
 
+        // ====================================================
+        // PROFILE PICTURE PREVIEW
+        // ====================================================
+
         profilePictureInput.addEventListener(
             "change",
             () => {
@@ -600,17 +739,20 @@ document.addEventListener(
                     )
                 ) {
 
-                    setMessage(
+                    window.setMessage(
                         "signup-message",
                         "Profile picture must be PNG, JPEG, or WebP.",
                         "error"
                     );
 
+
                     profilePictureInput.value =
                         "";
 
+
                     preview.style.display =
                         "none";
+
 
                     return;
 
@@ -622,17 +764,20 @@ document.addEventListener(
                     MAX_AVATAR_SIZE
                 ) {
 
-                    setMessage(
+                    window.setMessage(
                         "signup-message",
                         "Profile picture must be 5 MB or smaller.",
                         "error"
                     );
 
+
                     profilePictureInput.value =
                         "";
 
+
                     preview.style.display =
                         "none";
+
 
                     return;
 
@@ -648,6 +793,7 @@ document.addEventListener(
                     previewImage.src =
                         reader.result;
 
+
                     preview.style.display =
                         "block";
 
@@ -659,6 +805,10 @@ document.addEventListener(
             }
         );
 
+
+        // ====================================================
+        // SIGNUP
+        // ====================================================
 
         document
             .getElementById("signup-form")
@@ -678,13 +828,15 @@ document.addEventListener(
                     button.disabled =
                         true;
 
+
                     button.textContent =
                         "Creating...";
 
 
-                    setMessage(
+                    window.setMessage(
                         "signup-message",
-                        ""
+                        "",
+                        "info"
                     );
 
 
@@ -734,8 +886,13 @@ document.addEventListener(
 
                     const profilePicture =
                         profilePictureInput
-                            .files?.[0] || null;
+                            .files?.[0] ||
+                        null;
 
+
+                    // =================================================
+                    // VALIDATE AVATAR
+                    // =================================================
 
                     if (
                         profilePicture &&
@@ -744,17 +901,20 @@ document.addEventListener(
                         )
                     ) {
 
-                        setMessage(
+                        window.setMessage(
                             "signup-message",
                             "Profile picture must be PNG, JPEG, or WebP.",
                             "error"
                         );
 
+
                         button.disabled =
                             false;
 
+
                         button.textContent =
                             "Create Account";
+
 
                         return;
 
@@ -767,145 +927,213 @@ document.addEventListener(
                         MAX_AVATAR_SIZE
                     ) {
 
-                        setMessage(
+                        window.setMessage(
                             "signup-message",
                             "Profile picture must be 5 MB or smaller.",
                             "error"
                         );
 
+
                         button.disabled =
                             false;
 
+
                         button.textContent =
                             "Create Account";
+
 
                         return;
 
                     }
 
 
-                    const {
-                        data,
-                        error
-                    } =
-                        await supabaseClient
-                            .auth
-                            .signUp({
+                    try {
 
-                                email,
+                        // =============================================
+                        // CREATE SUPABASE ACCOUNT
+                        // =============================================
 
-                                password,
+                        const {
+                            data,
+                            error
+                        } =
+                            await window.supabaseClient
+                                .auth
+                                .signUp({
 
-                                options: {
+                                    email,
 
-                                    data: {
+                                    password,
 
-                                        username,
+                                    options: {
 
-                                        display_name:
-                                            displayName,
+                                        data: {
 
-                                        bio
+                                            username,
+
+                                            display_name:
+                                                displayName,
+
+                                            bio
+
+                                        }
 
                                     }
 
-                                }
-
-                            });
+                                });
 
 
-                    if (error) {
+                        if (error) {
 
-                        setMessage(
-                            "signup-message",
-                            error.message,
-                            "error"
-                        );
-
-                        button.disabled =
-                            false;
-
-                        button.textContent =
-                            "Create Account";
-
-                        return;
-
-                    }
-
-
-                    if (
-                        profilePicture
-                    ) {
-
-                        try {
-
-                            await savePendingAvatar(
-                                profilePicture
+                            window.setMessage(
+                                "signup-message",
+                                error.message,
+                                "error"
                             );
 
-                        } catch (error) {
 
-                            console.error(
-                                "[Signup] Could not save pending avatar:",
-                                error
-                            );
+                            button.disabled =
+                                false;
+
+
+                            button.textContent =
+                                "Create Account";
+
+
+                            return;
 
                         }
 
-                    }
+
+                        // =============================================
+                        // SAVE AVATAR FOR EMAIL CONFIRMATION FLOW
+                        // =============================================
+
+                        if (profilePicture) {
+
+                            try {
+
+                                await savePendingAvatar(
+                                    profilePicture
+                                );
+
+                            } catch (error) {
+
+                                console.error(
+                                    "[Signup] Could not save pending avatar:",
+                                    error
+                                );
+
+                            }
+
+                        }
 
 
-                    if (!data.session) {
+                        // =============================================
+                        // EMAIL CONFIRMATION REQUIRED
+                        // =============================================
 
-                        setMessage(
-                            "signup-message",
-                            "Account created. Check your email to confirm your account.",
-                            "success"
-                        );
+                        if (!data.session) {
 
-                        button.disabled =
-                            false;
-
-                        button.textContent =
-                            "Create Account";
-
-                        return;
-
-                    }
-
-
-                    if (
-                        profilePicture &&
-                        data.user
-                    ) {
-
-                        button.textContent =
-                            "Uploading profile picture...";
-
-
-                        const uploadResult =
-                            await uploadAvatar(
-                                profilePicture,
-                                data.user.id
+                            window.setMessage(
+                                "signup-message",
+                                "Account created. Check your email to confirm your account.",
+                                "success"
                             );
+
+
+                            button.disabled =
+                                false;
+
+
+                            button.textContent =
+                                "Create Account";
+
+
+                            return;
+
+                        }
+
+
+                        // =============================================
+                        // UPLOAD AVATAR
+                        // =============================================
+
+                        if (
+                            profilePicture &&
+                            data.user
+                        ) {
+
+                            button.textContent =
+                                "Uploading profile picture...";
+
+
+                            const uploadResult =
+                                await uploadAvatar(
+                                    profilePicture,
+                                    data.user.id
+                                );
+
+
+                            if (
+                                !uploadResult.success
+                            ) {
+
+                                console.error(
+                                    "[Signup] Avatar upload failed:",
+                                    uploadResult.error
+                                );
+
+                            }
+
+                        }
+
+
+                        // =============================================
+                        // FINISH
+                        // =============================================
+
+                        window.location.href =
+                            "/account/";
+
+                    } catch (error) {
+
+                        console.error(
+                            "[Signup] Unexpected error:",
+                            error
+                        );
 
 
                         if (
-                            !uploadResult.success
+                            typeof window
+                                .isSupabaseUnavailableError ===
+                            "function" &&
+                            window.isSupabaseUnavailableError(
+                                error
+                            )
                         ) {
 
-                            console.error(
-                                "[Signup] Avatar upload failed:",
-                                uploadResult.error
-                            );
+                            return;
 
                         }
 
+
+                        window.setMessage(
+                            "signup-message",
+                            error.message ||
+                                "An unexpected error occurred.",
+                            "error"
+                        );
+
+
+                        button.disabled =
+                            false;
+
+
+                        button.textContent =
+                            "Create Account";
+
                     }
-
-
-                    window.location.href =
-                        "/account/";
 
                 }
             );
@@ -914,7 +1142,7 @@ document.addEventListener(
 );
 
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
+
 </body>
+
 </html>

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -10,17 +13,25 @@
 
     <title>Log In — Rip_Dead Account</title>
 
-    <link rel="stylesheet" href="/css/auth.css">
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
 
 <nav class="site-navbar">
+
     <div class="navbar-inner">
 
-        <a href="/" class="navbar-brand">
+        <a
+            href="/"
+            class="navbar-brand"
+        >
             Rip_Dead Account
         </a>
 
@@ -77,6 +88,7 @@
             </a>
 
             <button
+                type="button"
                 id="navbar-logout"
                 class="auth-only navbar-logout"
                 hidden
@@ -87,6 +99,7 @@
         </div>
 
     </div>
+
 </nav>
 
 
@@ -170,9 +183,11 @@
             "
         >
             Don't have an account?
+
             <a href="/signup/">
                 Create one
             </a>
+
         </p>
 
     </section>
@@ -180,77 +195,199 @@
 </main>
 
 
+<!-- Authentication must load BEFORE the page script -->
+<script src="/js/auth.js"></script>
+
+<!-- Global site availability -->
+<script src="/js/global.js"></script>
+
+
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
 
-    const session = await getSession();
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    await initNavbar();
+        const session = await window.getSession();
 
-    /*
-     * Already logged in?
-     * Don't show the login form as the main action.
-     */
-    if (session) {
-        window.location.href = "/account/";
-        return;
-    }
+        await window.initNavbar();
 
 
-    document.getElementById("login-form").addEventListener(
-        "submit",
-        async event => {
+        /*
+         * Already logged in?
+         */
 
-            event.preventDefault();
+        if (session) {
 
-            const button =
-                document.getElementById("login-button");
+            window.location.href = "/account/";
 
-            button.disabled = true;
-            button.textContent = "Logging in...";
-
-            setMessage("login-message", "");
+            return;
+        }
 
 
-            const email =
-                document.getElementById("email").value.trim();
+        const form =
+            document.getElementById("login-form");
 
-            const password =
-                document.getElementById("password").value;
+        const button =
+            document.getElementById("login-button");
 
-
-            const {
-                data,
-                error
-            } = await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
+        const message =
+            document.getElementById("login-message");
 
 
-            if (error) {
+        form.addEventListener(
+            "submit",
+            async event => {
 
-                setMessage(
-                    "login-message",
-                    error.message,
-                    "error"
+                event.preventDefault();
+
+
+                button.disabled = true;
+
+                button.textContent =
+                    "Logging in...";
+
+
+                window.setMessage(
+                    message,
+                    "",
+                    "info"
                 );
 
-                button.disabled = false;
-                button.textContent = "Log In";
 
-                return;
+                const email =
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+
+                try {
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await window.supabaseClient.auth
+                            .signInWithPassword({
+                                email,
+                                password
+                            });
+
+
+                    if (error) {
+
+                        console.error(
+                            "[Login] Login failed:",
+                            error
+                        );
+
+
+                        window.setMessage(
+                            message,
+                            error.message,
+                            "error"
+                        );
+
+
+                        button.disabled = false;
+
+                        button.textContent =
+                            "Log In";
+
+                        return;
+                    }
+
+
+                    if (data && data.session) {
+
+                        console.log(
+                            "[Login] Login successful."
+                        );
+
+
+                        /*
+                         * Give Supabase a moment to persist
+                         * the session before navigating.
+                         */
+
+                        await new Promise(
+                            resolve =>
+                                setTimeout(
+                                    resolve,
+                                    100
+                                )
+                        );
+
+
+                        window.location.href =
+                            "/account/";
+
+                        return;
+                    }
+
+
+                    window.setMessage(
+                        message,
+                        "Login succeeded, but no session was returned.",
+                        "error"
+                    );
+
+
+                    button.disabled = false;
+
+                    button.textContent =
+                        "Log In";
+
+                } catch (error) {
+
+                    console.error(
+                        "[Login] Unexpected error:",
+                        error
+                    );
+
+
+                    if (
+                        typeof window
+                            .isSupabaseUnavailableError ===
+                        "function" &&
+                        window.isSupabaseUnavailableError(
+                            error
+                        )
+                    ) {
+
+                        return;
+                    }
+
+
+                    window.setMessage(
+                        message,
+                        error.message ||
+                            "An unexpected error occurred.",
+                        "error"
+                    );
+
+
+                    button.disabled = false;
+
+                    button.textContent =
+                        "Log In";
+                }
+
             }
+        );
 
+    }
+);
 
-            if (data.session) {
-                window.location.href = "/account/";
-            }
-        }
-    );
-});
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
+
 </body>
+
 </html>
