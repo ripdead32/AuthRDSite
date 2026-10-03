@@ -3086,6 +3086,13 @@
         }
     );
 
+function escapeIlikeValue(value) {
+    return value
+        .replace(/\\/g, "\\\\")
+        .replace(/%/g, "\\%")
+        .replace(/_/g, "\\_");
+}
+
     async function searchUsers() {
         const input =
             document.getElementById(
@@ -3364,179 +3371,211 @@
         );
     }
 
-    /* -------------------------
-       GROUP CHAT
-    ------------------------- */
-
-    document.getElementById(
-        "group-chat-button"
-    ).addEventListener(
-        "click",
-        () => {
-            clearChatError();
-
-            selectedGroupUsers =
-                [];
-
-            document.getElementById(
-                "group-name"
-            ).value =
-                "";
-
-            document.getElementById(
-                "group-user-search"
-            ).value =
-                "";
-
-            renderSelectedGroupUsers();
-
-            document.getElementById(
-                "group-user-results"
-            ).innerHTML =
-                "";
-
-            document.getElementById(
-                "group-chat-panel"
-            ).classList.add(
-                "open"
-            );
-
-            document.getElementById(
-                "group-name"
-            ).focus();
-        }
-    );
-
-    document.getElementById(
-        "close-group-chat"
-    ).addEventListener(
-        "click",
-        closeGroupChat
-    );
-
-    document.getElementById(
-        "group-chat-panel"
-    ).addEventListener(
-        "click",
-        event => {
-            if (
-                event.target.id ===
-                "group-chat-panel"
-            ) {
-                closeGroupChat();
-            }
-        }
-    );
-
-    function closeGroupChat() {
-        document.getElementById(
-            "group-chat-panel"
-        ).classList.remove(
-            "open"
-        );
-
-        selectedGroupUsers =
-            [];
+/* -------------------------
+   GROUP CHAT
+------------------------- */
+document.getElementById(
+    "group-chat-button"
+).addEventListener(
+    "click",
+    () => {
+        clearChatError();
+        selectedGroupUsers = [];
 
         document.getElementById(
             "group-name"
-        ).value =
-            "";
+        ).value = "";
 
         document.getElementById(
             "group-user-search"
-        ).value =
-            "";
+        ).value = "";
+
+        renderSelectedGroupUsers();
 
         document.getElementById(
             "group-user-results"
-        ).innerHTML =
-            "";
+        ).innerHTML = "";
 
-        renderSelectedGroupUsers();
+        document.getElementById(
+            "group-chat-panel"
+        ).classList.add("open");
+
+        document.getElementById(
+            "group-name"
+        ).focus();
     }
+);
+
+document.getElementById(
+    "close-group-chat"
+).addEventListener(
+    "click",
+    closeGroupChat
+);
+
+document.getElementById(
+    "group-chat-panel"
+).addEventListener(
+    "click",
+    event => {
+        if (
+            event.target.id ===
+            "group-chat-panel"
+        ) {
+            closeGroupChat();
+        }
+    }
+);
+
+function closeGroupChat() {
+    document.getElementById(
+        "group-chat-panel"
+    ).classList.remove("open");
+
+    selectedGroupUsers = [];
+
+    document.getElementById(
+        "group-name"
+    ).value = "";
 
     document.getElementById(
         "group-user-search"
-    ).addEventListener(
-        "input",
-        () => {
-            clearTimeout(
-                groupSearchTimeout
+    ).value = "";
+
+    document.getElementById(
+        "group-user-results"
+    ).innerHTML = "";
+
+    renderSelectedGroupUsers();
+}
+
+document.getElementById(
+    "group-user-search"
+).addEventListener(
+    "input",
+    () => {
+        clearTimeout(
+            groupSearchTimeout
+        );
+
+        groupSearchTimeout =
+            setTimeout(
+                searchGroupUsers,
+                300
             );
+    }
+);
 
-            groupSearchTimeout =
-                setTimeout(
-                    searchGroupUsers,
-                    300
-                );
-        }
-    );
+function escapeIlikeValue(value) {
+    return value
+        .replace(/\\/g, "\\\\")
+        .replace(/%/g, "\\%")
+        .replace(/_/g, "\\_");
+}
 
-    async function searchGroupUsers() {
-        const input =
-            document.getElementById(
-                "group-user-search"
-            );
+async function searchGroupUsers() {
+    const input =
+        document.getElementById(
+            "group-user-search"
+        );
 
-        const results =
-            document.getElementById(
-                "group-user-results"
-            );
+    const results =
+        document.getElementById(
+            "group-user-results"
+        );
 
-        const query =
-            input.value.trim();
+    const query =
+        input.value.trim();
 
-        if (!query) {
-            results.innerHTML =
-                "";
+    if (!query) {
+        results.innerHTML = "";
+        return;
+    }
 
-            return;
-        }
-
+    if (!currentSession?.user?.id) {
         results.innerHTML = `
             <div class="empty-chat">
-                Searching...
+                You must be logged in to search users.
             </div>
         `;
+        return;
+    }
 
-        const {
-            data,
-            error
-        } = await db
-            .from("profiles")
-            .select("*")
-            .or(
-                `username.ilike.%${query}%,display_name.ilike.%${query}%`
-            )
-            .neq(
-                "id",
-                currentSession.user.id
-            )
-            .limit(20);
+    results.innerHTML = `
+        <div class="empty-chat">
+            Searching...
+        </div>
+    `;
 
-        if (error) {
-            console.error(
-                "[Chat] Group user search error:",
-                error
-            );
+    const safeQuery =
+        escapeIlikeValue(query);
 
-            results.innerHTML = `
-                <div class="empty-chat">
-                    Search failed.
-                </div>
-            `;
+    const pattern =
+        `%${safeQuery}%`;
 
-            return;
+    try {
+        const [
+            usernameResult,
+            displayNameResult
+        ] = await Promise.all([
+            db
+                .from("profiles")
+                .select("*")
+                .ilike(
+                    "username",
+                    pattern
+                )
+                .neq(
+                    "id",
+                    currentSession.user.id
+                )
+                .limit(20),
+
+            db
+                .from("profiles")
+                .select("*")
+                .ilike(
+                    "display_name",
+                    pattern
+                )
+                .neq(
+                    "id",
+                    currentSession.user.id
+                )
+                .limit(20)
+        ]);
+
+        if (usernameResult.error) {
+            throw usernameResult.error;
         }
 
-        results.innerHTML =
-            "";
+        if (displayNameResult.error) {
+            throw displayNameResult.error;
+        }
 
-        for (
-            const profile
-            of data || []
-        ) {
+        const combined = [
+            ...(usernameResult.data || []),
+            ...(displayNameResult.data || [])
+        ];
+
+        const uniqueProfiles = [];
+        const seenIds = new Set();
+
+        for (const profile of combined) {
+            if (seenIds.has(profile.id)) {
+                continue;
+            }
+
+            seenIds.add(profile.id);
+            uniqueProfiles.push(profile);
+        }
+
+        const data =
+            uniqueProfiles.slice(0, 20);
+
+        results.innerHTML = "";
+
+        for (const profile of data) {
             profiles[
                 profile.id
             ] = profile;
@@ -3568,218 +3607,207 @@
             );
         }
 
-        if (
-            !data ||
-            !data.length
-        ) {
+        if (!data.length) {
             results.innerHTML = `
                 <div class="empty-chat">
                     No users found.
                 </div>
             `;
         }
-    }
 
-    function toggleGroupUser(
-        profile
-    ) {
-        const index =
-            selectedGroupUsers.findIndex(
-                user =>
-                    user.id ===
-                    profile.id
-            );
-
-        if (index >= 0) {
-            selectedGroupUsers.splice(
-                index,
-                1
-            );
-        } else {
-            selectedGroupUsers.push(
-                profile
-            );
-        }
-
-        renderSelectedGroupUsers();
-
-        searchGroupUsers();
-    }
-
-    function renderSelectedGroupUsers() {
-        const container =
-            document.getElementById(
-                "group-selected"
-            );
-
-        container.innerHTML =
-            "";
-
-        for (
-            const profile
-            of selectedGroupUsers
-        ) {
-            const chip =
-                document.createElement(
-                    "div"
-                );
-
-            chip.className =
-                "selected-user";
-
-            const name =
-                document.createElement(
-                    "span"
-                );
-
-            name.textContent =
-                profile.display_name ||
-                profile.username ||
-                "User";
-
-            const remove =
-                document.createElement(
-                    "button"
-                );
-
-            remove.type =
-                "button";
-
-            remove.textContent =
-                "×";
-
-            remove.title =
-                "Remove";
-
-            remove.addEventListener(
-                "click",
-                () => {
-                    toggleGroupUser(
-                        profile
-                    );
-                }
-            );
-
-            chip.appendChild(
-                name
-            );
-
-            chip.appendChild(
-                remove
-            );
-
-            container.appendChild(
-                chip
-            );
-        }
-    }
-
-    document.getElementById(
-        "create-group-button"
-    ).addEventListener(
-        "click",
-        createGroup
-    );
-
-    async function createGroup() {
-        clearChatError();
-
-        const nameInput =
-            document.getElementById(
-                "group-name"
-            );
-
-        const groupName =
-            nameInput.value.trim();
-
-        if (!groupName) {
-            showChatError(
-                "Please enter a group name."
-            );
-
-            nameInput.focus();
-
-            return;
-        }
-
-        if (
-            selectedGroupUsers.length <
-            1
-        ) {
-            showChatError(
-                "Select at least one other user."
-            );
-
-            return;
-        }
-
-        const button =
-            document.getElementById(
-                "create-group-button"
-            );
-
-        button.disabled =
-            true;
-
-        button.textContent =
-            "Creating...";
-
-        const memberIds =
-            selectedGroupUsers.map(
-                user =>
-                    user.id
-            );
-
-        const {
-            data: conversationId,
+    } catch (error) {
+        console.error(
+            "[Chat] Group user search error:",
             error
-        } = await db.rpc(
-            "create_group_conversation",
-            {
-                group_name:
-                    groupName,
+        );
 
-                member_ids:
-                    memberIds
+        results.innerHTML = `
+            <div class="empty-chat">
+                Search failed.
+            </div>
+        `;
+    }
+}
+
+function toggleGroupUser(
+    profile
+) {
+    const index =
+        selectedGroupUsers.findIndex(
+            user =>
+                user.id ===
+                profile.id
+        );
+
+    if (index >= 0) {
+        selectedGroupUsers.splice(
+            index,
+            1
+        );
+    } else {
+        selectedGroupUsers.push(
+            profile
+        );
+    }
+
+    renderSelectedGroupUsers();
+    searchGroupUsers();
+}
+
+function renderSelectedGroupUsers() {
+    const container =
+        document.getElementById(
+            "group-selected"
+        );
+
+    container.innerHTML = "";
+
+    for (
+        const profile
+        of selectedGroupUsers
+    ) {
+        const chip =
+            document.createElement(
+                "div"
+            );
+
+        chip.className =
+            "selected-user";
+
+        const name =
+            document.createElement(
+                "span"
+            );
+
+        name.textContent =
+            profile.display_name ||
+            profile.username ||
+            "User";
+
+        const remove =
+            document.createElement(
+                "button"
+            );
+
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.title = "Remove";
+
+        remove.addEventListener(
+            "click",
+            () => {
+                toggleGroupUser(
+                    profile
+                );
             }
         );
 
-        button.disabled =
-            false;
+        chip.appendChild(name);
+        chip.appendChild(remove);
 
-        button.textContent =
-            "Create Group";
+        container.appendChild(chip);
+    }
+}
 
-        if (error) {
-            console.error(
-                "[Chat] Group creation error:",
-                error
-            );
+document.getElementById(
+    "create-group-button"
+).addEventListener(
+    "click",
+    createGroup
+);
 
-            showChatError(
-                "Could not create the group."
-            );
+async function createGroup() {
+    clearChatError();
 
-            return;
-        }
-
-        closeGroupChat();
-
-        conversationMembers[
-            conversationId
-        ] = [];
-
-        delete conversationDetails[
-            conversationId
-        ];
-
-        await loadConversations();
-
-        await openConversation(
-            conversationId
+    const nameInput =
+        document.getElementById(
+            "group-name"
         );
+
+    const groupName =
+        nameInput.value.trim();
+
+    if (!groupName) {
+        showChatError(
+            "Please enter a group name."
+        );
+
+        nameInput.focus();
+        return;
     }
 
+    if (
+        selectedGroupUsers.length <
+        1
+    ) {
+        showChatError(
+            "Select at least one other user."
+        );
+
+        return;
+    }
+
+    const button =
+        document.getElementById(
+            "create-group-button"
+        );
+
+    button.disabled = true;
+    button.textContent = "Creating...";
+
+    const memberIds =
+        selectedGroupUsers.map(
+            user =>
+                user.id
+        );
+
+    const {
+        data: conversationId,
+        error
+    } = await db.rpc(
+        "create_group_conversation",
+        {
+            group_name:
+                groupName,
+
+            member_ids:
+                memberIds
+        }
+    );
+
+    button.disabled = false;
+    button.textContent =
+        "Create Group";
+
+    if (error) {
+        console.error(
+            "[Chat] Group creation error:",
+            error
+        );
+
+        showChatError(
+            "Could not create the group."
+        );
+
+        return;
+    }
+
+    closeGroupChat();
+
+    conversationMembers[
+        conversationId
+    ] = [];
+
+    delete conversationDetails[
+        conversationId
+    ];
+
+    await loadConversations();
+
+    await openConversation(
+        conversationId
+    );
+}
     /* -------------------------
        REALTIME
     ------------------------- */
