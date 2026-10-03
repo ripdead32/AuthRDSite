@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Search — Rip_Dead Account</title>
+    <title>Settings - Rip_Dead Account</title>
 
     <link
         rel="stylesheet"
@@ -118,56 +118,101 @@
 
 <main class="page page-small">
 
+    <div class="page-header">
+
+        <span
+            style="
+                display: block;
+                margin-bottom: 10px;
+                color: var(--purple-hover);
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+            "
+        >
+            RIP_DEAD ACCOUNT
+        </span>
+
+        <h1>
+            Settings
+        </h1>
+
+        <p>
+            Manage your account and profile.
+        </p>
+
+    </div>
+
+
+    <div
+        id="settings-message"
+        class="message"
+        aria-live="polite"
+    ></div>
+
+
     <section class="card">
 
-        <div class="page-header">
+        <h2 class="card-title">
+            Profile
+        </h2>
 
-            <div>
+        <p class="card-description">
+            Change your username, display name,
+            biography and profile picture.
+        </p>
 
-                <h1>
-                    Find Users
-                </h1>
+        <a
+            href="/profile/"
+            class="button"
+        >
+            Edit Profile
+        </a>
 
-                <p>
-                    Search for Rip_Dead users.
-                </p>
-
-            </div>
-
-        </div>
+    </section>
 
 
-        <div class="search-row">
+    <section class="card">
+
+        <h2 class="card-title">
+            Account
+        </h2>
+
+        <div class="form-group">
+
+            <label for="account-email">
+                Email
+            </label>
 
             <input
-                id="user-search"
-                type="search"
-                placeholder="Search username or display name..."
-                autocomplete="off"
+                type="email"
+                id="account-email"
+                class="account-field"
+                readonly
+                value="Loading..."
             >
-
-            <button
-                id="search-button"
-                class="button"
-                type="button"
-            >
-                Search
-            </button>
 
         </div>
 
-
-        <div
-            id="search-message"
-            class="message"
-            hidden
-        ></div>
+    </section>
 
 
-        <div
-            id="search-results"
-            class="user-list"
-        ></div>
+    <section class="card">
+
+        <h2 class="card-title">
+            Session
+        </h2>
+
+        <p class="card-description">
+            Sign out of your Rip_Dead account on this device.
+        </p>
+
+        <button
+            type="button"
+            id="settings-logout"
+        >
+            Log Out
+        </button>
 
     </section>
 
@@ -179,320 +224,101 @@
 
 <script>
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
-
-        const input =
-            document.getElementById(
-                "user-search"
-            );
-
-        const button =
-            document.getElementById(
-                "search-button"
-            );
-
-        const results =
-            document.getElementById(
-                "search-results"
-            );
-
-        const message =
-            document.getElementById(
-                "search-message"
-            );
+let settingsSession = null;
 
 
-        const session =
-            await window.requireAuth();
+const settingsMessage =
+    document.getElementById(
+        "settings-message"
+    );
 
 
-        if (!session) {
+async function initializeSettings() {
+
+    try {
+
+        settingsSession =
+            await window.getSession();
+
+
+        if (!settingsSession) {
+
+            window.location.href =
+                "/login/";
+
             return;
+
         }
 
 
         await window.initNavbar();
 
 
-        async function performSearch() {
+        document.getElementById(
+            "account-email"
+        ).value =
+            settingsSession.user.email ||
+            "No email available";
 
-            const query =
-                input.value.trim();
 
+    } catch (error) {
 
-            results.innerHTML = "";
-
-            message.hidden = true;
-
-
-            if (!query) {
-
-                message.textContent =
-                    "Enter a username or display name to search.";
-
-                message.hidden = false;
-
-                return;
-            }
-
-
-            button.disabled = true;
-
-            button.textContent =
-                "Searching...";
-
-
-            try {
-
-                const escapedQuery =
-                    query
-                        .replace(/\\/g, "\\\\")
-                        .replace(/%/g, "\\%")
-                        .replace(/_/g, "\\_");
-
-
-                const {
-                    data,
-                    error
-                } =
-                    await window.supabaseClient
-                        .from("profiles")
-                        .select(
-                            "id, username, display_name, avatar_url, bio, is_verified"
-                        )
-                        .or(
-                            `username.ilike.%${escapedQuery}%,display_name.ilike.%${escapedQuery}%`
-                        )
-                        .neq(
-                            "id",
-                            session.user.id
-                        )
-                        .limit(25);
-
-
-                if (error) {
-                    throw error;
-                }
-
-
-                if (
-                    !data ||
-                    data.length === 0
-                ) {
-
-                    message.textContent =
-                        "No users found.";
-
-                    message.hidden = false;
-
-                    return;
-                }
-
-
-                data.forEach(
-                    profile => {
-
-                        const userCard =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        userCard.className =
-                            "user-card";
-
-
-                        const avatar =
-                            window.createAvatar(
-                                profile,
-                                "user-avatar"
-                            );
-
-
-                        const userInfo =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        userInfo.className =
-                            "user-info";
-
-
-                        const name =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        name.className =
-                            "user-name";
-
-
-                        name.textContent =
-                            profile.display_name ||
-                            profile.username ||
-                            "Rip_Dead User";
-
-
-                        if (profile.is_verified) {
-
-                            const verified =
-                                document.createElement(
-                                    "span"
-                                );
-
-
-                            verified.className =
-                                "verified-text";
-
-
-                            verified.textContent =
-                                "✓ Verified";
-
-
-                            name.appendChild(
-                                verified
-                            );
-
-                        }
-
-
-                        const username =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        username.className =
-                            "user-username";
-
-
-                        username.textContent =
-                            "@" +
-                            (
-                                profile.username ||
-                                "unknown"
-                            );
-
-
-                        const actions =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        actions.className =
-                            "user-actions";
-
-
-                        const viewButton =
-                            document.createElement(
-                                "a"
-                            );
-
-
-                        viewButton.className =
-                            "button secondary";
-
-
-                        viewButton.textContent =
-                            "View Profile";
-
-
-                        viewButton.href =
-                            `/user/?id=${encodeURIComponent(profile.id)}`;
-
-
-                        actions.appendChild(
-                            viewButton
-                        );
-
-
-                        userInfo.appendChild(
-                            name
-                        );
-
-
-                        userInfo.appendChild(
-                            username
-                        );
-
-
-                        userCard.appendChild(
-                            avatar
-                        );
-
-
-                        userCard.appendChild(
-                            userInfo
-                        );
-
-
-                        userCard.appendChild(
-                            actions
-                        );
-
-
-                        results.appendChild(
-                            userCard
-                        );
-
-                    }
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "[Search] Search error:",
-                    error
-                );
-
-
-                message.textContent =
-                    "Something went wrong while searching.";
-
-
-                message.hidden = false;
-
-
-            } finally {
-
-                button.disabled = false;
-
-                button.textContent =
-                    "Search";
-
-            }
-
-        }
-
-
-        button.addEventListener(
-            "click",
-            performSearch
-        );
-
-
-        input.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Enter"
-                ) {
-
-                    performSearch();
-
-                }
-
-            }
+        console.error(
+            "[Settings] Initialization error:",
+            error
         );
 
     }
+
+}
+
+
+document.getElementById(
+    "settings-logout"
+).addEventListener(
+    "click",
+    async () => {
+
+        const button =
+            document.getElementById(
+                "settings-logout"
+            );
+
+
+        button.disabled =
+            true;
+
+
+        button.textContent =
+            "Logging out...";
+
+
+        try {
+
+            await window.signOut();
+
+        } catch (error) {
+
+            console.error(
+                "[Settings] Logout error:",
+                error
+            );
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Log Out";
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeSettings
 );
 
 </script>
