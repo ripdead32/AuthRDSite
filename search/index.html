@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -17,6 +18,7 @@
     >
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -177,6 +179,7 @@
 <script src="/js/auth.js"></script>
 <script src="/js/global.js"></script>
 
+
 <script>
 
 document.addEventListener(
@@ -188,15 +191,18 @@ document.addEventListener(
                 "user-search"
             );
 
+
         const button =
             document.getElementById(
                 "search-button"
             );
 
+
         const results =
             document.getElementById(
                 "search-results"
             );
+
 
         const message =
             document.getElementById(
@@ -204,12 +210,23 @@ document.addEventListener(
             );
 
 
+        /*
+         * Get the actual session directly.
+         *
+         * Do NOT use initNavbar() as the session.
+         */
+
         const session =
-            await window.requireAuth();
+            await window.getSession();
 
 
         if (!session) {
+
+            window.location.href =
+                "/login/";
+
             return;
+
         }
 
 
@@ -222,9 +239,12 @@ document.addEventListener(
                 input.value.trim();
 
 
-            results.innerHTML = "";
+            results.innerHTML =
+                "";
 
-            message.hidden = true;
+
+            message.hidden =
+                true;
 
 
             if (!query) {
@@ -232,13 +252,17 @@ document.addEventListener(
                 message.textContent =
                     "Enter a username or display name to search.";
 
-                message.hidden = false;
+                message.hidden =
+                    false;
 
                 return;
+
             }
 
 
-            button.disabled = true;
+            button.disabled =
+                true;
+
 
             button.textContent =
                 "Searching...";
@@ -273,7 +297,9 @@ document.addEventListener(
 
 
                 if (error) {
+
                     throw error;
+
                 }
 
 
@@ -285,9 +311,11 @@ document.addEventListener(
                     message.textContent =
                         "No users found.";
 
-                    message.hidden = false;
+                    message.hidden =
+                        false;
 
                     return;
+
                 }
 
 
@@ -337,7 +365,9 @@ document.addEventListener(
                             "Rip_Dead User";
 
 
-                        if (profile.is_verified) {
+                        if (
+                            profile.is_verified
+                        ) {
 
                             const verified =
                                 document.createElement(
@@ -403,7 +433,9 @@ document.addEventListener(
 
 
                         viewButton.href =
-                            `/user/?id=${encodeURIComponent(profile.id)}`;
+                            `/user/?id=${encodeURIComponent(
+                                profile.id
+                            )}`;
 
 
                         actions.appendChild(
@@ -456,12 +488,15 @@ document.addEventListener(
                     "Something went wrong while searching.";
 
 
-                message.hidden = false;
+                message.hidden =
+                    false;
 
 
             } finally {
 
-                button.disabled = false;
+                button.disabled =
+                    false;
+
 
                 button.textContent =
                     "Search";
@@ -496,6 +531,7 @@ document.addEventListener(
 );
 
 </script>
+
 
 </body>
 
