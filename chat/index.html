@@ -3220,20 +3220,16 @@ function escapeIlikeValue(value) {
             );
         }
 
-        const avatar =
-            createAvatar(
-                profile,
-                "message-avatar"
-            );
+const avatar =
+    document.createElement("div");
 
-        const info =
-            document.createElement(
-                "div"
-            );
+avatar.className =
+    "message-avatar";
 
-        info.className =
-            "user-result-info";
-
+createAvatar(
+    profile,
+    avatar
+);
         const nameRow =
             document.createElement(
                 "div"
