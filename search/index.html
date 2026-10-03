@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -11,10 +9,7 @@
 
     <title>Search - Rip_Dead Account</title>
 
-    <link
-        rel="stylesheet"
-        href="/css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -150,6 +145,17 @@
             font-weight: 900;
         }
 
+        .search-user-actions {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-user-actions .button {
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
         .search-empty {
             padding: 35px 20px;
             text-align: center;
@@ -174,6 +180,19 @@
             .search-form button {
                 width: 100%;
             }
+
+            .search-user {
+                align-items: flex-start;
+            }
+
+            .search-user-actions {
+                align-self: center;
+            }
+
+            .search-user-actions .button {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -181,13 +200,9 @@
 <body>
 
 <nav class="site-navbar">
-
     <div class="navbar-inner">
 
-        <a
-            href="/"
-            class="navbar-brand"
-        >
+        <a href="/" class="navbar-brand">
             Rip_Dead Account
         </a>
 
@@ -269,19 +284,14 @@
             </button>
 
         </div>
-
     </div>
-
 </nav>
-
 
 <main class="search-page">
 
     <section class="search-card">
 
-        <h1>
-            Search
-        </h1>
+        <h1>Search</h1>
 
         <p>
             Find Rip_Dead Account users by username or display name.
@@ -291,7 +301,6 @@
             id="search-form"
             class="search-form"
         >
-
             <input
                 type="search"
                 id="search-input"
@@ -300,12 +309,9 @@
                 maxlength="100"
             >
 
-            <button
-                type="submit"
-            >
+            <button type="submit">
                 Search
             </button>
-
         </form>
 
         <div
@@ -321,7 +327,6 @@
 
 </main>
 
-
 <script src="/js/auth.js"></script>
 <script src="/js/global.js"></script>
 
@@ -329,10 +334,6 @@
 
     let searchSession = null;
 
-
-    /* =========================================================
-       ESCAPE ILIKE SEARCH CHARACTERS
-    ========================================================= */
 
     function escapeIlikeValue(value) {
 
@@ -344,10 +345,6 @@
 
     }
 
-
-    /* =========================================================
-       SHOW RESULTS MESSAGE
-    ========================================================= */
 
     function showSearchMessage(
         message,
@@ -372,7 +369,6 @@
             `;
 
             return;
-
         }
 
         results.innerHTML = `
@@ -384,17 +380,13 @@
     }
 
 
-    /* =========================================================
-       CREATE USER AVATAR
-    ========================================================= */
-
     function createSearchAvatar(profile) {
 
         const avatar =
             document.createElement("div");
 
-        avatar.className =
-            "search-avatar";
+        avatar.className = "search-avatar";
+
 
         if (profile.avatar_url) {
 
@@ -409,6 +401,7 @@
                 profile.username ||
                 "User";
 
+
             image.onerror = () => {
 
                 image.remove();
@@ -420,11 +413,13 @@
 
             };
 
+
             avatar.appendChild(image);
 
             return avatar;
 
         }
+
 
         createSearchAvatarLetter(
             avatar,
@@ -447,24 +442,23 @@
         letter.className =
             "search-avatar-letter";
 
+
         const name =
             profile.display_name ||
             profile.username ||
             "User";
 
-        letter.textContent =
-            name.charAt(0).toUpperCase();
 
-        container.appendChild(
-            letter
-        );
+        letter.textContent =
+            name
+                .charAt(0)
+                .toUpperCase();
+
+
+        container.appendChild(letter);
 
     }
 
-
-    /* =========================================================
-       CREATE USER RESULT
-    ========================================================= */
 
     function createSearchUserCard(profile) {
 
@@ -476,9 +470,7 @@
 
 
         const avatar =
-            createSearchAvatar(
-                profile
-            );
+            createSearchAvatar(profile);
 
 
         const info =
@@ -507,9 +499,7 @@
             "User";
 
 
-        nameRow.appendChild(
-            name
-        );
+        nameRow.appendChild(name);
 
 
         if (profile.is_verified) {
@@ -545,13 +535,9 @@
                 : "";
 
 
-        info.appendChild(
-            nameRow
-        );
+        info.appendChild(nameRow);
 
-        info.appendChild(
-            username
-        );
+        info.appendChild(username);
 
 
         if (profile.bio) {
@@ -565,30 +551,53 @@
             bio.textContent =
                 profile.bio;
 
-            info.appendChild(
-                bio
-            );
+            info.appendChild(bio);
 
         }
 
 
-        card.appendChild(
-            avatar
+        /*
+         * View Profile button
+         */
+
+        const actions =
+            document.createElement("div");
+
+        actions.className =
+            "search-user-actions";
+
+
+        const viewProfile =
+            document.createElement("a");
+
+        viewProfile.className =
+            "button";
+
+        viewProfile.href =
+            `/user/?id=${encodeURIComponent(
+                profile.id
+            )}`;
+
+        viewProfile.textContent =
+            "View Profile";
+
+
+        actions.appendChild(
+            viewProfile
         );
 
-        card.appendChild(
-            info
-        );
+
+        card.appendChild(avatar);
+
+        card.appendChild(info);
+
+        card.appendChild(actions);
 
 
         return card;
 
     }
 
-
-    /* =========================================================
-       SEARCH USERS
-    ========================================================= */
 
     async function searchUsers() {
 
@@ -601,7 +610,6 @@
             document.getElementById(
                 "search-results"
             );
-
 
         const rawQuery =
             input.value.trim();
@@ -641,7 +649,6 @@
             escapeIlikeValue(
                 rawQuery
             );
-
 
         const pattern =
             `%${query}%`;
@@ -706,11 +713,8 @@
 
 
             const combined = [
-
                 ...(usernameResult.data || []),
-
                 ...(displayNameResult.data || [])
-
             ];
 
 
@@ -720,10 +724,7 @@
                 new Set();
 
 
-            for (
-                const profile
-                of combined
-            ) {
+            for (const profile of combined) {
 
                 if (
                     seenIds.has(
@@ -771,10 +772,7 @@
             results.innerHTML = "";
 
 
-            for (
-                const profile
-                of data
-            ) {
+            for (const profile of data) {
 
                 const card =
                     createSearchUserCard(
@@ -803,10 +801,6 @@
 
     }
 
-
-    /* =========================================================
-       INITIALIZATION
-    ========================================================= */
 
     async function initializeSearch() {
 
@@ -902,13 +896,13 @@
                 }
             );
 
-
         } catch (error) {
 
             console.error(
                 "[Search] Initialization error:",
                 error
             );
+
 
             showSearchMessage(
                 "Could not initialize search.",
