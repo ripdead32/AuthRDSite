@@ -1,14 +1,18 @@
-const SUPABASE_URL = "https://vcwfgyikbvfzgqiljmry.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
+const SUPABASE_URL =
+    "https://vcwfgyikbvfzgqiljmry.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_5fJDaLZ4YuN3oHh1XhgE2Q_l5L_g7PZ";
 
 /* =========================================================
    SUPABASE
 ========================================================= */
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
 /* =========================================================
    SITE DOWN DETECTION
@@ -25,17 +29,10 @@ function isSupabaseUnavailableError(error) {
     const message =
         String(error.message || "").toLowerCase();
 
-    /*
-     * Supabase Auth uses this error for retryable
-     * network/fetch failures.
-     */
     if (name === "authretryablefetcherror") {
         return true;
     }
 
-    /*
-     * Browser/network failure messages.
-     */
     const networkErrors = [
         "failed to fetch",
         "networkerror",
@@ -54,10 +51,6 @@ function isSupabaseUnavailableError(error) {
 }
 
 function redirectToDownPage() {
-    /*
-     * Prevent an infinite redirect loop if the down page
-     * itself happens to load auth.js.
-     */
     if (
         window.location.pathname === "/down/" ||
         window.location.pathname === "/down/index.html"
@@ -65,6 +58,20 @@ function redirectToDownPage() {
         return;
     }
 
+    /*
+     * Prefer the global overlay when global.js is available.
+     */
+    if (
+        window.RipDeadGlobal &&
+        typeof window.RipDeadGlobal.showSiteDown === "function"
+    ) {
+        window.RipDeadGlobal.showSiteDown();
+        return;
+    }
+
+    /*
+     * Fallback if global.js has not loaded yet.
+     */
     window.location.href = "/down/";
 }
 
@@ -118,10 +125,13 @@ async function getSession() {
 ========================================================= */
 
 async function requireAuth() {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     if (!session) {
-        window.location.href = "/login/";
+        window.location.href =
+            "/login/";
+
         return null;
     }
 
@@ -133,7 +143,8 @@ async function requireAuth() {
 ========================================================= */
 
 async function getProfile(userId = null) {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     const id =
         userId ||
@@ -179,7 +190,8 @@ async function getProfile(userId = null) {
 }
 
 async function updateProfile(updates) {
-    const session = await getSession();
+    const session =
+        await getSession();
 
     if (!session) {
         return {
@@ -241,7 +253,6 @@ async function updateProfile(updates) {
 ========================================================= */
 
 function getAvatarLetter() {
-    // No random fallback letters.
     return "";
 }
 
@@ -260,7 +271,10 @@ function getAvatarUrl(profile) {
     return null;
 }
 
-function createAvatar(profile, className = "") {
+function createAvatar(
+    profile,
+    className = ""
+) {
     const wrapper =
         document.createElement("div");
 
@@ -269,8 +283,11 @@ function createAvatar(profile, className = "") {
 
     wrapper.classList.add("empty");
 
-    wrapper.style.overflow = "hidden";
-    wrapper.style.borderRadius = "50%";
+    wrapper.style.overflow =
+        "hidden";
+
+    wrapper.style.borderRadius =
+        "50%";
 
     const avatarUrl =
         getAvatarUrl(profile);
@@ -282,14 +299,29 @@ function createAvatar(profile, className = "") {
         image.src = avatarUrl;
         image.alt = "";
 
-        image.style.display = "block";
-        image.style.width = "100%";
-        image.style.height = "100%";
-        image.style.maxWidth = "100%";
-        image.style.maxHeight = "100%";
-        image.style.objectFit = "cover";
-        image.style.objectPosition = "center";
-        image.style.borderRadius = "50%";
+        image.style.display =
+            "block";
+
+        image.style.width =
+            "100%";
+
+        image.style.height =
+            "100%";
+
+        image.style.maxWidth =
+            "100%";
+
+        image.style.maxHeight =
+            "100%";
+
+        image.style.objectFit =
+            "cover";
+
+        image.style.objectPosition =
+            "center";
+
+        image.style.borderRadius =
+            "50%";
 
         image.addEventListener(
             "error",
@@ -298,7 +330,9 @@ function createAvatar(profile, className = "") {
             }
         );
 
-        wrapper.appendChild(image);
+        wrapper.appendChild(
+            image
+        );
     }
 
     return wrapper;
@@ -340,6 +374,10 @@ function setMessage(
 ========================================================= */
 
 async function initNavbar() {
+    console.trace(
+        "[Auth] initNavbar called"
+    );
+
     console.log(
         "[Auth] Initializing navbar..."
     );
@@ -354,9 +392,21 @@ async function initNavbar() {
             : "LOGGED OUT"
     );
 
+    /*
+     * If the backend went down while
+     * getSession() was running, stop here.
+     */
+    if (
+        window.RipDeadGlobal &&
+        document.getElementById(
+            "ripdead-site-down"
+        )
+    ) {
+        return session;
+    }
+
     /* ---------------------------------------------------------
        GUEST ELEMENTS
-       Log In / Create Account
     --------------------------------------------------------- */
 
     const guestElements =
@@ -366,7 +416,6 @@ async function initNavbar() {
 
     /* ---------------------------------------------------------
        AUTH ELEMENTS
-       Search / Friends / Settings / Account / Log Out
     --------------------------------------------------------- */
 
     const authElements =
@@ -382,6 +431,7 @@ async function initNavbar() {
         guestElements.forEach(
             element => {
                 element.hidden = true;
+
                 element.style.display =
                     "none";
 
@@ -518,7 +568,9 @@ async function initNavbar() {
         logoutButton.onclick =
             async () => {
 
-                if (logoutButton.disabled) {
+                if (
+                    logoutButton.disabled
+                ) {
                     return;
                 }
 
@@ -605,9 +657,10 @@ supabaseClient.auth.onAuthStateChange(
         }
 
         /*
-         * Do NOT automatically redirect here.
+         * Do NOT automatically redirect
+         * or initialize the navbar here.
          *
-         * Individual pages decide what they should do.
+         * Pages decide when to call initNavbar().
          */
     }
 );
@@ -648,3 +701,6 @@ window.initNavbar =
 
 window.signOut =
     signOut;
+
+window.isSupabaseUnavailableError =
+    isSupabaseUnavailableError;

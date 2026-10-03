@@ -9,11 +9,11 @@
     const SUPABASE_URL =
         "https://vcwfgyikbvfzgqiljmry.supabase.co";
 
-    const DOWN_PAGE =
-        "/down/";
-
     let checking = false;
     let siteDownShown = false;
+
+    const originalFetch =
+        window.fetch.bind(window);
 
     /* =========================================================
        DO NOT RUN ON DOWN PAGE
@@ -42,6 +42,15 @@
         }
 
         siteDownShown = true;
+
+        const existing =
+            document.getElementById(
+                "ripdead-site-down"
+            );
+
+        if (existing) {
+            return;
+        }
 
         const overlay =
             document.createElement("div");
@@ -96,6 +105,13 @@
             </div>
         `;
 
+        /*
+         * Make sure body exists.
+         */
+        if (!document.body) {
+            return;
+        }
+
         document.body.appendChild(
             overlay
         );
@@ -107,20 +123,9 @@
                 "ripdead-down-retry"
             );
 
-        const home =
-            document.getElementById(
-                "ripdead-down-home"
-            );
-
         if (retry) {
             retry.onclick = () => {
                 window.location.reload();
-            };
-        }
-
-        if (home) {
-            home.onclick = () => {
-                window.location.href = "/";
             };
         }
     }
@@ -317,11 +322,6 @@
                 background: #9333ea;
             }
 
-            #ripdead-down-home:hover {
-                background:
-                    rgba(255, 255, 255, 0.1);
-            }
-
             @media (max-width: 520px) {
                 .ripdead-down-buttons {
                     flex-direction: column;
@@ -339,7 +339,94 @@
     }
 
     /* =========================================================
-       CHECK SUPABASE
+       IS SUPABASE REQUEST?
+    ========================================================= */
+
+    function isSupabaseRequest(input) {
+        let url = "";
+
+        try {
+            if (
+                typeof input === "string"
+            ) {
+                url = input;
+            } else if (
+                input instanceof Request
+            ) {
+                url = input.url;
+            } else if (
+                input &&
+                typeof input.url === "string"
+            ) {
+                url = input.url;
+            }
+        } catch {
+            return false;
+        }
+
+        return url.startsWith(
+            SUPABASE_URL
+        );
+    }
+
+    /* =========================================================
+       FETCH MONITOR
+    ========================================================= */
+
+    window.fetch = async function (
+        input,
+        init
+    ) {
+        /*
+         * Don't monitor the down page.
+         */
+        if (isDownPage()) {
+            return originalFetch(
+                input,
+                init
+            );
+        }
+
+        const supabaseRequest =
+            isSupabaseRequest(input);
+
+        try {
+            const response =
+                await originalFetch(
+                    input,
+                    init
+                );
+
+            if (
+                supabaseRequest &&
+                response.status >= 500
+            ) {
+                console.error(
+                    "[Global] Supabase returned:",
+                    response.status
+                );
+
+                showSiteDown();
+            }
+
+            return response;
+
+        } catch (error) {
+            if (supabaseRequest) {
+                console.error(
+                    "[Global] Supabase request failed:",
+                    error
+                );
+
+                showSiteDown();
+            }
+
+            throw error;
+        }
+    };
+
+    /* =========================================================
+       INITIAL SUPABASE HEALTH CHECK
     ========================================================= */
 
     async function checkSupabase() {
@@ -357,11 +444,13 @@
             "[Global] Checking Rip_Dead Account..."
         );
 
+        let timeout = null;
+
         try {
             const controller =
                 new AbortController();
 
-            const timeout =
+            timeout =
                 setTimeout(
                     () => {
                         controller.abort();
@@ -370,7 +459,7 @@
                 );
 
             const response =
-                await fetch(
+                await originalFetch(
                     SUPABASE_URL +
                     "/auth/v1/health",
                     {
@@ -381,16 +470,11 @@
                     }
                 );
 
-            clearTimeout(timeout);
-
             console.log(
                 "[Global] Supabase response:",
                 response.status
             );
 
-            /*
-             * HTTP 5xx means the backend is unavailable.
-             */
             if (
                 response.status >= 500
             ) {
@@ -403,12 +487,6 @@
                 return;
             }
 
-            /*
-             * 2xx / 3xx / 4xx means the server
-             * itself responded.
-             *
-             * The backend is therefore reachable.
-             */
             console.log(
                 "[Global] Rip_Dead Account is reachable."
             );
@@ -419,18 +497,13 @@
                 error
             );
 
-            /*
-             * This catches:
-             *
-             * - network failure
-             * - DNS failure
-             * - timeout
-             * - connection failure
-             * - paused/unreachable project
-             */
             showSiteDown();
 
         } finally {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+
             checking = false;
         }
     }
@@ -444,9 +517,6 @@
             return;
         }
 
-        /*
-         * Give the page a moment to create its DOM.
-         */
         if (
             document.readyState ===
             "loading"
