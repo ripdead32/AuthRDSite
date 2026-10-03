@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -20,34 +21,178 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
             background: #09090d;
-            color: #eee;
+            color: #eeeeee;
             font-family: Arial, Helvetica, sans-serif;
         }
 
+        /* =========================================================
+           RIP_DEAD NAVBAR
+        ========================================================= */
+
+        .rd-navbar {
+            height: 58px;
+            min-height: 58px;
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 22px;
+
+            background: #0b0b10;
+            border-bottom: 1px solid #252530;
+
+            position: relative;
+            z-index: 1000;
+        }
+
+        .rd-navbar-left,
+        .rd-navbar-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .rd-navbar-left {
+            gap: 28px;
+        }
+
+        .rd-navbar-right {
+            gap: 8px;
+        }
+
+        .rd-brand {
+            color: #ffffff !important;
+            text-decoration: none !important;
+
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+
+            white-space: nowrap;
+        }
+
+        .rd-brand:hover {
+            color: #a78bfa !important;
+        }
+
+        .rd-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rd-navbar a {
+            text-decoration: none !important;
+        }
+
+        .rd-nav-links a,
+        .rd-account,
+        .rd-navbar-right > .guest-only {
+            color: #9696a5 !important;
+
+            padding: 8px 11px;
+            border-radius: 7px;
+
+            font-size: 13px;
+            font-weight: 500;
+
+            transition:
+                color 0.15s ease,
+                background 0.15s ease;
+        }
+
+        .rd-nav-links a:hover,
+        .rd-account:hover,
+        .rd-navbar-right > .guest-only:hover {
+            color: #ffffff !important;
+            background: #181820;
+        }
+
+        .rd-nav-links a.active {
+            color: #ffffff !important;
+            background: #241b35;
+        }
+
+        .rd-signup {
+            background: #7c3aed !important;
+            color: #ffffff !important;
+            padding: 8px 13px !important;
+        }
+
+        .rd-signup:hover {
+            background: #8b5cf6 !important;
+        }
+
+        .rd-logout {
+            border: 1px solid #30303b;
+            background: #15151c;
+            color: #aaaab6;
+
+            padding: 8px 12px;
+            border-radius: 7px;
+
+            font-size: 13px;
+            font-weight: 500;
+
+            cursor: pointer;
+
+            transition:
+                color 0.15s ease,
+                background 0.15s ease,
+                border-color 0.15s ease;
+        }
+
+        .rd-logout:hover {
+            color: #ffffff;
+            background: #1e1e27;
+            border-color: #454552;
+        }
+
+        .rd-navbar .auth-only[hidden],
+        .rd-navbar .guest-only[hidden] {
+            display: none !important;
+        }
+
+        /* =========================================================
+           CHAT PAGE
+        ========================================================= */
+
         .chat-page {
-            height: calc(100vh - 64px);
+            height: calc(100vh - 58px);
+            width: 100%;
+
             display: flex;
             overflow: hidden;
         }
 
-        /* =========================
+        /* =========================================================
            SIDEBAR
-        ========================= */
+        ========================================================= */
 
         .chat-sidebar {
             width: 320px;
             min-width: 320px;
+
             background: #101017;
             border-right: 1px solid #24242f;
+
             display: flex;
             flex-direction: column;
         }
 
         .sidebar-header {
             padding: 18px;
+
             border-bottom: 1px solid #24242f;
         }
 
@@ -55,22 +200,30 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+
             margin-bottom: 14px;
         }
 
         .sidebar-title {
             margin: 0;
+
             font-size: 21px;
+            font-weight: 700;
         }
 
         .new-chat-button {
             width: 36px;
             height: 36px;
+
             border: 0;
             border-radius: 9px;
+
             background: #7c3aed;
             color: white;
+
             font-size: 24px;
+            line-height: 1;
+
             cursor: pointer;
         }
 
@@ -80,12 +233,18 @@
 
         .conversation-search {
             width: 100%;
+
             padding: 11px 13px;
+
             border: 1px solid #30303c;
             border-radius: 9px;
+
             outline: none;
+
             background: #17171f;
             color: white;
+
+            font-size: 14px;
         }
 
         .conversation-search:focus {
@@ -94,17 +253,24 @@
 
         .conversation-list {
             flex: 1;
+
             overflow-y: auto;
+
             padding: 8px;
         }
 
         .conversation {
             display: flex;
             align-items: center;
+
             gap: 11px;
+
             padding: 11px;
+
             border-radius: 9px;
+
             cursor: pointer;
+
             margin-bottom: 3px;
         }
 
@@ -124,8 +290,11 @@
         .conversation-name {
             display: flex;
             align-items: center;
+
             gap: 5px;
+
             font-weight: 600;
+
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -133,8 +302,11 @@
 
         .conversation-preview {
             color: #888894;
+
             font-size: 13px;
+
             margin-top: 4px;
+
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -142,34 +314,48 @@
 
         .conversation-time {
             color: #666673;
+
             font-size: 11px;
+
             align-self: flex-start;
+
             white-space: nowrap;
         }
 
         .empty-conversations {
             text-align: center;
+
             color: #777783;
+
             padding: 40px 20px;
+
             line-height: 1.5;
         }
 
-        /* =========================
+        /* =========================================================
            AVATARS
-        ========================= */
+        ========================================================= */
 
         .avatar {
             width: 44px;
             height: 44px;
+
             min-width: 44px;
+
             border-radius: 50%;
+
             overflow: hidden;
+
             background: #292933;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ddd;
+
+            color: #dddddd;
+
             font-weight: bold;
+
             user-select: none;
         }
 
@@ -177,6 +363,7 @@
             width: 38px;
             height: 38px;
             min-width: 38px;
+
             font-size: 13px;
         }
 
@@ -189,29 +376,38 @@
         .avatar img {
             width: 100%;
             height: 100%;
+
             object-fit: cover;
         }
 
-        /* =========================
-           CHAT PANEL
-        ========================= */
+        /* =========================================================
+           CHAT MAIN
+        ========================================================= */
 
         .chat-main {
             flex: 1;
+
             min-width: 0;
+
             display: flex;
             flex-direction: column;
+
             background: #0c0c11;
         }
 
         .chat-header {
             height: 70px;
             min-height: 70px;
+
             border-bottom: 1px solid #24242f;
+
             background: #101017;
+
             display: flex;
             align-items: center;
+
             padding: 10px 18px;
+
             gap: 12px;
         }
 
@@ -227,16 +423,23 @@
 
         .chat-header-subtitle {
             color: #777783;
+
             font-size: 12px;
+
             margin-top: 3px;
         }
 
         .leave-button {
             border: 1px solid #4a2630;
+
             background: #241419;
+
             color: #ff7b8e;
+
             padding: 9px 14px;
+
             border-radius: 8px;
+
             cursor: pointer;
         }
 
@@ -244,24 +447,40 @@
             background: #321923;
         }
 
+        .leave-button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        /* =========================================================
+           MESSAGES
+        ========================================================= */
+
         .messages {
             flex: 1;
+
             overflow-y: auto;
+
             padding: 20px;
         }
 
         .messages-empty {
             height: 100%;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             color: #696974;
+
             text-align: center;
         }
 
         .message-row {
             display: flex;
+
             gap: 10px;
+
             margin-bottom: 17px;
         }
 
@@ -276,9 +495,13 @@
         .message-meta {
             display: flex;
             align-items: center;
+
             gap: 7px;
+
             margin-bottom: 4px;
+
             font-size: 12px;
+
             color: #777783;
         }
 
@@ -297,11 +520,17 @@
 
         .message-bubble {
             background: #191922;
+
             border: 1px solid #282833;
+
             border-radius: 12px;
+
             padding: 10px 13px;
+
             white-space: pre-wrap;
+
             overflow-wrap: anywhere;
+
             line-height: 1.45;
         }
 
@@ -312,9 +541,13 @@
 
         .message-actions {
             display: flex;
+
             gap: 5px;
+
             margin-top: 4px;
+
             opacity: 0;
+
             transition: opacity 0.15s;
         }
 
@@ -328,9 +561,13 @@
 
         .message-delete {
             border: 0;
+
             background: transparent;
+
             color: #777783;
+
             cursor: pointer;
+
             font-size: 11px;
         }
 
@@ -343,30 +580,44 @@
             font-size: 12px;
         }
 
-        /* =========================
+        /* =========================================================
            MESSAGE FORM
-        ========================= */
+        ========================================================= */
 
         .message-form {
             padding: 13px;
+
             border-top: 1px solid #24242f;
+
             background: #101017;
+
             display: flex;
+
             gap: 9px;
         }
 
         .message-input {
             flex: 1;
+
             min-width: 0;
+
             resize: none;
+
             height: 44px;
             max-height: 130px;
+
             padding: 12px;
+
             border: 1px solid #30303c;
+
             border-radius: 9px;
+
             background: #17171f;
+
             color: white;
+
             outline: none;
+
             font-family: inherit;
         }
 
@@ -376,11 +627,17 @@
 
         .send-button {
             border: 0;
+
             border-radius: 9px;
+
             padding: 0 19px;
+
             background: #7c3aed;
+
             color: white;
+
             font-weight: 600;
+
             cursor: pointer;
         }
 
@@ -389,21 +646,26 @@
         }
 
         .send-button:disabled {
-            opacity: .5;
+            opacity: 0.5;
             cursor: default;
         }
 
-        /* =========================
+        /* =========================================================
            MODAL
-        ========================= */
+        ========================================================= */
 
         .modal-backdrop {
             position: fixed;
+
             inset: 0;
-            background: rgba(0, 0, 0, .72);
+
+            background: rgba(0, 0, 0, 0.72);
+
             display: none;
+
             align-items: center;
             justify-content: center;
+
             z-index: 9999;
         }
 
@@ -413,19 +675,32 @@
 
         .chat-modal {
             width: min(520px, calc(100vw - 30px));
-            max-height: min(720px, calc(100vh - 30px));
+
+            max-height: min(
+                720px,
+                calc(100vh - 30px)
+            );
+
             overflow: hidden;
+
             display: flex;
             flex-direction: column;
+
             background: #111118;
+
             border: 1px solid #30303c;
+
             border-radius: 14px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, .55);
+
+            box-shadow:
+                0 25px 80px rgba(0, 0, 0, 0.55);
         }
 
         .modal-header {
             padding: 17px;
+
             border-bottom: 1px solid #292934;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -433,53 +708,77 @@
 
         .modal-header h2 {
             margin: 0;
+
             font-size: 19px;
         }
 
         .modal-close {
             border: 0;
+
             background: transparent;
+
             color: #888894;
+
             font-size: 22px;
+
             cursor: pointer;
         }
 
         .modal-body {
             padding: 17px;
+
             overflow-y: auto;
         }
 
         .chat-mode-buttons {
             display: flex;
+
             gap: 8px;
+
             margin-bottom: 13px;
         }
 
         .mode-button {
             flex: 1;
+
             padding: 10px;
+
             border-radius: 8px;
+
             border: 1px solid #30303c;
+
             background: #181820;
+
             color: #aaaab5;
+
             cursor: pointer;
         }
 
         .mode-button.active {
             border-color: #7c3aed;
+
             background: #291d3b;
+
             color: white;
         }
 
         .group-name {
             display: none;
+
             width: 100%;
+
             margin-bottom: 10px;
+
             padding: 11px;
+
             border: 1px solid #30303c;
+
             border-radius: 8px;
+
             background: #17171f;
+
             color: white;
+
             outline: none;
         }
 
@@ -489,26 +788,38 @@
 
         .user-search {
             width: 100%;
+
             padding: 11px;
+
             border: 1px solid #30303c;
+
             border-radius: 8px;
+
             background: #17171f;
+
             color: white;
+
             outline: none;
         }
 
         .search-results {
             margin-top: 10px;
+
             max-height: 300px;
+
             overflow-y: auto;
         }
 
         .search-result {
             display: flex;
             align-items: center;
+
             gap: 10px;
+
             padding: 10px;
+
             border-radius: 9px;
+
             cursor: pointer;
         }
 
@@ -527,38 +838,52 @@
 
         .search-result-username {
             color: #777783;
+
             font-size: 12px;
+
             margin-top: 2px;
         }
 
         .select-indicator {
             width: 20px;
             height: 20px;
+
             border-radius: 50%;
+
             border: 1px solid #555563;
         }
 
         .select-indicator.selected {
             background: #7c3aed;
+
             border-color: #7c3aed;
+
             position: relative;
         }
 
         .select-indicator.selected::after {
             content: "✓";
+
             position: absolute;
+
             inset: 0;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             color: white;
+
             font-size: 12px;
         }
 
         .selected-users {
             display: none;
+
             flex-wrap: wrap;
+
             gap: 6px;
+
             margin: 10px 0;
         }
 
@@ -568,54 +893,92 @@
 
         .selected-user {
             background: #29203b;
+
             color: #ddd;
+
             padding: 5px 8px;
+
             border-radius: 6px;
+
             font-size: 12px;
         }
 
         .modal-footer {
             padding: 13px 17px;
+
             border-top: 1px solid #292934;
+
             display: flex;
+
             justify-content: flex-end;
+
             gap: 8px;
         }
 
         .secondary-button,
         .primary-button {
             padding: 10px 15px;
+
             border-radius: 8px;
+
             cursor: pointer;
         }
 
         .secondary-button {
             border: 1px solid #30303c;
+
             background: #181820;
+
             color: #ccc;
         }
 
         .primary-button {
             border: 0;
+
             background: #7c3aed;
+
             color: white;
         }
 
         .primary-button:disabled {
-            opacity: .5;
+            opacity: 0.5;
             cursor: default;
         }
 
         .modal-status {
             color: #ff7185;
+
             font-size: 13px;
+
             margin-top: 9px;
+
             min-height: 18px;
         }
 
-        /* =========================
+        /* =========================================================
            MOBILE
-        ========================= */
+        ========================================================= */
+
+        @media (max-width: 900px) {
+            .rd-navbar {
+                padding: 0 12px;
+            }
+
+            .rd-navbar-left {
+                gap: 12px;
+            }
+
+            .rd-nav-links {
+                gap: 1px;
+            }
+
+            .rd-nav-links a,
+            .rd-account,
+            .rd-navbar-right > .guest-only {
+                padding: 7px 8px;
+                font-size: 12px;
+            }
+        }
 
         @media (max-width: 750px) {
             .chat-sidebar {
@@ -629,7 +992,15 @@
 
             .leave-button {
                 font-size: 12px;
+
                 padding: 8px 9px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .rd-nav-links a:nth-child(4),
+            .rd-nav-links a:nth-child(5) {
+                display: none;
             }
         }
 
@@ -643,13 +1014,23 @@
                 display: none;
             }
 
-            .chat-page.mobile-chat-open .chat-sidebar {
+            .chat-page.mobile-chat-open
+                .chat-sidebar {
                 display: none;
             }
 
-            .chat-page.mobile-chat-open .chat-main {
+            .chat-page.mobile-chat-open
+                .chat-main {
                 display: flex;
                 width: 100%;
+            }
+
+            .rd-navbar-left {
+                gap: 8px;
+            }
+
+            .rd-nav-links {
+                display: none;
             }
         }
     </style>
@@ -657,51 +1038,124 @@
 
 <body>
 
-    <!-- =========================
+    <!-- =========================================================
          NAVBAR
-    ========================= -->
+    ========================================================= -->
 
-    <nav class="navbar">
-        <a href="/" class="navbar-brand">Rip_Dead</a>
+    <nav class="rd-navbar">
 
-        <div class="navbar-links">
-            <a href="/">Home</a>
+        <div class="rd-navbar-left">
 
-            <a href="/search/" class="auth-only">Search</a>
-            <a href="/friends/" class="auth-only">Friends</a>
-            <a href="/chat/" class="auth-only">Chat</a>
-            <a href="/apps/" class="auth-only">Authorized Apps</a>
-            <a href="/settings/" class="auth-only">Settings</a>
-            <a href="/account/" class="auth-only" id="navbar-user">
+            <a
+                href="/"
+                class="rd-brand"
+            >
+                Rip_Dead
+            </a>
+
+            <div class="rd-nav-links">
+
+                <a href="/">
+                    Home
+                </a>
+
+                <a
+                    href="/search/"
+                    class="auth-only"
+                >
+                    Search
+                </a>
+
+                <a
+                    href="/friends/"
+                    class="auth-only"
+                >
+                    Friends
+                </a>
+
+                <a
+                    href="/chat/"
+                    class="auth-only active"
+                >
+                    Chat
+                </a>
+
+                <a
+                    href="/apps/"
+                    class="auth-only"
+                >
+                    Authorized Apps
+                </a>
+
+                <a
+                    href="/settings/"
+                    class="auth-only"
+                >
+                    Settings
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="rd-navbar-right">
+
+            <a
+                href="/account/"
+                class="auth-only rd-account"
+                id="navbar-user"
+            >
                 Account
             </a>
 
-            <a href="/login/" class="guest-only">Log In</a>
-            <a href="/signup/" class="guest-only">Create Account</a>
+            <a
+                href="/login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only rd-signup"
+            >
+                Create Account
+            </a>
 
             <button
                 id="navbar-logout"
-                class="auth-only"
+                class="auth-only rd-logout"
                 type="button"
             >
                 Log Out
             </button>
+
         </div>
+
     </nav>
 
 
-    <!-- =========================
-         CHAT
-    ========================= -->
+    <!-- =========================================================
+         CHAT PAGE
+    ========================================================= -->
 
-    <main class="chat-page" id="chat-page">
+    <main
+        class="chat-page"
+        id="chat-page"
+    >
+
+        <!-- SIDEBAR -->
 
         <aside class="chat-sidebar">
 
             <div class="sidebar-header">
 
                 <div class="sidebar-title-row">
-                    <h1 class="sidebar-title">Messages</h1>
+
+                    <h1 class="sidebar-title">
+                        Messages
+                    </h1>
 
                     <button
                         class="new-chat-button"
@@ -711,6 +1165,7 @@
                     >
                         +
                     </button>
+
                 </div>
 
                 <input
@@ -723,6 +1178,7 @@
 
             </div>
 
+
             <div
                 class="conversation-list"
                 id="conversation-list"
@@ -730,6 +1186,8 @@
 
         </aside>
 
+
+        <!-- MAIN CHAT -->
 
         <section class="chat-main">
 
@@ -743,6 +1201,7 @@
                 </div>
 
                 <div class="chat-header-info">
+
                     <div
                         class="chat-header-name"
                         id="chat-header-name"
@@ -756,6 +1215,7 @@
                     >
                         Choose a conversation to start chatting
                     </div>
+
                 </div>
 
                 <button
@@ -809,9 +1269,9 @@
     </main>
 
 
-    <!-- =========================
+    <!-- =========================================================
          NEW CHAT MODAL
-    ========================= -->
+    ========================================================= -->
 
     <div
         class="modal-backdrop"
@@ -941,106 +1401,155 @@
             let currentUser = null;
 
             let conversations = [];
-            let conversationMembers = new Map();
-            let profiles = new Map();
-            let latestMessages = new Map();
+
+            let conversationMembers =
+                new Map();
+
+            let profiles =
+                new Map();
+
+            let latestMessages =
+                new Map();
 
             let currentConversationId = null;
 
-            let realtimeMessagesChannel = null;
-            let realtimeConversationsChannel = null;
+            let realtimeMessagesChannel =
+                null;
+
+            let realtimeConversationsChannel =
+                null;
 
             let modalMode = "direct";
-            let selectedGroupUsers = new Map();
+
+            let selectedGroupUsers =
+                new Map();
 
             let searchTimer = null;
 
             const chatPage =
-                document.getElementById("chat-page");
+                document.getElementById(
+                    "chat-page"
+                );
 
             const conversationList =
-                document.getElementById("conversation-list");
+                document.getElementById(
+                    "conversation-list"
+                );
 
             const conversationSearch =
-                document.getElementById("conversation-search");
+                document.getElementById(
+                    "conversation-search"
+                );
 
             const messagesElement =
-                document.getElementById("messages");
+                document.getElementById(
+                    "messages"
+                );
 
             const messageForm =
-                document.getElementById("message-form");
+                document.getElementById(
+                    "message-form"
+                );
 
             const messageInput =
-                document.getElementById("message-input");
+                document.getElementById(
+                    "message-input"
+                );
 
             const sendButton =
-                document.getElementById("send-button");
+                document.getElementById(
+                    "send-button"
+                );
 
             const leaveButton =
-                document.getElementById("leave-button");
+                document.getElementById(
+                    "leave-button"
+                );
 
             const headerAvatar =
-                document.getElementById("header-avatar");
+                document.getElementById(
+                    "header-avatar"
+                );
 
             const headerName =
-                document.getElementById("chat-header-name");
+                document.getElementById(
+                    "chat-header-name"
+                );
 
             const headerSubtitle =
-                document.getElementById("chat-header-subtitle");
+                document.getElementById(
+                    "chat-header-subtitle"
+                );
 
             const modalBackdrop =
-                document.getElementById("modal-backdrop");
+                document.getElementById(
+                    "modal-backdrop"
+                );
 
             const userSearch =
-                document.getElementById("user-search");
+                document.getElementById(
+                    "user-search"
+                );
 
             const searchResults =
-                document.getElementById("search-results");
+                document.getElementById(
+                    "search-results"
+                );
 
             const modalStatus =
-                document.getElementById("modal-status");
+                document.getElementById(
+                    "modal-status"
+                );
 
             const groupName =
-                document.getElementById("group-name");
+                document.getElementById(
+                    "group-name"
+                );
 
             const selectedUsers =
-                document.getElementById("selected-users");
+                document.getElementById(
+                    "selected-users"
+                );
 
             const directModeButton =
-                document.getElementById("direct-mode-button");
+                document.getElementById(
+                    "direct-mode-button"
+                );
 
             const groupModeButton =
-                document.getElementById("group-mode-button");
+                document.getElementById(
+                    "group-mode-button"
+                );
 
             const createGroupButton =
-                document.getElementById("create-group-button");
+                document.getElementById(
+                    "create-group-button"
+                );
 
 
-            /* =========================
+            /* =====================================================
                HELPERS
-            ========================= */
+            ===================================================== */
 
-            function escapeHTML(value) {
-                const div = document.createElement("div");
-                div.textContent = value ?? "";
-                return div.innerHTML;
+            function normalizeId(id) {
+                return String(id);
             }
 
 
-            function getInitials(profileOrName) {
-                let value = "";
+            function getInitials(value) {
+                let text = "";
 
-                if (typeof profileOrName === "string") {
-                    value = profileOrName;
+                if (typeof value === "string") {
+                    text = value;
                 } else {
-                    value =
-                        profileOrName?.display_name ||
-                        profileOrName?.username ||
+                    text =
+                        value?.display_name ||
+                        value?.username ||
                         "";
                 }
 
                 const parts =
-                    value
+                    text
                         .trim()
                         .split(/\s+/)
                         .filter(Boolean);
@@ -1068,58 +1577,69 @@
                 }
 
                 try {
-                    const parsed = new URL(url);
+                    const parsed =
+                        new URL(url);
 
                     if (
-                        parsed.protocol !== "https:" &&
-                        parsed.protocol !== "http:"
+                        parsed.protocol !==
+                            "https:" &&
+                        parsed.protocol !==
+                            "http:"
                     ) {
                         return null;
                     }
 
                     return parsed.href;
+
                 } catch {
                     return null;
                 }
             }
 
 
-            function renderAvatar(element, profile, fallbackName) {
+            function renderAvatar(
+                element,
+                profile,
+                fallback
+            ) {
                 if (!element) {
                     return;
                 }
 
                 element.innerHTML = "";
 
-                const avatarURL =
-                    validAvatarURL(profile?.avatar_url);
+                const url =
+                    validAvatarURL(
+                        profile?.avatar_url
+                    );
 
-                if (avatarURL) {
+                if (url) {
                     const img =
-                        document.createElement("img");
+                        document.createElement(
+                            "img"
+                        );
 
-                    img.src = avatarURL;
+                    img.src = url;
                     img.alt = "";
 
                     img.onerror = () => {
-                        element.innerHTML =
-                            escapeHTML(
-                                getInitials(
-                                    profile ||
-                                    fallbackName ||
-                                    "?"
-                                )
+                        element.textContent =
+                            getInitials(
+                                profile ||
+                                fallback ||
+                                "?"
                             );
                     };
 
                     element.appendChild(img);
+
                     return;
                 }
 
                 element.textContent =
                     getInitials(
                         profile ||
-                        fallbackName ||
+                        fallback ||
                         "?"
                     );
             }
@@ -1130,13 +1650,19 @@
                     return "";
                 }
 
-                const date = new Date(timestamp);
+                const date =
+                    new Date(timestamp);
 
-                if (Number.isNaN(date.getTime())) {
+                if (
+                    Number.isNaN(
+                        date.getTime()
+                    )
+                ) {
                     return "";
                 }
 
-                const now = new Date();
+                const now =
+                    new Date();
 
                 if (
                     date.toDateString() ===
@@ -1161,108 +1687,77 @@
             }
 
 
-            function normalizeId(id) {
-                return String(id);
-            }
-
-
             function generateNumericId() {
-                /*
-                 * Your conversations/messages tables use bigint IDs
-                 * without relying on a client-side UUID.
-                 *
-                 * This stays below JavaScript's safe integer limit.
-                 */
                 return (
                     Date.now() * 1000 +
-                    Math.floor(Math.random() * 1000)
+                    Math.floor(
+                        Math.random() * 1000
+                    )
                 );
             }
 
 
             async function insertWithGeneratedId(
                 table,
-                payload,
-                attempts = 5
+                payload
             ) {
-                for (let attempt = 0; attempt < attempts; attempt++) {
-
+                for (
+                    let attempt = 0;
+                    attempt < 5;
+                    attempt++
+                ) {
                     const id =
                         generateNumericId();
 
-                    const { data, error } =
-                        await db
-                            .from(table)
-                            .insert({
-                                id,
-                                ...payload
-                            })
-                            .select()
-                            .single();
+                    const {
+                        data,
+                        error
+                    } = await db
+                        .from(table)
+                        .insert({
+                            id,
+                            ...payload
+                        })
+                        .select()
+                        .single();
 
                     if (!error) {
                         return data;
                     }
 
-                    if (error.code !== "23505") {
+                    if (
+                        error.code !==
+                        "23505"
+                    ) {
                         throw error;
                     }
                 }
 
                 throw new Error(
-                    "Could not generate a unique ID. Please try again."
+                    "Could not generate a unique ID."
                 );
             }
 
 
-            function getConversationMembers(conversationId) {
+            function getConversationMembers(
+                conversationId
+            ) {
                 return (
                     conversationMembers.get(
-                        normalizeId(conversationId)
+                        normalizeId(
+                            conversationId
+                        )
                     ) || []
                 );
             }
 
 
-            function getConversationName(conversation) {
-                if (conversation.is_group) {
-                    return (
-                        conversation.name ||
-                        "Group Chat"
-                    );
-                }
-
-                const members =
-                    getConversationMembers(
-                        conversation.id
-                    );
-
-                const otherId =
-                    members.find(
-                        id =>
-                            normalizeId(id) !==
-                            normalizeId(currentUser.id)
-                    );
-
-                if (!otherId) {
-                    return "Unknown user";
-                }
-
-                const profile =
-                    profiles.get(
-                        normalizeId(otherId)
-                    );
-
-                return (
-                    profile?.display_name ||
-                    profile?.username ||
-                    "Unknown user"
-                );
-            }
-
-
-            function getConversationProfile(conversation) {
-                if (conversation.is_group) {
+            function getConversationProfile(
+                conversation
+            ) {
+                if (
+                    conversation.is_group
+                ) {
                     return null;
                 }
 
@@ -1275,31 +1770,71 @@
                     members.find(
                         id =>
                             normalizeId(id) !==
-                            normalizeId(currentUser.id)
+                            normalizeId(
+                                currentUser.id
+                            )
                     );
 
-                return otherId
-                    ? profiles.get(normalizeId(otherId))
-                    : null;
+                if (!otherId) {
+                    return null;
+                }
+
+                return profiles.get(
+                    normalizeId(otherId)
+                );
             }
 
 
-            function setMessagesEmpty(text) {
-                messagesElement.innerHTML = "";
+            function getConversationName(
+                conversation
+            ) {
+                if (
+                    conversation.is_group
+                ) {
+                    return (
+                        conversation.name ||
+                        "Group Chat"
+                    );
+                }
 
-                const empty =
-                    document.createElement("div");
+                const profile =
+                    getConversationProfile(
+                        conversation
+                    );
 
-                empty.className = "messages-empty";
-                empty.textContent = text;
-
-                messagesElement.appendChild(empty);
+                return (
+                    profile?.display_name ||
+                    profile?.username ||
+                    "Unknown user"
+                );
             }
 
 
-            /* =========================
-               LOAD CONVERSATIONS
-            ========================= */
+            function setMessagesEmpty(
+                text
+            ) {
+                messagesElement.innerHTML =
+                    "";
+
+                const element =
+                    document.createElement(
+                        "div"
+                    );
+
+                element.className =
+                    "messages-empty";
+
+                element.textContent = text;
+
+                messagesElement.appendChild(
+                    element
+                );
+            }
+
+
+            /* =====================================================
+               CONVERSATIONS
+            ===================================================== */
 
             async function loadConversations() {
                 if (!currentUser) {
@@ -1308,9 +1843,12 @@
 
                 const {
                     data: memberships,
-                    error: membershipError
+                    error:
+                        membershipError
                 } = await db
-                    .from("conversation_members")
+                    .from(
+                        "conversation_members"
+                    )
                     .select(
                         "conversation_id,user_id,joined_at"
                     )
@@ -1326,20 +1864,33 @@
                     );
 
                     conversationList.innerHTML =
-                        '<div class="empty-conversations">' +
-                        escapeHTML(
-                            membershipError.message
-                        ) +
-                        "</div>";
+                        "";
+
+                    const error =
+                        document.createElement(
+                            "div"
+                        );
+
+                    error.className =
+                        "empty-conversations";
+
+                    error.textContent =
+                        membershipError.message;
+
+                    conversationList.appendChild(
+                        error
+                    );
 
                     return;
                 }
 
 
-                const conversationIds =
+                const ids =
                     [
                         ...new Set(
-                            memberships.map(
+                            (
+                                memberships || []
+                            ).map(
                                 row =>
                                     normalizeId(
                                         row.conversation_id
@@ -1350,29 +1901,33 @@
 
 
                 conversations = [];
-                conversationMembers = new Map();
-                latestMessages = new Map();
+                conversationMembers =
+                    new Map();
+                latestMessages =
+                    new Map();
 
 
-                if (!conversationIds.length) {
+                if (!ids.length) {
                     renderConversationList();
                     resetChat();
+
                     return;
                 }
 
 
                 const {
-                    data: conversationRows,
-                    error: conversationError
+                    data:
+                        conversationRows,
+                    error:
+                        conversationError
                 } = await db
-                    .from("conversations")
+                    .from(
+                        "conversations"
+                    )
                     .select(
                         "id,created_at,name,is_group"
                     )
-                    .in(
-                        "id",
-                        conversationIds
-                    );
+                    .in("id", ids);
 
 
                 if (conversationError) {
@@ -1393,19 +1948,21 @@
                     data: memberRows,
                     error: memberError
                 } = await db
-                    .from("conversation_members")
+                    .from(
+                        "conversation_members"
+                    )
                     .select(
                         "conversation_id,user_id,joined_at"
                     )
                     .in(
                         "conversation_id",
-                        conversationIds
+                        ids
                     );
 
 
                 if (memberError) {
                     console.error(
-                        "[Chat] Member loading error:",
+                        "[Chat] Member error:",
                         memberError
                     );
 
@@ -1413,10 +1970,14 @@
                 }
 
 
-                const profileIds = new Set();
+                const profileIds =
+                    new Set();
 
 
-                for (const row of memberRows || []) {
+                for (
+                    const row
+                    of memberRows || []
+                ) {
                     const conversationId =
                         normalizeId(
                             row.conversation_id
@@ -1438,7 +1999,9 @@
                         .push(row.user_id);
 
                     profileIds.add(
-                        normalizeId(row.user_id)
+                        normalizeId(
+                            row.user_id
+                        )
                     );
                 }
 
@@ -1454,27 +2017,34 @@
                         )
                         .in(
                             "id",
-                            [...profileIds]
+                            [
+                                ...profileIds
+                            ]
                         );
 
                     if (!profileError) {
-                        profiles = new Map(
-                            (profileRows || []).map(
-                                profile => [
-                                    normalizeId(
-                                        profile.id
-                                    ),
-                                    profile
-                                ]
-                            )
-                        );
+                        profiles =
+                            new Map(
+                                (
+                                    profileRows ||
+                                    []
+                                ).map(
+                                    profile => [
+                                        normalizeId(
+                                            profile.id
+                                        ),
+                                        profile
+                                    ]
+                                )
+                            );
                     }
                 }
 
 
                 const {
                     data: recentMessages,
-                    error: recentMessageError
+                    error:
+                        recentMessageError
                 } = await db
                     .from("messages")
                     .select(
@@ -1482,7 +2052,7 @@
                     )
                     .in(
                         "conversation_id",
-                        conversationIds
+                        ids
                     )
                     .order(
                         "created_at",
@@ -1498,16 +2068,18 @@
                         const message
                         of recentMessages || []
                     ) {
-                        const key =
+                        const id =
                             normalizeId(
                                 message.conversation_id
                             );
 
                         if (
-                            !latestMessages.has(key)
+                            !latestMessages.has(
+                                id
+                            )
                         ) {
                             latestMessages.set(
-                                key,
+                                id,
                                 message
                             );
                         }
@@ -1515,38 +2087,43 @@
                 }
 
 
-                conversations.sort((a, b) => {
-                    const aLatest =
-                        latestMessages.get(
-                            normalizeId(a.id)
+                conversations.sort(
+                    (a, b) => {
+                        const aLatest =
+                            latestMessages.get(
+                                normalizeId(
+                                    a.id
+                                )
+                            );
+
+                        const bLatest =
+                            latestMessages.get(
+                                normalizeId(
+                                    b.id
+                                )
+                            );
+
+                        return (
+                            new Date(
+                                bLatest?.created_at ||
+                                b.created_at
+                            ).getTime() -
+                            new Date(
+                                aLatest?.created_at ||
+                                a.created_at
+                            ).getTime()
                         );
-
-                    const bLatest =
-                        latestMessages.get(
-                            normalizeId(b.id)
-                        );
-
-                    const aTime =
-                        new Date(
-                            aLatest?.created_at ||
-                            a.created_at
-                        ).getTime();
-
-                    const bTime =
-                        new Date(
-                            bLatest?.created_at ||
-                            b.created_at
-                        ).getTime();
-
-                    return bTime - aTime;
-                });
+                    }
+                );
 
 
                 renderConversationList();
 
 
-                if (currentConversationId) {
-                    const stillExists =
+                if (
+                    currentConversationId
+                ) {
+                    const exists =
                         conversations.some(
                             conversation =>
                                 normalizeId(
@@ -1557,19 +2134,16 @@
                                 )
                         );
 
-                    if (!stillExists) {
+                    if (!exists) {
                         resetChat();
                     }
                 }
             }
 
 
-            /* =========================
-               CONVERSATION LIST
-            ========================= */
-
             function renderConversationList() {
-                conversationList.innerHTML = "";
+                conversationList.innerHTML =
+                    "";
 
                 const query =
                     conversationSearch.value
@@ -1597,13 +2171,18 @@
                                 );
 
                             const preview =
-                                latest?.content
-                                    ?.toLowerCase() ||
-                                "";
+                                (
+                                    latest?.content ||
+                                    ""
+                                ).toLowerCase();
 
                             return (
-                                name.includes(query) ||
-                                preview.includes(query)
+                                name.includes(
+                                    query
+                                ) ||
+                                preview.includes(
+                                    query
+                                )
                             );
                         }
                     );
@@ -1611,7 +2190,9 @@
 
                 if (!filtered.length) {
                     const empty =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     empty.className =
                         "empty-conversations";
@@ -1621,18 +2202,26 @@
                             ? "No conversations found."
                             : "No conversations yet. Click + to start one.";
 
-                    conversationList.appendChild(empty);
+                    conversationList.appendChild(
+                        empty
+                    );
 
                     return;
                 }
 
 
-                for (const conversation of filtered) {
+                for (
+                    const conversation
+                    of filtered
+                ) {
                     const item =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     item.className =
                         "conversation";
+
 
                     if (
                         currentConversationId &&
@@ -1643,12 +2232,16 @@
                             conversation.id
                         )
                     ) {
-                        item.classList.add("active");
+                        item.classList.add(
+                            "active"
+                        );
                     }
 
 
                     const avatar =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     avatar.className =
                         "avatar small";
@@ -1663,7 +2256,8 @@
                     if (
                         conversation.is_group
                     ) {
-                        avatar.textContent = "👥";
+                        avatar.textContent =
+                            "👥";
                     } else {
                         renderAvatar(
                             avatar,
@@ -1676,14 +2270,18 @@
 
 
                     const info =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     info.className =
                         "conversation-info";
 
 
                     const name =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     name.className =
                         "conversation-name";
@@ -1698,14 +2296,19 @@
                         profile?.is_verified
                     ) {
                         const badge =
-                            document.createElement("span");
+                            document.createElement(
+                                "span"
+                            );
 
                         badge.className =
                             "verified";
 
-                        badge.textContent = "✓";
+                        badge.textContent =
+                            "✓";
 
-                        name.appendChild(badge);
+                        name.appendChild(
+                            badge
+                        );
                     }
 
 
@@ -1718,7 +2321,9 @@
 
 
                     const preview =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     preview.className =
                         "conversation-preview";
@@ -1736,7 +2341,9 @@
 
 
                     const time =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     time.className =
                         "conversation-time";
@@ -1755,22 +2362,23 @@
 
                     item.addEventListener(
                         "click",
-                        () => {
+                        () =>
                             openConversation(
                                 conversation.id
-                            );
-                        }
+                            )
                     );
 
 
-                    conversationList.appendChild(item);
+                    conversationList.appendChild(
+                        item
+                    );
                 }
             }
 
 
-            /* =========================
-               OPEN CONVERSATION
-            ========================= */
+            /* =====================================================
+               OPEN CHAT
+            ===================================================== */
 
             async function openConversation(
                 conversationId
@@ -1779,10 +2387,6 @@
                     normalizeId(
                         conversationId
                     );
-
-                chatPage.classList.add(
-                    "mobile-chat-open"
-                );
 
 
                 const conversation =
@@ -1801,6 +2405,11 @@
                 }
 
 
+                chatPage.classList.add(
+                    "mobile-chat-open"
+                );
+
+
                 const profile =
                     getConversationProfile(
                         conversation
@@ -1813,7 +2422,9 @@
                     );
 
 
-                if (conversation.is_group) {
+                if (
+                    conversation.is_group
+                ) {
                     headerAvatar.textContent =
                         "👥";
 
@@ -1842,14 +2453,13 @@
                 leaveButton.hidden = false;
                 messageForm.hidden = false;
 
+                renderedMessageIds.clear();
 
                 renderConversationList();
-
 
                 await loadMessages(
                     conversation.id
                 );
-
 
                 messageInput.focus();
             }
@@ -1886,7 +2496,7 @@
 
                 if (error) {
                     console.error(
-                        "[Chat] Message loading error:",
+                        "[Chat] Message error:",
                         error
                     );
 
@@ -1898,7 +2508,8 @@
                 }
 
 
-                messagesElement.innerHTML = "";
+                messagesElement.innerHTML =
+                    "";
 
 
                 if (!data?.length) {
@@ -1910,7 +2521,10 @@
                 }
 
 
-                for (const message of data) {
+                for (
+                    const message
+                    of data
+                ) {
                     appendMessage(
                         message,
                         false
@@ -1922,9 +2536,9 @@
             }
 
 
-            /* =========================
+            /* =====================================================
                MESSAGE RENDERING
-            ========================= */
+            ===================================================== */
 
             const renderedMessageIds =
                 new Set();
@@ -1932,10 +2546,12 @@
 
             function appendMessage(
                 message,
-                scroll = true
+                shouldScroll = true
             ) {
                 const messageId =
-                    normalizeId(message.id);
+                    normalizeId(
+                        message.id
+                    );
 
 
                 if (
@@ -1971,7 +2587,7 @@
                     );
 
 
-                const senderProfile =
+                const profile =
                     profiles.get(
                         normalizeId(
                             message.sender_id
@@ -1980,25 +2596,36 @@
 
 
                 const row =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 row.className =
                     "message-row";
 
+                row.dataset.messageId =
+                    messageId;
+
+
                 if (mine) {
-                    row.classList.add("mine");
+                    row.classList.add(
+                        "mine"
+                    );
                 }
 
 
                 const avatar =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 avatar.className =
                     "avatar small";
 
+
                 renderAvatar(
                     avatar,
-                    senderProfile,
+                    profile,
                     mine
                         ? currentUser.email
                         : "User"
@@ -2006,21 +2633,27 @@
 
 
                 const area =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 area.className =
                     "message-content-area";
 
 
                 const meta =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 meta.className =
                     "message-meta";
 
 
                 const author =
-                    document.createElement("span");
+                    document.createElement(
+                        "span"
+                    );
 
                 author.className =
                     "message-author";
@@ -2029,22 +2662,25 @@
                     mine
                         ? "You"
                         : (
-                            senderProfile?.display_name ||
-                            senderProfile?.username ||
+                            profile?.display_name ||
+                            profile?.username ||
                             "Unknown user"
                         );
 
 
                 if (
-                    senderProfile?.is_verified
+                    profile?.is_verified
                 ) {
                     const badge =
-                        document.createElement("span");
+                        document.createElement(
+                            "span"
+                        );
 
                     badge.className =
                         "verified";
 
-                    badge.textContent = "✓";
+                    badge.textContent =
+                        " ✓";
 
                     author.appendChild(
                         badge
@@ -2053,7 +2689,9 @@
 
 
                 const time =
-                    document.createElement("span");
+                    document.createElement(
+                        "span"
+                    );
 
                 time.className =
                     "message-time";
@@ -2069,7 +2707,9 @@
 
 
                 const bubble =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 bubble.className =
                     "message-bubble";
@@ -2084,14 +2724,18 @@
 
                 if (mine) {
                     const actions =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     actions.className =
                         "message-actions";
 
 
                     const deleteButton =
-                        document.createElement("button");
+                        document.createElement(
+                            "button"
+                        );
 
                     deleteButton.type =
                         "button";
@@ -2105,12 +2749,11 @@
 
                     deleteButton.addEventListener(
                         "click",
-                        () => {
+                        () =>
                             deleteMessage(
                                 message.id,
                                 row
-                            );
-                        }
+                            )
                     );
 
 
@@ -2127,10 +2770,12 @@
                 row.appendChild(avatar);
                 row.appendChild(area);
 
-                messagesElement.appendChild(row);
+                messagesElement.appendChild(
+                    row
+                );
 
 
-                if (scroll) {
+                if (shouldScroll) {
                     scrollMessages();
                 }
             }
@@ -2139,31 +2784,20 @@
             function removeRenderedMessage(
                 messageId
             ) {
-                const rows =
-                    messagesElement.querySelectorAll(
-                        ".message-row"
+                const id =
+                    normalizeId(messageId);
+
+                const row =
+                    messagesElement.querySelector(
+                        `[data-message-id="${CSS.escape(id)}"]`
                     );
 
-                for (const row of rows) {
-                    const deleteButton =
-                        row.querySelector(
-                            ".message-delete"
-                        );
-
-                    /*
-                     * Message IDs are also stored directly
-                     * on each rendered row.
-                     */
-                    if (
-                        row.dataset.messageId ===
-                        normalizeId(messageId)
-                    ) {
-                        row.remove();
-                    }
+                if (row) {
+                    row.remove();
                 }
 
                 renderedMessageIds.delete(
-                    normalizeId(messageId)
+                    id
                 );
             }
 
@@ -2174,13 +2808,14 @@
             }
 
 
-            /* =========================
+            /* =====================================================
                SEND MESSAGE
-            ========================= */
+            ===================================================== */
 
             async function sendMessage() {
                 const content =
                     messageInput.value.trim();
+
 
                 if (
                     !content ||
@@ -2197,11 +2832,13 @@
                 const {
                     data,
                     error
-                } = await insertMessageWithId({
+                } = await insertMessage({
                     conversation_id:
                         currentConversationId,
+
                     sender_id:
                         currentUser.id,
+
                     content
                 });
 
@@ -2218,6 +2855,7 @@
                     );
 
                     sendButton.disabled = false;
+
                     return;
                 }
 
@@ -2237,15 +2875,19 @@
 
 
                 sendButton.disabled = false;
+
                 messageInput.focus();
             }
 
 
-            async function insertMessageWithId(
+            async function insertMessage(
                 payload
             ) {
-                for (let attempt = 0; attempt < 5; attempt++) {
-
+                for (
+                    let attempt = 0;
+                    attempt < 5;
+                    attempt++
+                ) {
                     const id =
                         generateNumericId();
 
@@ -2285,15 +2927,15 @@
                 return {
                     data: null,
                     error: new Error(
-                        "Could not create a unique message ID."
+                        "Could not create message ID."
                     )
                 };
             }
 
 
-            /* =========================
+            /* =====================================================
                DELETE MESSAGE
-            ========================= */
+            ===================================================== */
 
             async function deleteMessage(
                 messageId,
@@ -2344,14 +2986,13 @@
                     normalizeId(messageId)
                 );
 
-
                 await refreshConversationPreviews();
             }
 
 
-            /* =========================
+            /* =====================================================
                LEAVE CONVERSATION
-            ========================= */
+            ===================================================== */
 
             async function leaveConversation() {
                 if (
@@ -2385,13 +3026,11 @@
                     );
 
 
-                const confirmed =
-                    confirm(
+                if (
+                    !confirm(
                         `Leave "${name}"?`
-                    );
-
-
-                if (!confirmed) {
+                    )
+                ) {
                     return;
                 }
 
@@ -2402,7 +3041,9 @@
                 const {
                     error
                 } = await db
-                    .from("conversation_members")
+                    .from(
+                        "conversation_members"
+                    )
                     .delete()
                     .eq(
                         "conversation_id",
@@ -2426,11 +3067,13 @@
                     );
 
                     leaveButton.disabled = false;
+
                     return;
                 }
 
 
-                currentConversationId = null;
+                currentConversationId =
+                    null;
 
                 resetChat();
 
@@ -2441,7 +3084,8 @@
 
 
             function resetChat() {
-                currentConversationId = null;
+                currentConversationId =
+                    null;
 
                 headerAvatar.textContent =
                     "?";
@@ -2453,6 +3097,7 @@
                     "Choose a conversation to start chatting";
 
                 leaveButton.hidden = true;
+
                 messageForm.hidden = true;
 
                 renderedMessageIds.clear();
@@ -2469,17 +3114,21 @@
             }
 
 
-            /* =========================
+            /* =====================================================
                NEW CHAT MODAL
-            ========================= */
+            ===================================================== */
 
             function openModal() {
                 modalBackdrop.classList.add(
                     "visible"
                 );
 
-                modalStatus.textContent = "";
+                modalStatus.textContent =
+                    "";
+
                 userSearch.value = "";
+
+                groupName.value = "";
 
                 selectedGroupUsers.clear();
 
@@ -2487,7 +3136,8 @@
 
                 setModalMode("direct");
 
-                searchResults.innerHTML = "";
+                searchResults.innerHTML =
+                    "";
 
                 userSearch.focus();
             }
@@ -2500,47 +3150,51 @@
             }
 
 
-            function setModalMode(mode) {
+            function setModalMode(
+                mode
+            ) {
                 modalMode = mode;
 
-                const isGroup =
+                const group =
                     mode === "group";
 
 
                 directModeButton.classList.toggle(
                     "active",
-                    !isGroup
+                    !group
                 );
 
                 groupModeButton.classList.toggle(
                     "active",
-                    isGroup
+                    group
                 );
 
 
                 groupName.classList.toggle(
                     "visible",
-                    isGroup
+                    group
                 );
 
 
                 selectedUsers.classList.toggle(
                     "visible",
-                    isGroup
+                    group
                 );
 
 
                 createGroupButton.hidden =
-                    !isGroup;
+                    !group;
 
 
-                if (!isGroup) {
+                if (!group) {
                     selectedGroupUsers.clear();
+
                     renderSelectedUsers();
                 }
 
 
-                modalStatus.textContent = "";
+                modalStatus.textContent =
+                    "";
             }
 
 
@@ -2549,15 +3203,11 @@
                     userSearch.value.trim();
 
 
-                searchResults.innerHTML = "";
+                searchResults.innerHTML =
+                    "";
 
 
-                if (!query) {
-                    return;
-                }
-
-
-                if (!currentUser) {
+                if (!query || !currentUser) {
                     return;
                 }
 
@@ -2625,7 +3275,7 @@
                     displayNameResult.error
                 ) {
                     console.error(
-                        "[Chat] User search error:",
+                        "[Chat] Search error:",
                         usernameResult.error ||
                         displayNameResult.error
                     );
@@ -2644,25 +3294,42 @@
                 for (
                     const profile
                     of [
-                        ...(usernameResult.data || []),
-                        ...(displayNameResult.data || [])
+                        ...(
+                            usernameResult.data ||
+                            []
+                        ),
+                        ...(
+                            displayNameResult.data ||
+                            []
+                        )
                     ]
                 ) {
                     unique.set(
-                        normalizeId(profile.id),
+                        normalizeId(
+                            profile.id
+                        ),
                         profile
                     );
                 }
 
 
-                profiles = new Map([
-                    ...profiles,
-                    ...unique
-                ]);
+                for (
+                    const [
+                        id,
+                        profile
+                    ] of unique
+                ) {
+                    profiles.set(
+                        id,
+                        profile
+                    );
+                }
 
 
                 renderSearchResults(
-                    [...unique.values()]
+                    [
+                        ...unique.values()
+                    ]
                 );
             }
 
@@ -2670,12 +3337,15 @@
             function renderSearchResults(
                 results
             ) {
-                searchResults.innerHTML = "";
+                searchResults.innerHTML =
+                    "";
 
 
                 if (!results.length) {
                     const empty =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     empty.className =
                         "empty-conversations";
@@ -2691,19 +3361,27 @@
                 }
 
 
-                for (const profile of results) {
+                for (
+                    const profile
+                    of results
+                ) {
                     const result =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     result.className =
                         "search-result";
 
 
                     const avatar =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     avatar.className =
                         "avatar small";
+
 
                     renderAvatar(
                         avatar,
@@ -2714,14 +3392,18 @@
 
 
                     const info =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     info.className =
                         "search-result-info";
 
 
                     const name =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     name.className =
                         "search-result-name";
@@ -2732,14 +3414,19 @@
                         "User";
 
 
-                    if (profile.is_verified) {
+                    if (
+                        profile.is_verified
+                    ) {
                         const badge =
-                            document.createElement("span");
+                            document.createElement(
+                                "span"
+                            );
 
                         badge.className =
                             "verified";
 
-                        badge.textContent = " ✓";
+                        badge.textContent =
+                            " ✓";
 
                         name.appendChild(
                             badge
@@ -2748,7 +3435,9 @@
 
 
                     const username =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     username.className =
                         "search-result-username";
@@ -2763,14 +3452,8 @@
                     info.appendChild(name);
                     info.appendChild(username);
 
-
-                    result.appendChild(
-                        avatar
-                    );
-
-                    result.appendChild(
-                        info
-                    );
+                    result.appendChild(avatar);
+                    result.appendChild(info);
 
 
                     if (
@@ -2778,7 +3461,9 @@
                         "group"
                     ) {
                         const indicator =
-                            document.createElement("div");
+                            document.createElement(
+                                "div"
+                            );
 
                         indicator.className =
                             "select-indicator";
@@ -2818,11 +3503,10 @@
                     } else {
                         result.addEventListener(
                             "click",
-                            () => {
+                            () =>
                                 createDirectConversation(
                                     profile
-                                );
-                            }
+                                )
                         );
                     }
 
@@ -2838,11 +3522,15 @@
                 profile
             ) {
                 const id =
-                    normalizeId(profile.id);
+                    normalizeId(
+                        profile.id
+                    );
 
 
                 if (
-                    selectedGroupUsers.has(id)
+                    selectedGroupUsers.has(
+                        id
+                    )
                 ) {
                     selectedGroupUsers.delete(
                         id
@@ -2859,13 +3547,14 @@
 
                 createGroupButton.disabled =
                     selectedGroupUsers.size <
-                    1 ||
+                        1 ||
                     !groupName.value.trim();
             }
 
 
             function renderSelectedUsers() {
-                selectedUsers.innerHTML = "";
+                selectedUsers.innerHTML =
+                    "";
 
 
                 for (
@@ -2873,7 +3562,9 @@
                     of selectedGroupUsers.values()
                 ) {
                     const chip =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
                     chip.className =
                         "selected-user";
@@ -2882,7 +3573,6 @@
                         profile.display_name ||
                         profile.username ||
                         "User";
-
 
                     selectedUsers.appendChild(
                         chip
@@ -2898,9 +3588,9 @@
             }
 
 
-            /* =========================
-               CREATE DIRECT CHAT
-            ========================= */
+            /* =====================================================
+               CREATE DM
+            ===================================================== */
 
             async function createDirectConversation(
                 targetProfile
@@ -2909,10 +3599,6 @@
                     "Opening chat...";
 
 
-                /*
-                 * Refresh first so duplicate DMs
-                 * are less likely.
-                 */
                 await loadConversations();
 
 
@@ -2975,13 +3661,9 @@
                         );
 
 
-                    /*
-                     * Add ourselves first.
-                     * The existing RLS policies allow
-                     * the creator to establish the membership.
-                     */
                     const {
-                        error: ownMemberError
+                        error:
+                            ownMemberError
                     } = await db
                         .from(
                             "conversation_members"
@@ -3000,7 +3682,8 @@
 
 
                     const {
-                        error: targetMemberError
+                        error:
+                            targetMemberError
                     } = await db
                         .from(
                             "conversation_members"
@@ -3013,7 +3696,9 @@
                         });
 
 
-                    if (targetMemberError) {
+                    if (
+                        targetMemberError
+                    ) {
                         throw targetMemberError;
                     }
 
@@ -3039,9 +3724,9 @@
             }
 
 
-            /* =========================
+            /* =====================================================
                CREATE GROUP
-            ========================= */
+            ===================================================== */
 
             async function createGroup() {
                 const name =
@@ -3152,9 +3837,9 @@
             }
 
 
-            /* =========================
+            /* =====================================================
                REALTIME
-            ========================= */
+            ===================================================== */
 
             function setupRealtime() {
                 if (!db) {
@@ -3206,11 +3891,6 @@
                                         currentConversationId
                                     )
                                 ) {
-                                    /*
-                                     * The sender already renders
-                                     * its own returned message.
-                                     * appendMessage prevents duplicates.
-                                     */
                                     appendMessage(
                                         message,
                                         true
@@ -3229,14 +3909,9 @@
                                 table: "messages"
                             },
                             async payload => {
-                                const deleted =
-                                    payload.old;
-
-
                                 removeRenderedMessage(
-                                    deleted.id
+                                    payload.old.id
                                 );
-
 
                                 await refreshConversationPreviews();
                             }
@@ -3254,7 +3929,8 @@
                             {
                                 event: "*",
                                 schema: "public",
-                                table: "conversation_members"
+                                table:
+                                    "conversation_members"
                             },
                             async () => {
                                 await loadConversations();
@@ -3265,7 +3941,8 @@
                             {
                                 event: "*",
                                 schema: "public",
-                                table: "conversations"
+                                table:
+                                    "conversations"
                             },
                             async () => {
                                 await loadConversations();
@@ -3276,7 +3953,9 @@
 
 
             async function refreshConversationPreviews() {
-                if (!conversations.length) {
+                if (
+                    !conversations.length
+                ) {
                     return;
                 }
 
@@ -3314,17 +3993,23 @@
                 }
 
 
-                latestMessages = new Map();
+                latestMessages =
+                    new Map();
 
 
-                for (const message of data || []) {
+                for (
+                    const message
+                    of data || []
+                ) {
                     const id =
                         normalizeId(
                             message.conversation_id
                         );
 
                     if (
-                        !latestMessages.has(id)
+                        !latestMessages.has(
+                            id
+                        )
                     ) {
                         latestMessages.set(
                             id,
@@ -3334,37 +4019,34 @@
                 }
 
 
-                conversations.sort((a, b) => {
-                    const aLatest =
-                        latestMessages.get(
-                            normalizeId(a.id)
-                        );
-
-                    const bLatest =
-                        latestMessages.get(
-                            normalizeId(b.id)
-                        );
-
-                    return (
+                conversations.sort(
+                    (a, b) =>
                         new Date(
-                            bLatest?.created_at ||
+                            latestMessages.get(
+                                normalizeId(
+                                    b.id
+                                )
+                            )?.created_at ||
                             b.created_at
                         ).getTime() -
                         new Date(
-                            aLatest?.created_at ||
+                            latestMessages.get(
+                                normalizeId(
+                                    a.id
+                                )
+                            )?.created_at ||
                             a.created_at
                         ).getTime()
-                    );
-                });
+                );
 
 
                 renderConversationList();
             }
 
 
-            /* =========================
+            /* =====================================================
                EVENT HANDLERS
-            ========================= */
+            ===================================================== */
 
             document
                 .getElementById(
@@ -3416,8 +4098,11 @@
                         "direct"
                     );
 
-                    searchResults.innerHTML = "";
-                    userSearch.value = "";
+                    searchResults.innerHTML =
+                        "";
+
+                    userSearch.value =
+                        "";
                 }
             );
 
@@ -3429,8 +4114,11 @@
                         "group"
                     );
 
-                    searchResults.innerHTML = "";
-                    userSearch.value = "";
+                    searchResults.innerHTML =
+                        "";
+
+                    userSearch.value =
+                        "";
                 }
             );
 
@@ -3478,6 +4166,7 @@
                 "submit",
                 event => {
                     event.preventDefault();
+
                     sendMessage();
                 }
             );
@@ -3491,6 +4180,7 @@
                         !event.shiftKey
                     ) {
                         event.preventDefault();
+
                         sendMessage();
                     }
                 }
@@ -3518,9 +4208,9 @@
             );
 
 
-            /* =========================
+            /* =====================================================
                INITIALIZE
-            ========================= */
+            ===================================================== */
 
             async function initializeChat() {
                 if (!db) {
@@ -3535,10 +4225,6 @@
                 let session = null;
 
 
-                /*
-                 * Give auth.js a moment to restore
-                 * the Supabase session.
-                 */
                 for (
                     let attempt = 0;
                     attempt < 20;
