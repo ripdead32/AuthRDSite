@@ -203,6 +203,9 @@
 
 
 
+<script src="/js/auth.js"></script>
+<script src="/js/global.js"></script>
+
 <script>
 
 let appsSession = null;
@@ -234,7 +237,11 @@ function setAppsMessage(
 
 
     if (type) {
-        appsMessage.classList.add(type);
+
+        appsMessage.classList.add(
+            type
+        );
+
     }
 
 }
@@ -295,11 +302,19 @@ function formatAuthorizationDate(
 
 
     const date =
-        new Date(dateString);
+        new Date(
+            dateString
+        );
 
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
         return "Unknown";
+
     }
 
 
@@ -559,7 +574,9 @@ function createAppCard(
 
 
     const scopeList =
-        Array.isArray(app.scopes)
+        Array.isArray(
+            app.scopes
+        )
             ? app.scopes
             : [];
 
@@ -709,28 +726,104 @@ function createAppCard(
                 "Revoking...";
 
 
-            const {
-                data: revoked,
-                error
-            } =
-                await supabaseClient
-                    .rpc(
-                        "revoke_oauth_app_authorization",
-                        {
-                            requested_client_id:
-                                app.client_id
-                        }
+            try {
+
+                const {
+                    data: revoked,
+                    error
+                } =
+                    await window.supabaseClient
+                        .rpc(
+                            "revoke_oauth_app_authorization",
+                            {
+                                requested_client_id:
+                                    app.client_id
+                            }
+                        );
+
+
+                if (
+                    error ||
+                    revoked !== true
+                ) {
+
+                    console.error(
+                        "[Apps] Revoke error:",
+                        error
                     );
 
 
+                    revokeButton.disabled =
+                        false;
 
-            if (
-                error ||
-                revoked !== true
-            ) {
+
+                    revokeButton.textContent =
+                        "Revoke Access";
+
+
+                    setAppsMessage(
+                        "Could not revoke application access.",
+                        "error"
+                    );
+
+
+                    return;
+
+                }
+
+
+                /*
+                 * The authorization and its
+                 * active site sessions have now
+                 * been revoked.
+                 *
+                 * Remove the application from
+                 * the visible list immediately.
+                 */
+
+                card.remove();
+
+
+                setAppsMessage(
+                    "Application access revoked.",
+                    "success"
+                );
+
+
+                /*
+                 * If this was the last active
+                 * application, show the empty state.
+                 */
+
+                if (
+                    appsList.children.length === 0
+                ) {
+
+                    const empty =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    empty.className =
+                        "card-description";
+
+
+                    empty.textContent =
+                        "You have not authorized any applications yet.";
+
+
+                    appsList.appendChild(
+                        empty
+                    );
+
+                }
+
+
+            } catch (error) {
 
                 console.error(
-                    "[Apps] Revoke error:",
+                    "[Apps] Revoke exception:",
                     error
                 );
 
@@ -746,56 +839,6 @@ function createAppCard(
                 setAppsMessage(
                     "Could not revoke application access.",
                     "error"
-                );
-
-
-                return;
-
-            }
-
-
-
-            /*
-             * The authorization and its
-             * active site sessions have now
-             * been revoked.
-             *
-             * Remove the application from
-             * the visible list immediately.
-             */
-            card.remove();
-
-
-            setAppsMessage(
-                "Application access revoked.",
-                "success"
-            );
-
-
-            /*
-             * If this was the last active
-             * application, show the empty state.
-             */
-            if (
-                appsList.children.length === 0
-            ) {
-
-                const empty =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                empty.className =
-                    "card-description";
-
-
-                empty.textContent =
-                    "You have not authorized any applications yet.";
-
-
-                appsList.appendChild(
-                    empty
                 );
 
             }
@@ -822,7 +865,8 @@ function createAppCard(
 
 async function loadAuthorizedApps() {
 
-    appsList.innerHTML = "";
+    appsList.innerHTML =
+        "";
 
 
     const loading =
@@ -844,23 +888,119 @@ async function loadAuthorizedApps() {
     );
 
 
+    try {
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .rpc(
-                "get_my_oauth_apps",
-                {
-                    requested_user_id:
-                        appsSession.user.id
-                }
+        const {
+            data,
+            error
+        } =
+            await window.supabaseClient
+                .rpc(
+                    "get_my_oauth_apps",
+                    {
+                        requested_user_id:
+                            appsSession.user.id
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const apps =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        appsList.innerHTML =
+            "";
+
+
+        if (
+            apps.length === 0
+        ) {
+
+            const empty =
+                document.createElement(
+                    "div"
+                );
+
+
+            empty.className =
+                "card-description";
+
+
+            empty.textContent =
+                "You have not authorized any applications yet.";
+
+
+            appsList.appendChild(
+                empty
             );
 
 
+            return;
 
-    if (error) {
+        }
+
+
+        apps.forEach(
+            app => {
+
+                /*
+                 * The RPC already filters revoked
+                 * authorizations, but keep this
+                 * check as a second client-side guard.
+                 */
+
+                if (
+                    app.revoked_at
+                ) {
+
+                    return;
+
+                }
+
+
+                appsList.appendChild(
+                    createAppCard(
+                        app
+                    )
+                );
+
+            }
+        );
+
+
+        if (
+            appsList.children.length === 0
+        ) {
+
+            const empty =
+                document.createElement(
+                    "div"
+                );
+
+
+            empty.className =
+                "card-description";
+
+
+            empty.textContent =
+                "You have not authorized any applications yet.";
+
+
+            appsList.appendChild(
+                empty
+            );
+
+        }
+
+
+    } catch (error) {
 
         console.error(
             "[Apps] Failed to load applications:",
@@ -868,7 +1008,8 @@ async function loadAuthorizedApps() {
         );
 
 
-        appsList.innerHTML = "";
+        appsList.innerHTML =
+            "";
 
 
         const errorElement =
@@ -895,99 +1036,6 @@ async function loadAuthorizedApps() {
             "error"
         );
 
-
-        return;
-
-    }
-
-
-
-    const apps =
-        Array.isArray(data)
-            ? data
-            : [];
-
-
-    appsList.innerHTML = "";
-
-
-
-    if (
-        apps.length === 0
-    ) {
-
-        const empty =
-            document.createElement(
-                "div"
-            );
-
-
-        empty.className =
-            "card-description";
-
-
-        empty.textContent =
-            "You have not authorized any applications yet.";
-
-
-        appsList.appendChild(
-            empty
-        );
-
-
-        return;
-
-    }
-
-
-
-    apps.forEach(
-        app => {
-
-            /*
-             * The RPC already filters revoked
-             * authorizations, but keep this
-             * check as a second client-side guard.
-             */
-            if (
-                app.revoked_at
-            ) {
-                return;
-            }
-
-
-            appsList.appendChild(
-                createAppCard(
-                    app
-                )
-            );
-
-        }
-    );
-
-
-    if (
-        appsList.children.length === 0
-    ) {
-
-        const empty =
-            document.createElement(
-                "div"
-            );
-
-
-        empty.className =
-            "card-description";
-
-
-        empty.textContent =
-            "You have not authorized any applications yet.";
-
-
-        appsList.appendChild(
-            empty
-        );
-
     }
 
 }
@@ -997,7 +1045,7 @@ async function loadAuthorizedApps() {
 async function initializeApps() {
 
     appsSession =
-        await requireAuth();
+        await window.requireAuth();
 
 
     if (!appsSession) {
@@ -1005,7 +1053,7 @@ async function initializeApps() {
     }
 
 
-    await initNavbar();
+    await window.initNavbar();
 
 
     await loadAuthorizedApps();
@@ -1017,8 +1065,8 @@ async function initializeApps() {
 initializeApps();
 
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
+
+
 </body>
 
 </html>

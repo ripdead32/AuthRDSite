@@ -11,7 +11,12 @@
 
     <title>Search — Rip_Dead Account</title>
 
-    <link rel="stylesheet" href="/css/auth.css">
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -20,7 +25,10 @@
 
     <div class="navbar-inner">
 
-        <a href="/" class="navbar-brand">
+        <a
+            href="/"
+            class="navbar-brand"
+        >
             Rip_Dead Account
         </a>
 
@@ -61,7 +69,7 @@
             >
                 Authorized Apps
             </a>
-            
+
             <a
                 href="/settings/"
                 class="auth-only"
@@ -166,101 +174,63 @@
 </main>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="/js/auth.js"></script>
+<script src="/js/global.js"></script>
 
 <script>
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    const input =
-        document.getElementById("user-search");
+        const input =
+            document.getElementById(
+                "user-search"
+            );
 
-    const button =
-        document.getElementById("search-button");
+        const button =
+            document.getElementById(
+                "search-button"
+            );
 
-    const results =
-        document.getElementById("search-results");
+        const results =
+            document.getElementById(
+                "search-results"
+            );
 
-    const message =
-        document.getElementById("search-message");
-
-
-    const session =
-        await initNavbar();
-
-
-    if (!session) {
-
-        window.location.href =
-            "/login/";
-
-        return;
-    }
+        const message =
+            document.getElementById(
+                "search-message"
+            );
 
 
-    async function performSearch() {
-
-        const query =
-            input.value.trim();
+        const session =
+            await window.requireAuth();
 
 
-        results.innerHTML = "";
-
-        message.hidden = true;
-
-
-        if (!query) {
-
-            message.textContent =
-                "Enter a username or display name to search.";
-
-            message.hidden = false;
-
+        if (!session) {
             return;
         }
 
 
-        button.disabled = true;
-        button.textContent = "Searching...";
+        await window.initNavbar();
 
 
-        try {
+        async function performSearch() {
 
-            const escapedQuery =
-                query
-                    .replace(/\\/g, "\\\\")
-                    .replace(/%/g, "\\%")
-                    .replace(/_/g, "\\_");
+            const query =
+                input.value.trim();
 
 
-            const {
-                data,
-                error
-            } = await supabaseClient
-                .from("profiles")
-                .select(
-                    "id, username, display_name, avatar_url, bio, is_verified"
-                )
-                .or(
-                    `username.ilike.%${escapedQuery}%,display_name.ilike.%${escapedQuery}%`
-                )
-                .neq(
-                    "id",
-                    session.user.id
-                )
-                .limit(25);
+            results.innerHTML = "";
+
+            message.hidden = true;
 
 
-            if (error) {
-                throw error;
-            }
-
-
-            if (!data || data.length === 0) {
+            if (!query) {
 
                 message.textContent =
-                    "No users found.";
+                    "Enter a username or display name to search.";
 
                 message.hidden = false;
 
@@ -268,165 +238,265 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
 
-            data.forEach(profile => {
+            button.disabled = true;
 
-                const userCard =
-                    document.createElement("div");
-
-                userCard.className =
-                    "user-card";
+            button.textContent =
+                "Searching...";
 
 
-                const avatar =
-                    createAvatar(
-                        profile,
-                        "user-avatar"
-                    );
+            try {
+
+                const escapedQuery =
+                    query
+                        .replace(/\\/g, "\\\\")
+                        .replace(/%/g, "\\%")
+                        .replace(/_/g, "\\_");
 
 
-                const userInfo =
-                    document.createElement("div");
+                const {
+                    data,
+                    error
+                } =
+                    await window.supabaseClient
+                        .from("profiles")
+                        .select(
+                            "id, username, display_name, avatar_url, bio, is_verified"
+                        )
+                        .or(
+                            `username.ilike.%${escapedQuery}%,display_name.ilike.%${escapedQuery}%`
+                        )
+                        .neq(
+                            "id",
+                            session.user.id
+                        )
+                        .limit(25);
 
-                userInfo.className =
-                    "user-info";
 
-
-                const name =
-                    document.createElement("div");
-
-                name.className =
-                    "user-name";
-
-                name.textContent =
-                    profile.display_name ||
-                    profile.username ||
-                    "Rip_Dead User";
-
-
-                if (profile.is_verified) {
-
-                    const verified =
-                        document.createElement("span");
-
-                    verified.className =
-                        "verified-text";
-
-                    verified.textContent =
-                        "✓ Verified";
-
-                    name.appendChild(
-                        verified
-                    );
+                if (error) {
+                    throw error;
                 }
 
 
-                const username =
-                    document.createElement("div");
+                if (
+                    !data ||
+                    data.length === 0
+                ) {
 
-                username.className =
-                    "user-username";
+                    message.textContent =
+                        "No users found.";
 
-                username.textContent =
-                    "@" +
-                    (
-                        profile.username ||
-                        "unknown"
-                    );
+                    message.hidden = false;
 
-
-                const actions =
-                    document.createElement("div");
-
-                actions.className =
-                    "user-actions";
+                    return;
+                }
 
 
-                const viewButton =
-                    document.createElement("a");
+                data.forEach(
+                    profile => {
 
-                viewButton.className =
-                    "button secondary";
-
-                viewButton.textContent =
-                    "View Profile";
-
-                viewButton.href =
-                    `/user/?id=${encodeURIComponent(profile.id)}`;
+                        const userCard =
+                            document.createElement(
+                                "div"
+                            );
 
 
-                actions.appendChild(
-                    viewButton
+                        userCard.className =
+                            "user-card";
+
+
+                        const avatar =
+                            window.createAvatar(
+                                profile,
+                                "user-avatar"
+                            );
+
+
+                        const userInfo =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        userInfo.className =
+                            "user-info";
+
+
+                        const name =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        name.className =
+                            "user-name";
+
+
+                        name.textContent =
+                            profile.display_name ||
+                            profile.username ||
+                            "Rip_Dead User";
+
+
+                        if (profile.is_verified) {
+
+                            const verified =
+                                document.createElement(
+                                    "span"
+                                );
+
+
+                            verified.className =
+                                "verified-text";
+
+
+                            verified.textContent =
+                                "✓ Verified";
+
+
+                            name.appendChild(
+                                verified
+                            );
+
+                        }
+
+
+                        const username =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        username.className =
+                            "user-username";
+
+
+                        username.textContent =
+                            "@" +
+                            (
+                                profile.username ||
+                                "unknown"
+                            );
+
+
+                        const actions =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        actions.className =
+                            "user-actions";
+
+
+                        const viewButton =
+                            document.createElement(
+                                "a"
+                            );
+
+
+                        viewButton.className =
+                            "button secondary";
+
+
+                        viewButton.textContent =
+                            "View Profile";
+
+
+                        viewButton.href =
+                            `/user/?id=${encodeURIComponent(profile.id)}`;
+
+
+                        actions.appendChild(
+                            viewButton
+                        );
+
+
+                        userInfo.appendChild(
+                            name
+                        );
+
+
+                        userInfo.appendChild(
+                            username
+                        );
+
+
+                        userCard.appendChild(
+                            avatar
+                        );
+
+
+                        userCard.appendChild(
+                            userInfo
+                        );
+
+
+                        userCard.appendChild(
+                            actions
+                        );
+
+
+                        results.appendChild(
+                            userCard
+                        );
+
+                    }
                 );
 
 
-                userInfo.appendChild(
-                    name
-                );
+            } catch (error) {
 
-                userInfo.appendChild(
-                    username
-                );
-
-
-                userCard.appendChild(
-                    avatar
-                );
-
-                userCard.appendChild(
-                    userInfo
-                );
-
-                userCard.appendChild(
-                    actions
+                console.error(
+                    "[Search] Search error:",
+                    error
                 );
 
 
-                results.appendChild(
-                    userCard
-                );
-
-            });
-
-        } catch (error) {
-
-            console.error(error);
-
-            message.textContent =
-                "Something went wrong while searching.";
-
-            message.hidden = false;
-
-        } finally {
-
-            button.disabled = false;
-
-            button.textContent =
-                "Search";
-        }
-    }
+                message.textContent =
+                    "Something went wrong while searching.";
 
 
-    button.addEventListener(
-        "click",
-        performSearch
-    );
+                message.hidden = false;
 
 
-    input.addEventListener(
-        "keydown",
-        event => {
+            } finally {
 
-            if (event.key === "Enter") {
+                button.disabled = false;
 
-                performSearch();
+                button.textContent =
+                    "Search";
+
             }
-        }
-    );
 
-});
+        }
+
+
+        button.addEventListener(
+            "click",
+            performSearch
+        );
+
+
+        input.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    performSearch();
+
+                }
+
+            }
+        );
+
+    }
+);
 
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
+
 </body>
+
 </html>
