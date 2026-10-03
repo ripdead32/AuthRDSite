@@ -2114,11 +2114,16 @@
                 "none";
 
             if (profile) {
-                const avatar =
-                    createAvatar(
-                        profile,
-                        "message-avatar"
-                    );
+const avatar =
+    document.createElement("div");
+
+avatar.className =
+    "message-avatar";
+
+createAvatar(
+    profile,
+    avatar
+);
 
                 const image =
                     avatar.querySelector(
@@ -3195,106 +3200,131 @@ function escapeIlikeValue(value) {
         }
     }
 
-    /* -------------------------
-       USER RESULT
-    ------------------------- */
+/* -------------------------
+   USER RESULT
+------------------------- */
 
-    function createUserResultButton(
-        profile,
-        selected
-    ) {
-        const button =
-            document.createElement(
-                "button"
-            );
-
-        button.type =
-            "button";
-
-        button.className =
-            "user-result";
-
-        if (selected) {
-            button.classList.add(
-                "selected"
-            );
-        }
-
-const avatar =
-    document.createElement("div");
-
-avatar.className =
-    "message-avatar";
-
-createAvatar(
+function createUserResultButton(
     profile,
-    avatar
-);
-        const nameRow =
-            document.createElement(
-                "div"
-            );
+    selected
+) {
 
-        nameRow.style.display =
-            "flex";
-
-        nameRow.style.alignItems =
-            "center";
-
-        const name =
-            document.createElement(
-                "span"
-            );
-
-        name.className =
-            "user-result-name";
-
-        name.textContent =
-            profile.display_name ||
-            profile.username ||
-            "User";
-
-        nameRow.appendChild(
-            name
+    const button =
+        document.createElement(
+            "button"
         );
 
-        appendVerifiedBadge(
-            nameRow,
-            profile
+    button.type =
+        "button";
+
+    button.className =
+        "user-result";
+
+
+    if (selected) {
+
+        button.classList.add(
+            "selected"
         );
 
-        const username =
-            document.createElement(
-                "div"
-            );
-
-        username.className =
-            "user-result-username";
-
-        username.textContent =
-            profile.username
-                ? `@${profile.username}`
-                : "";
-
-        info.appendChild(
-            nameRow
-        );
-
-        info.appendChild(
-            username
-        );
-
-        button.appendChild(
-            avatar
-        );
-
-        button.appendChild(
-            info
-        );
-
-        return button;
     }
 
+
+    const avatar =
+        document.createElement(
+            "div"
+        );
+
+    avatar.className =
+        "message-avatar";
+
+
+    createAvatar(
+        profile,
+        avatar
+    );
+
+
+    const info =
+        document.createElement(
+            "div"
+        );
+
+    info.className =
+        "user-result-info";
+
+
+    const nameRow =
+        document.createElement(
+            "div"
+        );
+
+    nameRow.style.display =
+        "flex";
+
+    nameRow.style.alignItems =
+        "center";
+
+
+    const name =
+        document.createElement(
+            "span"
+        );
+
+    name.className =
+        "user-result-name";
+
+    name.textContent =
+        profile.display_name ||
+        profile.username ||
+        "User";
+
+
+    nameRow.appendChild(
+        name
+    );
+
+
+    appendVerifiedBadge(
+        nameRow,
+        profile
+    );
+
+
+    const username =
+        document.createElement(
+            "div"
+        );
+
+    username.className =
+        "user-result-username";
+
+    username.textContent =
+        profile.username
+            ? `@${profile.username}`
+            : "";
+
+
+    info.appendChild(
+        nameRow
+    );
+
+    info.appendChild(
+        username
+    );
+
+
+    button.appendChild(
+        avatar
+    );
+
+    button.appendChild(
+        info
+    );
+
+
+    return button;
+}
     /* -------------------------
        START DIRECT CHAT
     ------------------------- */
