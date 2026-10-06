@@ -679,8 +679,29 @@ document.addEventListener(
         /*
          * Already logged in?
          */
-
         if (session) {
+
+            const enforcement =
+                await window.enforceBans(
+                    session
+                );
+
+
+            if (enforcement.banned) {
+                return;
+            }
+
+
+            const banStatus =
+                await window.checkAccountBan(
+                    session
+                );
+
+
+            if (banStatus.banned) {
+                return;
+            }
+
 
             window.location.href =
                 "/account/";
@@ -740,7 +761,6 @@ document.addEventListener(
                 ) {
 
                     window.setMessage(
-                        "signup-message",
                         "Profile picture must be PNG, JPEG, or WebP.",
                         "error"
                     );
@@ -765,7 +785,6 @@ document.addEventListener(
                 ) {
 
                     window.setMessage(
-                        "signup-message",
                         "Profile picture must be 5 MB or smaller.",
                         "error"
                     );
@@ -1006,7 +1025,7 @@ document.addEventListener(
 
 
                         // =============================================
-                        // SAVE AVATAR FOR EMAIL CONFIRMATION FLOW
+                        // SAVE AVATAR FOR EMAIL CONFIRMATION
                         // =============================================
 
                         if (profilePicture) {
@@ -1048,6 +1067,58 @@ document.addEventListener(
 
                             button.textContent =
                                 "Create Account";
+
+
+                            return;
+
+                        }
+
+
+                        // =============================================
+                        // SERVER-SIDE BAN ENFORCEMENT
+                        // =============================================
+
+                        const enforcement =
+                            await window.enforceBans(
+                                data.session
+                            );
+
+
+                        if (enforcement.banned) {
+
+                            console.warn(
+                                "[Signup] New account matched a ban:",
+                                enforcement.ban_type
+                            );
+
+
+                            await window
+                                .supabaseClient
+                                .auth
+                                .signOut();
+
+
+                            return;
+
+                        }
+
+
+                        // =============================================
+                        // PROFILE BAN CHECK
+                        // =============================================
+
+                        const banStatus =
+                            await window.checkAccountBan(
+                                data.session
+                            );
+
+
+                        if (banStatus.banned) {
+
+                            await window
+                                .supabaseClient
+                                .auth
+                                .signOut();
 
 
                             return;
