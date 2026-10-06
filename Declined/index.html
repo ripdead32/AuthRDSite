@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
 
@@ -9,471 +8,701 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Access Restricted — Rip_Dead Account</title>
+    <title>Account Restricted - Rip_Dead Account</title>
 
-    <link
-        rel="stylesheet"
-        href="/css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/global.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 24px;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #24152d 0%,
+                    #0d0d12 42%,
+                    #08080c 100%
+                );
+
+            color: #ffffff;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+        .declined-page {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .declined-card {
+            background: #111118;
+
+            border: 1px solid #2d2d39;
+
+            border-radius: 16px;
+
+            padding: 36px;
+
+            box-shadow:
+                0 30px 90px rgba(
+                    0,
+                    0,
+                    0,
+                    0.55
+                );
+
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 21px;
+
+            font-weight: 800;
+
+            letter-spacing: -0.4px;
+
+            margin-bottom: 30px;
+        }
+
+        .logo span {
+            color: #8b5cf6;
+        }
+
+        .icon {
+            width: 72px;
+            height: 72px;
+
+            margin: 0 auto 22px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #29151b;
+
+            border: 1px solid #55232e;
+
+            color: #ff7185;
+
+            font-size: 31px;
+
+            font-weight: 700;
+        }
+
+        h1 {
+            margin: 0;
+
+            font-size: 28px;
+
+            font-weight: 750;
+
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            margin: 12px auto 0;
+
+            max-width: 430px;
+
+            color: #92929e;
+
+            line-height: 1.55;
+
+            font-size: 14px;
+        }
+
+        .status-box {
+            margin-top: 25px;
+
+            padding: 15px 17px;
+
+            border-radius: 10px;
+
+            background: #191920;
+
+            border: 1px solid #30303b;
+
+            text-align: left;
+        }
+
+        .status-label {
+            color: #777783;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+
+            margin-bottom: 6px;
+        }
+
+        .status {
+            color: #ff7185;
+
+            font-size: 16px;
+
+            font-weight: 700;
+        }
+
+        .ban-reason {
+            margin-top: 18px;
+
+            padding: 14px 16px;
+
+            border-radius: 10px;
+
+            background: #15151c;
+
+            border: 1px solid #292934;
+
+            text-align: left;
+        }
+
+        .reason-label {
+            color: #777783;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+
+            margin-bottom: 6px;
+        }
+
+        .reason-text {
+            color: #b7b7c2;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            overflow-wrap: anywhere;
+        }
+
+        .actions {
+            margin-top: 27px;
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 9px;
+
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            min-height: 40px;
+
+            padding: 0 17px;
+
+            border-radius: 8px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            font-family: inherit;
+
+            transition:
+                background 0.15s ease,
+                color 0.15s ease,
+                border-color 0.15s ease,
+                opacity 0.15s ease;
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+
+            cursor: default;
+        }
+
+        .primary-button {
+            background: #7c3aed;
+
+            border: 1px solid #7c3aed;
+
+            color: #ffffff;
+        }
+
+        .primary-button:hover:not(:disabled) {
+            background: #8b5cf6;
+
+            border-color: #8b5cf6;
+        }
+
+        .secondary-button {
+            background: #191920;
+
+            border: 1px solid #30303b;
+
+            color: #b7b7c2;
+        }
+
+        .secondary-button:hover {
+            background: #22222b;
+
+            border-color: #3a3a47;
+
+            color: #ffffff;
+        }
+
+        .loading {
+            color: #8f8f9b;
+
+            font-size: 14px;
+        }
+
+        .error {
+            color: #ff7185;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            .declined-card {
+                padding: 28px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<nav class="site-navbar">
+    <main class="declined-page">
 
-    <div class="navbar-inner">
+        <section class="declined-card">
 
-        <a
-            href="/"
-            class="navbar-brand"
-        >
-            Rip_Dead Account
-        </a>
+            <div class="logo">
+                Rip_<span>Dead</span>
+            </div>
 
-        <div class="navbar-links">
-
-            <a href="/">
-                Home
-            </a>
-
-            <a
-                href="/search/"
-                class="auth-only"
-                hidden
+            <div
+                class="icon"
+                id="status-icon"
             >
-                Search
-            </a>
+                !
+            </div>
 
-            <a
-                href="/friends/"
-                class="auth-only"
-                hidden
-            >
-                Friends
-            </a>
+            <div id="content">
 
-            <a
-                href="/chat/"
-                class="auth-only"
-                hidden
-            >
-                Chat
-            </a>
+                <div class="loading">
+                    Checking account status...
+                </div>
 
-            <a
-                href="/apps/"
-                class="auth-only"
-                hidden
-            >
-                Apps
-            </a>
+            </div>
 
-            <a
-                href="/settings/"
-                class="auth-only"
-                hidden
-            >
-                Settings
-            </a>
+        </section>
 
-            <a
-                href="/account/"
-                class="auth-only"
-                hidden
-            >
-                Account
-            </a>
+    </main>
 
-            <a
-                href="/login/"
-                class="guest-only"
-            >
-                Log In
-            </a>
+    <script>
+        (() => {
+            "use strict";
 
-            <a
-                href="/signup/"
-                class="guest-only button-link"
-            >
-                Create Account
-            </a>
+            const db =
+                window.supabaseClient;
 
-            <button
-                type="button"
-                id="navbar-logout"
-                class="auth-only navbar-logout"
-                hidden
-            >
-                Log Out
-            </button>
-
-        </div>
-
-    </div>
-
-</nav>
-
-
-<main class="center-page">
-
-    <section class="auth-card">
-
-        <h1 id="declined-title">
-            Access Restricted
-        </h1>
-
-        <p id="declined-message">
-            Your account has been restricted.
-        </p>
-
-
-        <div
-            id="ban-details"
-            class="message error"
-            style="margin-top:20px;"
-        >
-
-            <strong>
-                Ban Type:
-            </strong>
-
-            <span id="ban-type">
-                Unknown
-            </span>
-
-
-            <br>
-
-
-            <strong>
-                Reason:
-            </strong>
-
-            <span id="ban-reason">
-                No reason provided.
-            </span>
-
-        </div>
-
-
-        <div
-            style="
-                margin-top:20px;
-                display:flex;
-                justify-content:center;
-                gap:10px;
-                flex-wrap:wrap;
-            "
-        >
-
-            <a
-                href="/"
-                class="button-full"
-                style="
-                    text-decoration:none;
-                    text-align:center;
-                "
-            >
-                Return Home
-            </a>
-
-            <button
-                type="button"
-                id="declined-logout"
-                class="button-full"
-            >
-                Log Out
-            </button>
-
-        </div>
-
-    </section>
-
-</main>
-
-
-<!-- Authentication -->
-<script src="/js/auth.js"></script>
-
-<!-- Global site availability -->
-<script src="/js/global.js"></script>
-
-
-<script>
-
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
-
-        const title =
-            document.getElementById(
-                "declined-title"
-            );
-
-        const message =
-            document.getElementById(
-                "declined-message"
-            );
-
-        const banType =
-            document.getElementById(
-                "ban-type"
-            );
-
-        const banReason =
-            document.getElementById(
-                "ban-reason"
-            );
-
-        const logoutButton =
-            document.getElementById(
-                "declined-logout"
-            );
-
-
-        /*
-         * Initialize navbar.
-         */
-
-        try {
-
-            await window.initNavbar();
-
-        } catch (error) {
-
-            console.error(
-                "[Declined] Navbar error:",
-                error
-            );
-
-        }
-
-
-        /*
-         * Get current session.
-         */
-
-        let session = null;
-
-        try {
-
-            session =
-                await window.getSession();
-
-        } catch (error) {
-
-            console.error(
-                "[Declined] Session error:",
-                error
-            );
-
-        }
-
-
-        /*
-         * No session.
-         */
-
-        if (!session) {
-
-            title.textContent =
-                "Access Restricted";
-
-            message.textContent =
-                "Please log in to view your account status.";
-
-            banType.textContent =
-                "Unknown";
-
-            banReason.textContent =
-                "No reason provided.";
-
-            return;
-
-        }
-
-
-        /*
-         * Get profile.
-         */
-
-        try {
-
-            const {
-                data: profile,
-                error
-            } =
-                await window.supabaseClient
-                    .from("profiles")
-                    .select(
-                        "id,isBanned,ban_type,ban_reason"
-                    )
-                    .eq(
-                        "id",
-                        session.user.id
-                    )
-                    .maybeSingle();
-
-
-            if (error) {
-
-                console.error(
-                    "[Declined] Failed to load profile:",
-                    error
+            const content =
+                document.getElementById(
+                    "content"
                 );
 
-                message.textContent =
-                    "Unable to load your account restriction.";
+            const icon =
+                document.getElementById(
+                    "status-icon"
+                );
 
-                return;
 
+            function escapeHTML(value) {
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+                div.textContent =
+                    value ?? "";
+
+                return div.innerHTML;
             }
 
 
-            /*
-             * Account is not banned.
-             */
+            function getBanInfo(banType) {
 
-            if (
-                !profile ||
-                !profile.isBanned
+                switch (banType) {
+
+                    case "Banned":
+                        return {
+                            title:
+                                "Account Banned",
+
+                            description:
+                                "This account has been banned from Rip_Dead Account."
+                        };
+
+
+                    case "Terminated":
+                        return {
+                            title:
+                                "Account Terminated",
+
+                            description:
+                                "This account has been permanently terminated."
+                        };
+
+
+                    case "IP Banned":
+                        return {
+                            title:
+                                "IP Banned",
+
+                            description:
+                                "Access to Rip_Dead Account has been blocked for this network."
+                        };
+
+
+                    case "HW Banned":
+                        return {
+                            title:
+                                "Hardware Banned",
+
+                            description:
+                                "This account has been blocked due to a device restriction."
+                        };
+
+
+                    default:
+                        return {
+                            title:
+                                "Account Restricted",
+
+                            description:
+                                "This account is currently restricted from accessing Rip_Dead Account."
+                        };
+                }
+            }
+
+
+            function showRestricted(
+                banType,
+                banReason
             ) {
+
+                const info =
+                    getBanInfo(
+                        banType
+                    );
+
+
+                icon.textContent =
+                    banType ===
+                    "Terminated"
+                        ? "×"
+                        : "!";
+
+
+                content.innerHTML = `
+                    <h1>
+                        ${escapeHTML(
+                            info.title
+                        )}
+                    </h1>
+
+                    <p class="subtitle">
+                        ${escapeHTML(
+                            info.description
+                        )}
+                    </p>
+
+                    <div class="status-box">
+
+                        <div class="status-label">
+                            Restriction
+                        </div>
+
+                        <div class="status">
+                            ${escapeHTML(
+                                banType ||
+                                "Restricted"
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div class="ban-reason">
+
+                        <div class="reason-label">
+                            Reason
+                        </div>
+
+                        <div class="reason-text">
+                            ${escapeHTML(
+                                banReason ||
+                                "No reason provided."
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <a
+                            href="/"
+                            class="button secondary-button"
+                        >
+                            Return Home
+                        </a>
+
+                        <button
+                            type="button"
+                            class="button primary-button"
+                            id="logout-button"
+                        >
+                            Log Out
+                        </button>
+
+                    </div>
+                `;
+
+
+                document
+                    .getElementById(
+                        "logout-button"
+                    )
+                    ?.addEventListener(
+                        "click",
+                        async () => {
+
+                            const button =
+                                document.getElementById(
+                                    "logout-button"
+                                );
+
+                            button.disabled =
+                                true;
+
+                            button.textContent =
+                                "Logging Out...";
+
+
+                            try {
+
+                                await db.auth.signOut();
+
+                            } catch (error) {
+
+                                console.error(
+                                    "[Declined] Logout error:",
+                                    error
+                                );
+
+                            } finally {
+
+                                window.location.href =
+                                    "/login/";
+                            }
+                        }
+                    );
+            }
+
+
+            function showNormalAccountRedirect() {
 
                 window.location.href =
                     "/account/";
-
-                return;
-
             }
 
 
-            /*
-             * Display ban type.
-             */
+            async function checkAccount() {
 
-            const type =
-                profile.ban_type ||
-                "Banned";
+                if (!db) {
 
-            banType.textContent =
-                type;
+                    content.innerHTML = `
+                        <h1>
+                            Unable to Check Account
+                        </h1>
 
+                        <p class="error">
+                            The Rip_Dead Account service
+                            could not be loaded.
+                        </p>
+                    `;
 
-            /*
-             * Display ban reason.
-             */
-
-            banReason.textContent =
-                profile.ban_reason ||
-                "No reason provided.";
+                    return;
+                }
 
 
-            /*
-             * Customize the message.
-             */
+                try {
 
-            if (
-                type === "Terminated"
-            ) {
-
-                title.textContent =
-                    "Account Terminated";
-
-                message.textContent =
-                    "This account has been terminated.";
-
-            } else if (
-                type === "IP Banned"
-            ) {
-
-                title.textContent =
-                    "IP Banned";
-
-                message.textContent =
-                    "Access from your IP address has been restricted.";
-
-            } else if (
-                type === "HW Banned"
-            ) {
-
-                title.textContent =
-                    "Device Banned";
-
-                message.textContent =
-                    "Access from this device has been restricted.";
-
-            } else {
-
-                title.textContent =
-                    "Account Banned";
-
-                message.textContent =
-                    "This account has been banned.";
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "[Declined] Unexpected error:",
-                error
-            );
-
-            message.textContent =
-                "An unexpected error occurred.";
-
-        }
+                    const {
+                        data,
+                        error
+                    } =
+                        await db.auth.getSession();
 
 
-        /*
-         * Log out button.
-         */
-
-        if (logoutButton) {
-
-            logoutButton.addEventListener(
-                "click",
-                async () => {
-
-                    logoutButton.disabled =
-                        true;
-
-                    logoutButton.textContent =
-                        "Logging Out...";
-
-
-                    try {
-
-                        await window
-                            .supabaseClient
-                            .auth
-                            .signOut();
-
-                    } catch (error) {
+                    if (error) {
 
                         console.error(
-                            "[Declined] Logout error:",
+                            "[Declined] Session error:",
                             error
                         );
 
+                        content.innerHTML = `
+                            <h1>
+                                Unable to Check Account
+                            </h1>
+
+                            <p class="error">
+                                ${escapeHTML(
+                                    error.message
+                                )}
+                            </p>
+                        `;
+
+                        return;
                     }
 
 
-                    window.location.href =
-                        "/login/";
+                    const session =
+                        data?.session;
 
+
+                    if (!session) {
+
+                        window.location.href =
+                            "/login/";
+
+                        return;
+                    }
+
+
+                    const {
+                        data: profile,
+                        error:
+                            profileError
+                    } =
+                        await db
+                            .from("profiles")
+                            .select(
+                                "id,isBanned,ban_type,ban_reason"
+                            )
+                            .eq(
+                                "id",
+                                session.user.id
+                            )
+                            .maybeSingle();
+
+
+                    if (profileError) {
+
+                        console.error(
+                            "[Declined] Profile error:",
+                            profileError
+                        );
+
+                        content.innerHTML = `
+                            <h1>
+                                Unable to Check Account
+                            </h1>
+
+                            <p class="error">
+                                ${escapeHTML(
+                                    profileError.message
+                                )}
+                            </p>
+                        `;
+
+                        return;
+                    }
+
+
+                    if (
+                        !profile ||
+                        profile.isBanned !== true
+                    ) {
+
+                        showNormalAccountRedirect();
+
+                        return;
+                    }
+
+
+                    showRestricted(
+                        profile.ban_type,
+                        profile.ban_reason
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "[Declined] Unexpected error:",
+                        error
+                    );
+
+                    content.innerHTML = `
+                        <h1>
+                            Unable to Check Account
+                        </h1>
+
+                        <p class="error">
+                            ${escapeHTML(
+                                error.message ||
+                                "An unexpected error occurred."
+                            )}
+                        </p>
+                    `;
                 }
-            );
+            }
 
-        }
 
-    }
-);
+            checkAccount();
 
-</script>
+        })();
+    </script>
 
 </body>
-
 </html>
