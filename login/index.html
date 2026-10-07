@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
 
@@ -17,571 +16,455 @@
     >
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/global.js"></script>
 </head>
 
 <body>
 
-<nav class="site-navbar">
+    <nav class="site-navbar">
 
-    <div class="navbar-inner">
-
-        <a
-            href="/"
-            class="navbar-brand"
-        >
-            Rip_Dead Account
-        </a>
-
-        <div class="navbar-links">
-
-            <a href="/">
-                Home
-            </a>
+        <div class="navbar-inner">
 
             <a
-                href="/search/"
-                class="auth-only"
-                hidden
+                href="/"
+                class="navbar-brand"
             >
-                Search
+                Rip_<span>Dead</span>
             </a>
 
-            <a
-                href="/friends/"
-                class="auth-only"
-                hidden
-            >
-                Friends
-            </a>
+            <div class="navbar-links">
 
-            <a
-                href="/chat/"
-                class="auth-only"
-                hidden
-            >
-                Chat
-            </a>
+                <a href="/">
+                    Home
+                </a>
 
-            <a
-                href="/apps/"
-                class="auth-only"
-                hidden
-            >
-                Apps
-            </a>
+                <a href="/search/">
+                    Search
+                </a>
 
-            <a
-                href="/settings/"
-                class="auth-only"
-                hidden
-            >
-                Settings
-            </a>
+                <a href="/friends/">
+                    Friends
+                </a>
 
-            <a
-                href="/account/"
-                class="auth-only"
-                hidden
-            >
-                Account
-            </a>
+                <a href="/chat/">
+                    Chat
+                </a>
 
-            <a
-                href="/login/"
-                class="guest-only"
-            >
-                Log In
-            </a>
+                <a href="/apps/">
+                    Apps
+                </a>
 
-            <a
-                href="/signup/"
-                class="guest-only button-link"
-            >
-                Create Account
-            </a>
+                <a href="/settings/">
+                    Settings
+                </a>
 
-            <button
-                type="button"
-                id="navbar-logout"
-                class="auth-only navbar-logout"
-                hidden
-            >
-                Log Out
-            </button>
+                <a href="/account/">
+                    Account
+                </a>
+
+                <a
+                    href="/login/"
+                    class="guest-only"
+                >
+                    Log In
+                </a>
+
+                <a
+                    href="/signup/"
+                    class="guest-only"
+                >
+                    Create Account
+                </a>
+
+                <button
+                    type="button"
+                    id="navbar-logout"
+                    class="auth-only navbar-logout"
+                    hidden
+                >
+                    Log Out
+                </button>
+
+            </div>
 
         </div>
 
-    </div>
-
-</nav>
+    </nav>
 
 
-<main class="center-page">
+    <main class="center-page">
 
-    <section class="auth-card">
+        <section class="auth-card">
 
-        <h1>
-            Welcome back
-        </h1>
+            <h1>
+                Log In
+            </h1>
 
-        <p>
-            Log in to your Rip_Dead account.
-        </p>
+            <p class="auth-subtitle">
+                Log in to your Rip_Dead Account.
+            </p>
 
 
-        <form id="login-form">
+            <form id="login-form">
 
-            <div class="form-group">
-
-                <label
-                    for="email"
-                    class="form-label"
-                >
+                <label for="email">
                     Email
                 </label>
 
                 <input
-                    id="email"
                     type="email"
+                    id="email"
+                    name="email"
                     autocomplete="email"
-                    placeholder="you@example.com"
                     required
                 >
 
-            </div>
 
-
-            <div class="form-group">
-
-                <label
-                    for="password"
-                    class="form-label"
-                >
+                <label for="password">
                     Password
                 </label>
 
                 <input
-                    id="password"
                     type="password"
+                    id="password"
+                    name="password"
                     autocomplete="current-password"
-                    placeholder="Your password"
                     required
                 >
 
-            </div>
+
+                <div
+                    style="
+                        display: flex;
+                        justify-content: flex-end;
+                        margin-top: 8px;
+                    "
+                >
+                    <a
+                        href="/reset-password/"
+                        style="
+                            color: #8b5cf6;
+                            font-size: 13px;
+                            text-decoration: none;
+                        "
+                    >
+                        Forgot password?
+                    </a>
+                </div>
 
 
-            <div
-                id="login-message"
-                class="message"
-                hidden
-            ></div>
+                <div
+                    id="login-message"
+                    class="message hidden"
+                ></div>
 
 
-            <button
-                type="submit"
-                class="button-full"
-                id="login-button"
+                <button
+                    type="submit"
+                    id="login-button"
+                    class="button-full"
+                >
+                    Log In
+                </button>
+
+            </form>
+
+
+            <p
+                style="
+                    margin-top: 20px;
+                    text-align: center;
+                    color: #888894;
+                    font-size: 13px;
+                "
             >
-                Log In
-            </button>
+                Don't have an account?
+                <a
+                    href="/signup/"
+                    style="
+                        color: #8b5cf6;
+                        text-decoration: none;
+                    "
+                >
+                    Create Account
+                </a>
+            </p>
 
-        </form>
+        </section>
 
-
-        <p
-            style="
-                margin-top:20px;
-                margin-bottom:0;
-                text-align:center;
-            "
-        >
-            Don't have an account?
-
-            <a href="/signup/">
-                Create one
-            </a>
-        </p>
-
-    </section>
-
-</main>
+    </main>
 
 
-<!-- Authentication must load BEFORE the page script -->
-<script src="/js/auth.js"></script>
+    <script>
+        (() => {
+            "use strict";
 
-<!-- Global site availability -->
-<script src="/js/global.js"></script>
+            const form =
+                document.getElementById(
+                    "login-form"
+                );
 
+            const emailInput =
+                document.getElementById(
+                    "email"
+                );
 
-<script>
+            const passwordInput =
+                document.getElementById(
+                    "password"
+                );
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+            const message =
+                document.getElementById(
+                    "login-message"
+                );
 
-        const form =
-            document.getElementById(
-                "login-form"
-            );
-
-        const button =
-            document.getElementById(
-                "login-button"
-            );
-
-        const message =
-            document.getElementById(
-                "login-message"
-            );
-
-
-        /*
-         * Show a login-page message.
-         */
-
-        function showMessage(
-            text,
-            type = "info"
-        ) {
-
-            message.textContent =
-                text;
-
-            message.classList.remove(
-                "success",
-                "error",
-                "info",
-                "warning"
-            );
-
-            message.classList.add(
-                type
-            );
-
-            message.hidden = false;
-
-        }
-
-
-        /*
-         * Initialize the navbar.
-         */
-
-        await window.initNavbar();
-
-
-        /*
-         * Check whether an existing session
-         * belongs to a restricted account.
-         */
-
-        const existingSession =
-            await window.getSession();
-
-
-        if (existingSession) {
-
-            /*
-             * Check IP/device bans.
-             */
-
-            const enforceResult =
-                await window.enforceBans(
-                    existingSession
+            const button =
+                document.getElementById(
+                    "login-button"
                 );
 
 
-            if (
-                enforceResult &&
-                enforceResult.banned
+            function showMessage(
+                text,
+                type = "error"
             ) {
-                return;
-            }
+                message.textContent =
+                    text;
 
-
-            /*
-             * Check normal account bans.
-             */
-
-            const banStatus =
-                await window.checkAccountBan(
-                    existingSession
+                message.classList.remove(
+                    "hidden",
+                    "success",
+                    "error",
+                    "info",
+                    "warning"
                 );
 
-
-            if (banStatus.banned) {
-                return;
+                message.classList.add(
+                    type
+                );
             }
 
 
-            /*
-             * Already authenticated normally.
-             */
+            function hideMessage() {
+                message.textContent = "";
 
-            window.location.href =
-                "/account/";
-
-            return;
-        }
+                message.classList.add(
+                    "hidden"
+                );
+            }
 
 
-        /*
-         * Login form.
-         */
+            async function initialize() {
 
-        form.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
+                await window.initNavbar();
 
 
-                button.disabled = true;
-
-                button.textContent =
-                    "Logging in...";
+                const session =
+                    await window.getSession();
 
 
-                message.hidden = true;
-
-
-                const email =
-                    document
-                        .getElementById(
-                            "email"
-                        )
-                        .value
-                        .trim();
-
-
-                const password =
-                    document
-                        .getElementById(
-                            "password"
-                        )
-                        .value;
-
-
-                if (
-                    !email ||
-                    !password
-                ) {
-
-                    showMessage(
-                        "Please enter your email and password.",
-                        "error"
-                    );
-
-                    button.disabled =
-                        false;
-
-                    button.textContent =
-                        "Log In";
-
+                if (!session) {
                     return;
                 }
 
 
-                try {
-
-                    const {
-                        data,
-                        error
-                    } =
-                        await window
-                            .supabaseClient
-                            .auth
-                            .signInWithPassword({
-                                email,
-                                password
-                            });
+                const enforcement =
+                    await window.enforceBans(
+                        session
+                    );
 
 
-                    /*
-                     * Normal Supabase login failure.
-                     */
+                if (enforcement.banned) {
+                    return;
+                }
 
-                    if (error) {
+
+                const banStatus =
+                    await window.checkAccountBan(
+                        session
+                    );
+
+
+                if (banStatus.banned) {
+                    return;
+                }
+
+
+                window.location.href =
+                    "/account/";
+            }
+
+
+            form.addEventListener(
+                "submit",
+                async event => {
+
+                    event.preventDefault();
+
+                    hideMessage();
+
+                    button.disabled =
+                        true;
+
+                    button.textContent =
+                        "Logging In...";
+
+
+                    const email =
+                        emailInput.value.trim();
+
+                    const password =
+                        passwordInput.value;
+
+
+                    if (!email || !password) {
+
+                        showMessage(
+                            "Please enter your email and password.",
+                            "error"
+                        );
+
+                        button.disabled =
+                            false;
+
+                        button.textContent =
+                            "Log In";
+
+                        return;
+                    }
+
+
+                    try {
+
+                        const {
+                            data,
+                            error
+                        } =
+                            await window
+                                .supabaseClient
+                                .auth
+                                .signInWithPassword({
+                                    email,
+                                    password
+                                });
+
+
+                        if (error) {
+
+                            console.error(
+                                "[Login] Sign in error:",
+                                error
+                            );
+
+
+                            if (
+                                window
+                                    .isSupabaseUnavailableError(
+                                        error
+                                    )
+                            ) {
+                                return;
+                            }
+
+
+                            showMessage(
+                                error.message ||
+                                "Unable to log in.",
+                                "error"
+                            );
+
+                            return;
+                        }
+
+
+                        const session =
+                            data?.session;
+
+
+                        if (!session) {
+
+                            showMessage(
+                                "Login succeeded, but no session was created.",
+                                "error"
+                            );
+
+                            return;
+                        }
+
+
+                        const enforcement =
+                            await window
+                                .enforceBans(
+                                    session
+                                );
+
+
+                        if (
+                            enforcement.banned
+                        ) {
+                            return;
+                        }
+
+
+                        const banStatus =
+                            await window
+                                .checkAccountBan(
+                                    session
+                                );
+
+
+                        if (
+                            banStatus.banned
+                        ) {
+                            return;
+                        }
+
+
+                        window.location.href =
+                            "/account/";
+
+                    } catch (error) {
 
                         console.error(
-                            "[Login] Login failed:",
+                            "[Login] Unexpected error:",
                             error
                         );
 
 
+                        if (
+                            window
+                                .isSupabaseUnavailableError(
+                                    error
+                                )
+                        ) {
+                            return;
+                        }
+
+
                         showMessage(
                             error.message ||
-                            "Unable to log in.",
+                            "An unexpected error occurred.",
                             "error"
                         );
 
+                    } finally {
 
                         button.disabled =
                             false;
 
                         button.textContent =
                             "Log In";
-
-                        return;
                     }
-
-
-                    if (
-                        !data ||
-                        !data.session
-                    ) {
-
-                        showMessage(
-                            "Login succeeded, but no session was returned.",
-                            "error"
-                        );
-
-
-                        button.disabled =
-                            false;
-
-                        button.textContent =
-                            "Log In";
-
-                        return;
-                    }
-
-
-                    console.log(
-                        "[Login] Login successful."
-                    );
-
-
-                    /*
-                     * Check IP/device bans.
-                     */
-
-                    const enforceResult =
-                        await window.enforceBans(
-                            data.session
-                        );
-
-
-                    /*
-                     * enforceBans() redirects
-                     * banned accounts to /Declined/.
-                     */
-
-                    if (
-                        enforceResult &&
-                        enforceResult.banned
-                    ) {
-
-                        console.warn(
-                            "[Login] IP/device ban detected."
-                        );
-
-                        await window
-                            .supabaseClient
-                            .auth
-                            .signOut();
-
-                        return;
-                    }
-
-
-                    /*
-                     * Check regular account bans.
-                     */
-
-                    const banStatus =
-                        await window
-                            .checkAccountBan(
-                                data.session
-                            );
-
-
-                    /*
-                     * Restricted account.
-                     */
-
-                    if (
-                        banStatus.banned
-                    ) {
-
-                        console.warn(
-                            "[Login] Restricted account detected."
-                        );
-
-
-                        await window
-                            .supabaseClient
-                            .auth
-                            .signOut();
-
-
-                        return;
-                    }
-
-
-                    /*
-                     * Small delay to let Supabase
-                     * persist the session.
-                     */
-
-                    await new Promise(
-                        resolve =>
-                            setTimeout(
-                                resolve,
-                                100
-                            )
-                    );
-
-
-                    window.location.href =
-                        "/account/";
-
-                } catch (error) {
-
-                    console.error(
-                        "[Login] Unexpected error:",
-                        error
-                    );
-
-
-                    if (
-                        typeof window
-                            .isSupabaseUnavailableError ===
-                        "function" &&
-                        window
-                            .isSupabaseUnavailableError(
-                                error
-                            )
-                    ) {
-                        return;
-                    }
-
-
-                    showMessage(
-                        error.message ||
-                        "An unexpected error occurred.",
-                        "error"
-                    );
-
-
-                    button.disabled =
-                        false;
-
-                    button.textContent =
-                        "Log In";
-
                 }
+            );
 
-            }
-        );
 
-    }
-);
+            initialize();
 
-</script>
+        })();
+    </script>
 
 </body>
-
 </html>

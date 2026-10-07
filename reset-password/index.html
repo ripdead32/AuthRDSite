@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Reset Password — Rip_Dead Account</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/auth.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/global.js"></script>
+</head>
+
+<body>
+
+<nav class="site-navbar">
+    <div class="navbar-inner">
+
+        <a href="/" class="navbar-brand">
+            Rip_<span>Dead</span>
+        </a>
+
+        <div class="navbar-links">
+
+            <a href="/">Home</a>
+            <a href="/search/">Search</a>
+            <a href="/friends/">Friends</a>
+            <a href="/chat/">Chat</a>
+            <a href="/apps/">Apps</a>
+            <a href="/settings/">Settings</a>
+            <a href="/account/">Account</a>
+
+            <a
+                href="/login/"
+                class="guest-only"
+            >
+                Log In
+            </a>
+
+            <a
+                href="/signup/"
+                class="guest-only"
+            >
+                Create Account
+            </a>
+
+            <button
+                type="button"
+                id="navbar-logout"
+                class="auth-only navbar-logout"
+                hidden
+            >
+                Log Out
+            </button>
+
+        </div>
+
+    </div>
+</nav>
+
+
+<main class="center-page">
+
+    <section class="auth-card">
+
+        <!-- REQUEST RESET EMAIL -->
+
+        <div id="request-section">
+
+            <h1>Reset Password</h1>
+
+            <p class="auth-subtitle">
+                Enter your email address and we'll send you a password reset link.
+            </p>
+
+            <form id="reset-request-form">
+
+                <label for="reset-email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="reset-email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                >
+
+                <div
+                    id="reset-message"
+                    class="message hidden"
+                ></div>
+
+                <button
+                    type="submit"
+                    id="reset-button"
+                    class="button-full"
+                >
+                    Reset Password
+                </button>
+
+            </form>
+
+            <p
+                style="
+                    margin-top:20px;
+                    text-align:center;
+                    font-size:13px;
+                "
+            >
+                <a
+                    href="/login/"
+                    style="
+                        color:#8b5cf6;
+                        text-decoration:none;
+                    "
+                >
+                    Back to Log In
+                </a>
+            </p>
+
+        </div>
+
+
+        <!-- SET NEW PASSWORD -->
+
+        <div
+            id="password-section"
+            hidden
+        >
+
+            <h1>Set New Password</h1>
+
+            <p class="auth-subtitle">
+                Choose a new password for your Rip_Dead Account.
+            </p>
+
+            <form id="password-form">
+
+                <label for="new-password">
+                    New Password
+                </label>
+
+                <input
+                    type="password"
+                    id="new-password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <label for="confirm-password">
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirm-password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                >
+
+                <div
+                    id="password-message"
+                    class="message hidden"
+                ></div>
+
+                <button
+                    type="submit"
+                    id="password-button"
+                    class="button-full"
+                >
+                    Update Password
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+(() => {
+
+    "use strict";
+
+    console.log(
+        "[Reset Password] Page script started"
+    );
+
+
+    /* =========================================================
+       SUPABASE
+    ========================================================= */
+
+    const db = window.supabaseClient;
+
+    if (!db) {
+
+        console.error(
+            "[Reset Password] Supabase client is missing!"
+        );
+
+        return;
+    }
+
+
+    /* =========================================================
+       ELEMENTS
+    ========================================================= */
+
+    const requestSection =
+        document.getElementById(
+            "request-section"
+        );
+
+    const passwordSection =
+        document.getElementById(
+            "password-section"
+        );
+
+
+    const requestForm =
+        document.getElementById(
+            "reset-request-form"
+        );
+
+    const passwordForm =
+        document.getElementById(
+            "password-form"
+        );
+
+
+    const resetEmail =
+        document.getElementById(
+            "reset-email"
+        );
+
+    const newPassword =
+        document.getElementById(
+            "new-password"
+        );
+
+    const confirmPassword =
+        document.getElementById(
+            "confirm-password"
+        );
+
+
+    const resetMessage =
+        document.getElementById(
+            "reset-message"
+        );
+
+    const passwordMessage =
+        document.getElementById(
+            "password-message"
+        );
+
+
+    const resetButton =
+        document.getElementById(
+            "reset-button"
+        );
+
+    const passwordButton =
+        document.getElementById(
+            "password-button"
+        );
+
+
+    console.log(
+        "[Reset Password] Form:",
+        requestForm
+    );
+
+    console.log(
+        "[Reset Password] Supabase:",
+        db
+    );
+
+
+    if (!requestForm) {
+
+        console.error(
+            "[Reset Password] reset-request-form was NOT found!"
+        );
+
+        return;
+    }
+
+
+    /* =========================================================
+       MESSAGE HELPERS
+    ========================================================= */
+
+    function showMessage(
+        element,
+        text,
+        type
+    ) {
+
+        element.textContent = text;
+
+        element.classList.remove(
+            "hidden",
+            "success",
+            "error",
+            "info",
+            "warning"
+        );
+
+        element.classList.add(type);
+    }
+
+
+    function hideMessage(element) {
+
+        element.textContent = "";
+
+        element.classList.add(
+            "hidden"
+        );
+    }
+
+
+    /* =========================================================
+       SHOW PASSWORD FORM
+    ========================================================= */
+
+    function showPasswordSection() {
+
+        requestSection.hidden = true;
+
+        passwordSection.hidden = false;
+
+        console.log(
+            "[Reset Password] Recovery mode enabled"
+        );
+    }
+
+
+    /* =========================================================
+       REQUEST PASSWORD RESET
+    ========================================================= */
+
+    requestForm.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+            console.log(
+                "[Reset Password] FORM SUBMITTED"
+            );
+
+
+            hideMessage(
+                resetMessage
+            );
+
+
+            const email =
+                resetEmail.value.trim();
+
+
+            console.log(
+                "[Reset Password] Email:",
+                email
+            );
+
+
+            if (!email) {
+
+                showMessage(
+                    resetMessage,
+                    "Please enter your email address.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            resetButton.disabled = true;
+
+            resetButton.textContent =
+                "Sending...";
+
+
+            console.log(
+                "[Reset Password] Sending reset email..."
+            );
+
+
+            try {
+
+                const redirectTo =
+                    window.location.origin +
+                    "/reset-password/";
+
+
+                console.log(
+                    "[Reset Password] Redirect URL:",
+                    redirectTo
+                );
+
+
+                const {
+                    data,
+                    error
+                } =
+                    await db.auth.resetPasswordForEmail(
+                        email,
+                        {
+                            redirectTo: redirectTo
+                        }
+                    );
+
+
+                console.log(
+                    "[Reset Password] Supabase data:",
+                    data
+                );
+
+
+                console.log(
+                    "[Reset Password] Supabase error:",
+                    error
+                );
+
+
+                if (error) {
+
+                    console.error(
+                        "[Reset Password] Email error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        resetMessage,
+                        error.message ||
+                            "Unable to send the reset email.",
+                        "error"
+                    );
+
+
+                    resetButton.disabled =
+                        false;
+
+                    resetButton.textContent =
+                        "Reset Password";
+
+                    return;
+                }
+
+
+                showMessage(
+                    resetMessage,
+                    "Check your email for a password reset link.",
+                    "success"
+                );
+
+
+                resetButton.textContent =
+                    "Email Sent";
+
+
+            } catch (error) {
+
+                console.error(
+                    "[Reset Password] Exception:",
+                    error
+                );
+
+
+                showMessage(
+                    resetMessage,
+                    error.message ||
+                        "An unexpected error occurred.",
+                    "error"
+                );
+
+
+                resetButton.disabled =
+                    false;
+
+                resetButton.textContent =
+                    "Reset Password";
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       UPDATE PASSWORD
+    ========================================================= */
+
+    passwordForm.addEventListener(
+        "submit",
+        async (event) => {
+
+            event.preventDefault();
+
+
+            console.log(
+                "[Reset Password] PASSWORD FORM SUBMITTED"
+            );
+
+
+            hideMessage(
+                passwordMessage
+            );
+
+
+            const password =
+                newPassword.value;
+
+            const confirmation =
+                confirmPassword.value;
+
+
+            if (password.length < 8) {
+
+                showMessage(
+                    passwordMessage,
+                    "Your password must be at least 8 characters long.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (password !== confirmation) {
+
+                showMessage(
+                    passwordMessage,
+                    "The passwords do not match.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            passwordButton.disabled =
+                true;
+
+            passwordButton.textContent =
+                "Updating...";
+
+
+            try {
+
+                const {
+                    error
+                } =
+                    await db.auth.updateUser({
+                        password: password
+                    });
+
+
+                if (error) {
+
+                    console.error(
+                        "[Reset Password] Update error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        passwordMessage,
+                        error.message ||
+                            "Unable to update your password.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                showMessage(
+                    passwordMessage,
+                    "Password updated successfully.",
+                    "success"
+                );
+
+
+                await db.auth.signOut();
+
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        "/login/";
+
+                }, 1200);
+
+
+            } catch (error) {
+
+                console.error(
+                    "[Reset Password] Update exception:",
+                    error
+                );
+
+
+                showMessage(
+                    passwordMessage,
+                    error.message ||
+                        "An unexpected error occurred.",
+                    "error"
+                );
+
+
+            } finally {
+
+                passwordButton.disabled =
+                    false;
+
+                passwordButton.textContent =
+                    "Update Password";
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       AUTH STATE
+    ========================================================= */
+
+    db.auth.onAuthStateChange(
+        (event, session) => {
+
+            console.log(
+                "[Reset Password] Auth event:",
+                event,
+                session
+            );
+
+
+            if (
+                event ===
+                "PASSWORD_RECOVERY"
+            ) {
+
+                console.log(
+                    "[Reset Password] Recovery link confirmed"
+                );
+
+
+                showPasswordSection();
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       NAVBAR
+    ========================================================= */
+
+    if (
+        typeof window.initNavbar ===
+        "function"
+    ) {
+
+        window.initNavbar();
+
+    } else {
+
+        console.warn(
+            "[Reset Password] initNavbar is not available"
+        );
+    }
+
+
+    console.log(
+        "[Reset Password] Page initialized"
+    );
+
+})();
+</script>
+
+</body>
+</html>
