@@ -1,117 +1,55 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In — Rip_Dead Account</title>
 
-    <link
-        rel="stylesheet"
-        href="/css/auth.css"
-    >
+    <link rel="stylesheet" href="/css/auth.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/global.js"></script>
 </head>
-
 <body>
-
     <nav class="site-navbar">
-
         <div class="navbar-inner">
-
-            <a
-                href="/"
-                class="navbar-brand"
-            >
+            <a href="/" class="navbar-brand">
                 Rip_<span>Dead</span>
             </a>
 
             <div class="navbar-links">
-
-                <a href="/">
-                    Home
-                </a>
-
-                <a href="/search/">
-                    Search
-                </a>
-
-                <a href="/friends/">
-                    Friends
-                </a>
-
-                <a href="/chat/">
-                    Chat
-                </a>
-
-                <a href="/apps/">
-                    Apps
-                </a>
-
-                <a href="/settings/">
-                    Settings
-                </a>
-
-                <a href="/account/">
-                    Account
-                </a>
-
-                <a
-                    href="/login/"
-                    class="guest-only"
-                >
-                    Log In
-                </a>
-
-                <a
-                    href="/signup/"
-                    class="guest-only"
-                >
-                    Create Account
-                </a>
+                <a href="/">Home</a>
+                <a href="/search/">Search</a>
+                <a href="/friends/">Friends</a>
+                <a href="/chat/">Chat</a>
+                <a href="/apps/">Apps</a>
+                <a href="/settings/">Settings</a>
+                <a href="/account/">Account</a>
+                <a href="/login/" class="guest-only">Log In</a>
+                <a href="/signup/" class="guest-only">Create Account</a>
 
                 <button
                     type="button"
                     id="navbar-logout"
                     class="auth-only navbar-logout"
                     hidden
-                >
-                    Log Out
-                </button>
-
+                >Log Out</button>
             </div>
-
         </div>
-
     </nav>
 
-
     <main class="center-page">
-
         <section class="auth-card">
-
-            <h1>
-                Log In
-            </h1>
+            <h1>Log In</h1>
 
             <p class="auth-subtitle">
                 Log in to your Rip_Dead Account.
             </p>
 
-
             <form id="login-form">
-
-                <label for="email">
-                    Email
-                </label>
-
+                <label for="email">Email</label>
                 <input
                     type="email"
                     id="email"
@@ -120,11 +58,7 @@
                     required
                 >
 
-
-                <label for="password">
-                    Password
-                </label>
-
+                <label for="password">Password</label>
                 <input
                     type="password"
                     id="password"
@@ -133,338 +67,176 @@
                     required
                 >
 
-
-                <div
-                    style="
-                        display: flex;
-                        justify-content: flex-end;
-                        margin-top: 8px;
-                    "
-                >
+                <div style="display:flex;justify-content:flex-end;margin-top:8px">
                     <a
                         href="/reset-password/"
-                        style="
-                            color: #8b5cf6;
-                            font-size: 13px;
-                            text-decoration: none;
-                        "
-                    >
-                        Forgot password?
-                    </a>
+                        style="color:#8b5cf6;font-size:13px;text-decoration:none"
+                    >Forgot password?</a>
                 </div>
 
+                <div id="login-message" class="message hidden"></div>
 
-                <div
-                    id="login-message"
-                    class="message hidden"
-                ></div>
-
-
-                <button
-                    type="submit"
-                    id="login-button"
-                    class="button-full"
-                >
+                <button type="submit" id="login-button" class="button-full">
                     Log In
                 </button>
-
             </form>
 
-
-            <p
-                style="
-                    margin-top: 20px;
-                    text-align: center;
-                    color: #888894;
-                    font-size: 13px;
-                "
-            >
+            <p style="margin-top:20px;text-align:center;color:#888894;font-size:13px">
                 Don't have an account?
-                <a
-                    href="/signup/"
-                    style="
-                        color: #8b5cf6;
-                        text-decoration: none;
-                    "
-                >
+                <a href="/signup/" style="color:#8b5cf6;text-decoration:none">
                     Create Account
                 </a>
             </p>
-
         </section>
-
     </main>
 
-
     <script>
-        (() => {
-            "use strict";
+    (() => {
+        "use strict";
 
-            const form =
-                document.getElementById(
-                    "login-form"
-                );
+        const form = document.getElementById("login-form");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const message = document.getElementById("login-message");
+        const button = document.getElementById("login-button");
 
-            const emailInput =
-                document.getElementById(
-                    "email"
-                );
+        function getPostLoginUrl() {
+            const params = new URLSearchParams(
+                window.location.search
+            );
 
-            const passwordInput =
-                document.getElementById(
-                    "password"
-                );
+            const redirect = params.get("redirect");
 
-            const message =
-                document.getElementById(
-                    "login-message"
-                );
-
-            const button =
-                document.getElementById(
-                    "login-button"
-                );
-
-
-            function showMessage(
-                text,
-                type = "error"
-            ) {
-                message.textContent =
-                    text;
-
-                message.classList.remove(
-                    "hidden",
-                    "success",
-                    "error",
-                    "info",
-                    "warning"
-                );
-
-                message.classList.add(
-                    type
-                );
+            if (!redirect) {
+                return "/account/";
             }
 
+            try {
+                const url = new URL(redirect);
 
-            function hideMessage() {
-                message.textContent = "";
-
-                message.classList.add(
-                    "hidden"
-                );
+                if (
+                    url.protocol === "https:" &&
+                    url.hostname === "ripdead.de5.net"
+                ) {
+                    return url.href;
+                }
+            } catch (error) {
+                console.warn("[Login] Invalid redirect URL.");
             }
 
+            return "/account/";
+        }
 
-            async function initialize() {
+        function showMessage(text, type = "error") {
+            message.textContent = text;
 
-                await window.initNavbar();
+            message.classList.remove(
+                "hidden", "success", "error", "info", "warning"
+            );
 
+            message.classList.add(type);
+        }
 
-                const session =
-                    await window.getSession();
+        function hideMessage() {
+            message.textContent = "";
+            message.classList.add("hidden");
+        }
 
+        async function verifyAndRedirect(session) {
+            const enforcement = await window.enforceBans(session);
 
-                if (!session) {
-                    return;
-                }
-
-
-                const enforcement =
-                    await window.enforceBans(
-                        session
-                    );
-
-
-                if (enforcement.banned) {
-                    return;
-                }
-
-
-                const banStatus =
-                    await window.checkAccountBan(
-                        session
-                    );
-
-
-                if (banStatus.banned) {
-                    return;
-                }
-
-
-                window.location.href =
-                    "/account/";
+            if (enforcement?.banned) {
+                return false;
             }
 
+            const banStatus = await window.checkAccountBan(session);
 
-            form.addEventListener(
-                "submit",
-                async event => {
+            if (banStatus?.banned) {
+                return false;
+            }
 
-                    event.preventDefault();
+            window.location.replace(getPostLoginUrl());
+            return true;
+        }
 
-                    hideMessage();
+        async function initialize() {
+            await window.initNavbar();
 
-                    button.disabled =
-                        true;
+            const session = await window.getSession();
 
-                    button.textContent =
-                        "Logging In...";
+            if (!session) {
+                return;
+            }
 
+            await verifyAndRedirect(session);
+        }
 
-                    const email =
-                        emailInput.value.trim();
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            hideMessage();
 
-                    const password =
-                        passwordInput.value;
+            button.disabled = true;
+            button.textContent = "Logging In...";
 
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
 
-                    if (!email || !password) {
+            try {
+                const { data, error } =
+                    await window.supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
 
+                if (error) {
+                    console.error("[Login] Sign-in error:", error);
+
+                    if (
+                        typeof window.isSupabaseUnavailableError === "function" &&
+                        window.isSupabaseUnavailableError(error)
+                    ) {
                         showMessage(
-                            "Please enter your email and password.",
+                            "Rip_Dead Account is temporarily unavailable.",
                             "error"
                         );
-
-                        button.disabled =
-                            false;
-
-                        button.textContent =
-                            "Log In";
-
                         return;
                     }
 
-
-                    try {
-
-                        const {
-                            data,
-                            error
-                        } =
-                            await window
-                                .supabaseClient
-                                .auth
-                                .signInWithPassword({
-                                    email,
-                                    password
-                                });
-
-
-                        if (error) {
-
-                            console.error(
-                                "[Login] Sign in error:",
-                                error
-                            );
-
-
-                            if (
-                                window
-                                    .isSupabaseUnavailableError(
-                                        error
-                                    )
-                            ) {
-                                return;
-                            }
-
-
-                            showMessage(
-                                error.message ||
-                                "Unable to log in.",
-                                "error"
-                            );
-
-                            return;
-                        }
-
-
-                        const session =
-                            data?.session;
-
-
-                        if (!session) {
-
-                            showMessage(
-                                "Login succeeded, but no session was created.",
-                                "error"
-                            );
-
-                            return;
-                        }
-
-
-                        const enforcement =
-                            await window
-                                .enforceBans(
-                                    session
-                                );
-
-
-                        if (
-                            enforcement.banned
-                        ) {
-                            return;
-                        }
-
-
-                        const banStatus =
-                            await window
-                                .checkAccountBan(
-                                    session
-                                );
-
-
-                        if (
-                            banStatus.banned
-                        ) {
-                            return;
-                        }
-
-
-                        window.location.href =
-                            "/account/";
-
-                    } catch (error) {
-
-                        console.error(
-                            "[Login] Unexpected error:",
-                            error
-                        );
-
-
-                        if (
-                            window
-                                .isSupabaseUnavailableError(
-                                    error
-                                )
-                        ) {
-                            return;
-                        }
-
-
-                        showMessage(
-                            error.message ||
-                            "An unexpected error occurred.",
-                            "error"
-                        );
-
-                    } finally {
-
-                        button.disabled =
-                            false;
-
-                        button.textContent =
-                            "Log In";
-                    }
+                    showMessage(
+                        error.message || "Unable to log in.",
+                        "error"
+                    );
+                    return;
                 }
-            );
 
+                const session = data?.session;
 
-            initialize();
+                if (!session) {
+                    showMessage(
+                        "Login succeeded, but no session was created.",
+                        "error"
+                    );
+                    return;
+                }
 
-        })();
+                await verifyAndRedirect(session);
+            } catch (error) {
+                console.error("[Login] Unexpected error:", error);
+
+                showMessage(
+                    "An unexpected error occurred. Please try again.",
+                    "error"
+                );
+            } finally {
+                button.disabled = false;
+                button.textContent = "Log In";
+            }
+        });
+
+        initialize().catch((error) => {
+            console.error("[Login] Initialization failed:", error);
+        });
+    })();
     </script>
-
 </body>
 </html>
