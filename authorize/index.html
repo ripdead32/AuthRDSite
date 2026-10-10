@@ -1,22 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authorize - Rip_Dead Account</title>
-
     <link rel="stylesheet" href="/css/auth.css">
 
     <style>
-        body {
-            min-height: 100vh;
-        }
+        body { min-height: 100vh; }
 
         .authorize-page {
             min-height: 100vh;
@@ -24,17 +16,18 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
+            box-sizing: border-box;
         }
 
         .authorize-card {
             width: 100%;
             max-width: 520px;
             background: var(--card-bg, #11111a);
-            border: 1px solid var(--border, rgba(255,255,255,0.08));
+            border: 1px solid var(--border, rgba(255,255,255,.08));
             border-radius: 20px;
             padding: 32px;
             box-sizing: border-box;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            box-shadow: 0 20px 60px rgba(0,0,0,.35);
         }
 
         .authorize-brand {
@@ -54,23 +47,20 @@
             color: white;
             font-size: 26px;
             font-weight: 900;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.25);
+            box-shadow: 0 10px 30px rgba(139,92,246,.25);
         }
 
-        .authorize-brand h1 {
-            margin: 0;
-            font-size: 24px;
-        }
+        .authorize-brand h1 { margin: 0; font-size: 24px; }
 
         .authorize-brand p {
             margin: 7px 0 0;
-            opacity: 0.65;
+            opacity: .65;
             font-size: 14px;
         }
 
         .request-box {
-            background: rgba(255,255,255,0.035);
-            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.07);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 22px;
@@ -81,6 +71,7 @@
             align-items: center;
             gap: 14px;
             margin-bottom: 20px;
+            min-width: 0;
         }
 
         .app-icon {
@@ -88,8 +79,8 @@
             height: 52px;
             min-width: 52px;
             border-radius: 14px;
-            background: rgba(139,92,246,0.15);
-            border: 1px solid rgba(139,92,246,0.25);
+            background: rgba(139,92,246,.15);
+            border: 1px solid rgba(139,92,246,.25);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -103,25 +94,21 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
         }
 
-        .app-name {
-            font-size: 18px;
-            font-weight: 800;
-        }
+        .app-name { font-size: 18px; font-weight: 800; }
 
         .app-client {
             margin-top: 4px;
             font-size: 12px;
-            opacity: 0.5;
-            word-break: break-all;
+            opacity: .5;
+            overflow-wrap: anywhere;
         }
 
         .request-text {
             font-size: 15px;
             line-height: 1.55;
-            opacity: 0.85;
+            opacity: .85;
         }
 
         .scope-list {
@@ -152,10 +139,7 @@
             font-weight: 900;
         }
 
-        .authorize-actions {
-            display: flex;
-            gap: 12px;
-        }
+        .authorize-actions { display: flex; gap: 12px; }
 
         .authorize-actions button {
             flex: 1;
@@ -165,30 +149,21 @@
             font: inherit;
             font-weight: 800;
             cursor: pointer;
-            transition:
-                transform 0.15s ease,
-                opacity 0.15s ease,
-                background 0.15s ease;
+            transition: transform .15s ease, opacity .15s ease;
         }
 
-        .authorize-actions button:hover {
-            transform: translateY(-1px);
-        }
-
-        .authorize-actions button:active {
-            transform: translateY(0);
-        }
+        .authorize-actions button:hover { transform: translateY(-1px); }
 
         .authorize-actions button:disabled {
             cursor: not-allowed;
-            opacity: 0.6;
+            opacity: .6;
             transform: none;
         }
 
         .deny-button {
-            background: rgba(255,255,255,0.07);
+            background: rgba(255,255,255,.07);
             color: inherit;
-            border: 1px solid rgba(255,255,255,0.08) !important;
+            border: 1px solid rgba(255,255,255,.08) !important;
         }
 
         .allow-button {
@@ -196,988 +171,493 @@
             color: white;
         }
 
-        .allow-button:hover {
-            opacity: 0.9;
-        }
+        .allow-button:hover { opacity: .9; }
 
         .authorize-error {
             display: none;
             margin-bottom: 20px;
             padding: 13px 15px;
             border-radius: 11px;
-            background: rgba(239,68,68,0.1);
-            border: 1px solid rgba(239,68,68,0.2);
+            background: rgba(239,68,68,.1);
+            border: 1px solid rgba(239,68,68,.2);
             color: #fca5a5;
             font-size: 14px;
             line-height: 1.45;
+            overflow-wrap: anywhere;
         }
 
-        .authorize-error.visible {
-            display: block;
-        }
+        .authorize-error.visible { display: block; }
 
         .authorize-loading {
             text-align: center;
             padding: 30px 0;
-            opacity: 0.65;
+            opacity: .65;
         }
 
         .authorize-footer {
             margin-top: 20px;
             text-align: center;
             font-size: 12px;
-            opacity: 0.45;
+            opacity: .45;
             line-height: 1.5;
         }
 
-        .authorize-footer a {
-            color: inherit;
-        }
+        .authorize-footer a { color: inherit; }
 
         @media (max-width: 520px) {
-            .authorize-page {
-                padding: 14px;
-            }
-
-            .authorize-card {
-                padding: 24px;
-                border-radius: 17px;
-            }
-
-            .authorize-actions {
-                flex-direction: column-reverse;
-            }
+            .authorize-page { padding: 14px; }
+            .authorize-card { padding: 24px; border-radius: 17px; }
+            .authorize-actions { flex-direction: column-reverse; }
         }
     </style>
 </head>
 
 <body>
-
 <div class="authorize-page">
-
     <main class="authorize-card">
-
         <div class="authorize-brand">
-
-            <div class="authorize-logo">
-                RD
-            </div>
-
+            <div class="authorize-logo">RD</div>
             <h1>Rip_Dead Account</h1>
-
             <p>Application Authorization</p>
-
         </div>
 
+        <div id="authorize-error" class="authorize-error" role="alert"></div>
 
-        <div
-            id="authorize-error"
-            class="authorize-error"
-        ></div>
-
-
-        <div
-            id="authorize-loading"
-            class="authorize-loading"
-        >
+        <div id="authorize-loading" class="authorize-loading">
             Checking authorization request...
         </div>
 
-
-        <section
-            id="authorize-content"
-            hidden
-        >
-
+        <section id="authorize-content" hidden>
             <div class="request-box">
-
                 <div class="app-info">
-
-                    <div
-                        id="app-icon"
-                        class="app-icon"
-                    >
-                        RD
-                    </div>
-
+                    <div id="app-icon" class="app-icon">RD</div>
                     <div>
-
-                        <div
-                            id="app-name"
-                            class="app-name"
-                        >
-                            Application
-                        </div>
-
-                        <div
-                            id="app-client"
-                            class="app-client"
-                        ></div>
-
+                        <div id="app-name" class="app-name">Application</div>
+                        <div id="app-client" class="app-client"></div>
                     </div>
-
                 </div>
-
 
                 <div class="request-text">
-
-                    <strong id="app-name-text">
-                        This application
-                    </strong>
-
+                    <strong id="app-name-text">This application</strong>
                     wants to access your Rip_Dead Account.
-
                 </div>
 
-
-                <ul
-                    id="scope-list"
-                    class="scope-list"
-                ></ul>
-
+                <ul id="scope-list" class="scope-list"></ul>
             </div>
-
 
             <div class="authorize-actions">
-
-                <button
-                    id="deny-button"
-                    class="deny-button"
-                    type="button"
-                >
+                <button id="deny-button" class="deny-button" type="button">
                     Cancel
                 </button>
-
-                <button
-                    id="allow-button"
-                    class="allow-button"
-                    type="button"
-                >
+                <button id="allow-button" class="allow-button" type="button">
                     Allow
                 </button>
-
             </div>
-
         </section>
 
-
         <div class="authorize-footer">
-
             Only continue if you trust this application.
-
             <br>
-
-            <a href="https://ripdead.de5.net">
-                Rip_Dead
-            </a>
-
+            <a href="https://ripdead.de5.net">Rip_Dead</a>
         </div>
-
     </main>
-
 </div>
 
-
+<!-- IMPORTANT: Load shared authentication before authorization code. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="/js/auth.js"></script>
+<script src="/js/global.js"></script>
 
 <script>
 "use strict";
 
+(async function () {
+    const params = new URLSearchParams(window.location.search);
 
-/*
- * ---------------------------------------------------------
- * Authorization request
- * ---------------------------------------------------------
- */
+    const clientId = params.get("client_id");
+    const redirectUri = params.get("redirect_uri");
+    const responseType = params.get("response_type");
+    const requestedScopes = params.get("scope");
+    const state = params.get("state");
 
-const params =
-    new URLSearchParams(window.location.search);
+    const loadingElement = document.getElementById("authorize-loading");
+    const contentElement = document.getElementById("authorize-content");
+    const errorElement = document.getElementById("authorize-error");
+    const appNameElement = document.getElementById("app-name");
+    const appNameTextElement = document.getElementById("app-name-text");
+    const appClientElement = document.getElementById("app-client");
+    const appIconElement = document.getElementById("app-icon");
+    const scopeListElement = document.getElementById("scope-list");
+    const allowButton = document.getElementById("allow-button");
+    const denyButton = document.getElementById("deny-button");
 
-const clientId =
-    params.get("client_id");
+    const SCOPE_DESCRIPTIONS = {
+        profile: "View your basic Rip_Dead Account profile",
+        username: "View your username",
+        display_name: "View your display name",
+        avatar: "View your profile avatar",
+        friends: "Access your Rip_Dead friends",
+        follows: "Access your Rip_Dead follows"
+    };
 
-const redirectUri =
-    params.get("redirect_uri");
+    let currentApp = null;
+    let currentScopes = [];
+    let busy = false;
 
-const responseType =
-    params.get("response_type");
-
-const requestedScopes =
-    params.get("scope");
-
-const state =
-    params.get("state");
-
-
-/*
- * ---------------------------------------------------------
- * DOM
- * ---------------------------------------------------------
- */
-
-const loadingElement =
-    document.getElementById("authorize-loading");
-
-const contentElement =
-    document.getElementById("authorize-content");
-
-const errorElement =
-    document.getElementById("authorize-error");
-
-const appNameElement =
-    document.getElementById("app-name");
-
-const appNameTextElement =
-    document.getElementById("app-name-text");
-
-const appClientElement =
-    document.getElementById("app-client");
-
-const appIconElement =
-    document.getElementById("app-icon");
-
-const scopeListElement =
-    document.getElementById("scope-list");
-
-const allowButton =
-    document.getElementById("allow-button");
-
-const denyButton =
-    document.getElementById("deny-button");
-
-
-/*
- * ---------------------------------------------------------
- * Scope descriptions
- * ---------------------------------------------------------
- */
-
-const SCOPE_DESCRIPTIONS = {
-
-    profile:
-        "View your basic Rip_Dead Account profile",
-
-    username:
-        "View your username",
-
-    display_name:
-        "View your display name",
-
-    avatar:
-        "View your profile avatar",
-
-    friends:
-        "Access your Rip_Dead friends",
-
-    follows:
-        "Access your Rip_Dead follows"
-};
-
-
-/*
- * ---------------------------------------------------------
- * Current application
- * ---------------------------------------------------------
- */
-
-let currentApp = null;
-
-let currentScopes = [];
-
-
-/*
- * ---------------------------------------------------------
- * Error handling
- * ---------------------------------------------------------
- */
-
-function showError(message) {
-
-    loadingElement.hidden = true;
-
-    contentElement.hidden = true;
-
-    errorElement.textContent =
-        message;
-
-    errorElement.classList.add(
-        "visible"
-    );
-}
-
-
-/*
- * ---------------------------------------------------------
- * Redirect helper
- * ---------------------------------------------------------
- */
-
-function redirectWithError(errorCode) {
-
-    if (!redirectUri) {
-
-        window.location.href =
-            "/login/";
-
-        return;
+    function showError(message) {
+        loadingElement.hidden = true;
+        contentElement.hidden = true;
+        errorElement.textContent = message;
+        errorElement.classList.add("visible");
     }
 
-    try {
-
-        const url =
-            new URL(redirectUri);
-
-        url.searchParams.set(
-            "error",
-            errorCode
-        );
-
-        if (state) {
-
-            url.searchParams.set(
-                "state",
-                state
-            );
+    function redirectWithError(errorCode) {
+        if (!redirectUri) {
+            window.location.assign("/login/");
+            return;
         }
 
-        window.location.href =
-            url.toString();
+        try {
+            const url = new URL(redirectUri);
 
-    } catch (error) {
+            // Only redirect to an exact URI registered for this app.
+            if (
+                !currentApp ||
+                !Array.isArray(currentApp.redirect_uris) ||
+                !currentApp.redirect_uris.includes(redirectUri)
+            ) {
+                showError(
+                    "The application's redirect URI could not be verified."
+                );
+                return;
+            }
 
-        console.error(
-            "[Authorize] Redirect error:",
-            error
-        );
+            url.searchParams.set("error", errorCode);
 
-        window.location.href =
-            "/login/";
-    }
-}
+            if (state) {
+                url.searchParams.set("state", state);
+            }
 
-
-/*
- * ---------------------------------------------------------
- * Secure random authorization code
- * ---------------------------------------------------------
- */
-
-function generateAuthorizationCode() {
-
-    const bytes =
-        new Uint8Array(32);
-
-    crypto.getRandomValues(bytes);
-
-    let binary = "";
-
-    for (const byte of bytes) {
-
-        binary +=
-            String.fromCharCode(byte);
+            window.location.assign(url.toString());
+        } catch (error) {
+            console.error("[Authorize] Redirect error:", error);
+            showError("The application's redirect URI is invalid.");
+        }
     }
 
-    return btoa(binary)
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/g, "");
-}
+    function generateAuthorizationCode() {
+        const bytes = new Uint8Array(32);
+        crypto.getRandomValues(bytes);
 
+        let binary = "";
+        for (const byte of bytes) {
+            binary += String.fromCharCode(byte);
+        }
 
-/*
- * ---------------------------------------------------------
- * SHA-256
- * ---------------------------------------------------------
- */
-
-async function sha256(value) {
-
-    const data =
-        new TextEncoder().encode(value);
-
-    const digest =
-        await crypto.subtle.digest(
-            "SHA-256",
-            data
-        );
-
-    const bytes =
-        new Uint8Array(digest);
-
-    let binary = "";
-
-    for (const byte of bytes) {
-
-        binary +=
-            String.fromCharCode(byte);
+        return btoa(binary)
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/g, "");
     }
 
-    return btoa(binary)
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/g, "");
-}
+    async function sha256(value) {
+        const data = new TextEncoder().encode(value);
+        const digest = await crypto.subtle.digest("SHA-256", data);
 
+        let binary = "";
+        for (const byte of new Uint8Array(digest)) {
+            binary += String.fromCharCode(byte);
+        }
 
-/*
- * ---------------------------------------------------------
- * Render scopes
- * ---------------------------------------------------------
- */
+        return btoa(binary)
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/g, "");
+    }
 
-function renderScopes(app) {
+    function renderScopes(app) {
+        scopeListElement.replaceChildren();
 
-    scopeListElement.innerHTML = "";
-
-    const requested =
-        requestedScopes
-            ? requestedScopes
-                .split(" ")
-                .map(scope => scope.trim())
-                .filter(Boolean)
+        const requested = requestedScopes
+            ? requestedScopes.split(" ").map(s => s.trim()).filter(Boolean)
             : ["profile"];
 
-    const allowedScopes =
-        Array.isArray(app.allowed_scopes)
+        const allowedScopes = Array.isArray(app.allowed_scopes)
             ? app.allowed_scopes
             : [];
 
-    const uniqueScopes =
-        [...new Set(requested)];
+        const uniqueScopes = [...new Set(requested)];
 
-    for (const scope of uniqueScopes) {
+        for (const scope of uniqueScopes) {
+            if (!allowedScopes.includes(scope)) {
+                showError(
+                    `This application requested an unsupported permission: ${scope}`
+                );
+                return false;
+            }
 
-        if (!allowedScopes.includes(scope)) {
+            const li = document.createElement("li");
+            const check = document.createElement("span");
+            const text = document.createElement("span");
 
+            check.className = "scope-check";
+            check.textContent = "✓";
+            text.textContent = SCOPE_DESCRIPTIONS[scope] || scope;
+
+            li.append(check, text);
+            scopeListElement.appendChild(li);
+        }
+
+        currentScopes = uniqueScopes;
+        return true;
+    }
+
+    async function loadApplication() {
+        if (!clientId || !redirectUri || !responseType) {
             showError(
-                `This application requested an unsupported permission: ${scope}`
+                "This authorization request is missing a required parameter."
             );
-
-            return false;
+            return null;
         }
 
-        const li =
-            document.createElement("li");
-
-        const check =
-            document.createElement("span");
-
-        check.className =
-            "scope-check";
-
-        check.textContent =
-            "✓";
-
-        const text =
-            document.createElement("span");
-
-        text.textContent =
-            SCOPE_DESCRIPTIONS[scope] ||
-            scope;
-
-        li.appendChild(check);
-
-        li.appendChild(text);
-
-        scopeListElement.appendChild(li);
-    }
-
-    currentScopes =
-        uniqueScopes;
-
-    return true;
-}
-
-
-/*
- * ---------------------------------------------------------
- * Load application from Supabase
- * ---------------------------------------------------------
- */
-
-async function loadApplication() {
-
-    if (!clientId) {
-
-        showError(
-            "This authorization request is missing a client_id."
-        );
-
-        return null;
-    }
-
-    if (!redirectUri) {
-
-        showError(
-            "This authorization request is missing a redirect_uri."
-        );
-
-        return null;
-    }
-
-    if (!responseType) {
-
-        showError(
-            "This authorization request is missing a response_type."
-        );
-
-        return null;
-    }
-
-    if (responseType !== "code") {
-
-        showError(
-            "Unsupported response type. Rip_Dead Account currently supports authorization code requests."
-        );
-
-        return null;
-    }
-
-
-    /*
-     * Get the registered application
-     * from Supabase instead of using
-     * a client-side application registry.
-     */
-
-    const {
-        data,
-        error
-    } = await window.supabaseClient.rpc(
-        "get_oauth_app",
-        {
-            requested_client_id:
-                clientId
+        if (responseType !== "code") {
+            showError(
+                "Unsupported response type. Rip_Dead Account supports authorization code requests."
+            );
+            return null;
         }
-    );
 
+        let parsedRedirect;
 
-    if (error) {
+        try {
+            parsedRedirect = new URL(redirectUri);
+        } catch {
+            showError("The redirect URI is invalid.");
+            return null;
+        }
 
-        console.error(
-            "[Authorize] App lookup failed:",
-            error
+        if (parsedRedirect.protocol !== "https:" &&
+            parsedRedirect.hostname !== "localhost") {
+            showError("The redirect URI must use HTTPS.");
+            return null;
+        }
+
+        if (!window.supabaseClient || !window.getSession) {
+            showError(
+                "Rip_Dead Account authentication failed to initialize. Refresh and try again."
+            );
+            return null;
+        }
+
+        const { data, error } = await window.supabaseClient.rpc(
+            "get_oauth_app",
+            { requested_client_id: clientId }
         );
 
-        showError(
-            "Could not load the application authorization information."
-        );
+        if (error) {
+            console.error("[Authorize] App lookup failed:", error);
+            showError(
+                "Could not load application information. Check the get_oauth_app database function and permissions."
+            );
+            return null;
+        }
 
-        return null;
-    }
+        const app = Array.isArray(data) ? data[0] : data;
 
+        if (!app) {
+            showError("Unknown application.");
+            return null;
+        }
 
-    const app =
-        Array.isArray(data)
-            ? data[0]
-            : data;
-
-
-    if (!app) {
-
-        showError(
-            "Unknown application."
-        );
-
-        return null;
-    }
-
-
-    /*
-     * Exact redirect URI validation.
-     */
-
-    const redirectUris =
-        Array.isArray(app.redirect_uris)
+        const redirectUris = Array.isArray(app.redirect_uris)
             ? app.redirect_uris
             : [];
 
-
-    if (!redirectUris.includes(redirectUri)) {
-
-        showError(
-            "The redirect URI is not registered for this application."
-        );
-
-        return null;
-    }
-
-
-    /*
-     * Render requested scopes.
-     */
-
-    if (!renderScopes(app)) {
-
-        return null;
-    }
-
-
-    return app;
-}
-
-
-/*
- * ---------------------------------------------------------
- * Display application
- * ---------------------------------------------------------
- */
-
-function displayApplication(app) {
-
-    currentApp =
-        app;
-
-    appNameElement.textContent =
-        app.name ||
-        "Application";
-
-    appNameTextElement.textContent =
-        app.name ||
-        "This application";
-
-    appClientElement.textContent =
-        `Client ID: ${clientId}`;
-
-
-    /*
-     * Application icon
-     */
-
-    appIconElement.innerHTML = "";
-
-    if (
-        typeof app.icon_url === "string" &&
-        app.icon_url.trim() !== ""
-    ) {
-
-        const image =
-            document.createElement("img");
-
-        image.src =
-            app.icon_url;
-
-        image.alt = "";
-
-        image.onerror = () => {
-
-            appIconElement.textContent =
-                "RD";
-        };
-
-        appIconElement.appendChild(
-            image
-        );
-
-    } else {
-
-        appIconElement.textContent =
-            "RD";
-    }
-
-
-    loadingElement.hidden =
-        true;
-
-    contentElement.hidden =
-        false;
-}
-
-
-/*
- * ---------------------------------------------------------
- * Authorize application
- * ---------------------------------------------------------
- */
-
-async function authorizeApplication() {
-
-    if (allowButton.disabled) {
-
-        return;
-    }
-
-
-    allowButton.disabled =
-        true;
-
-    denyButton.disabled =
-        true;
-
-    allowButton.textContent =
-        "Authorizing...";
-
-
-    try {
-
-        /*
-         * Make sure the user is logged in.
-         */
-
-        const session =
-            await window.getSession();
-
-
-        if (!session) {
-
-            const currentUrl =
-                window.location.href;
-
-            window.location.href =
-                `/login/?redirect=${encodeURIComponent(currentUrl)}`;
-
-            return;
+        if (!redirectUris.includes(redirectUri)) {
+            showError(
+                "The redirect URI is not registered for this application."
+            );
+            return null;
         }
 
+        if (!renderScopes(app)) {
+            return null;
+        }
 
-        /*
-         * Generate the raw authorization code.
-         *
-         * This code is sent to the application.
-         * Only its SHA-256 hash is stored
-         * in the database.
-         */
+        return app;
+    }
 
-        const authorizationCode =
-            generateAuthorizationCode();
+    function displayApplication(app) {
+        currentApp = app;
 
+        appNameElement.textContent = app.name || "Application";
+        appNameTextElement.textContent = app.name || "This application";
+        appClientElement.textContent = `Client ID: ${clientId}`;
 
-        const codeHash =
-            await sha256(
-                authorizationCode
-            );
+        appIconElement.replaceChildren();
 
+        if (typeof app.icon_url === "string" && app.icon_url.trim()) {
+            try {
+                const iconUrl = new URL(app.icon_url);
 
-        /*
-         * Ask Supabase to create the
-         * short-lived authorization code.
-         *
-         * The SQL function verifies:
-         *
-         * - logged-in user
-         * - client ID
-         * - redirect URI
-         * - allowed scopes
-         */
-
-        const {
-            data,
-            error
-        } = await window.supabaseClient.rpc(
-            "create_oauth_authorization_code",
-            {
-                requested_client_id:
-                    clientId,
-
-                requested_redirect_uri:
-                    redirectUri,
-
-                requested_scopes:
-                    currentScopes,
-
-                requested_code_hash:
-                    codeHash
+                if (iconUrl.protocol === "https:") {
+                    const image = document.createElement("img");
+                    image.src = iconUrl.href;
+                    image.alt = "";
+                    image.onerror = () => {
+                        appIconElement.replaceChildren();
+                        appIconElement.textContent = "RD";
+                    };
+                    appIconElement.appendChild(image);
+                } else {
+                    appIconElement.textContent = "RD";
+                }
+            } catch {
+                appIconElement.textContent = "RD";
             }
-        );
-
-
-        if (error) {
-
-            console.error(
-                "[Authorize] Code creation failed:",
-                error
-            );
-
-            showError(
-                error.message ||
-                "Could not authorize this application."
-            );
-
-            return;
+        } else {
+            appIconElement.textContent = "RD";
         }
 
-
-        if (data !== true) {
-
-            console.error(
-                "[Authorize] Unexpected authorization response:",
-                data
-            );
-
-            showError(
-                "The authorization server returned an unexpected response."
-            );
-
-            return;
-        }
-
-
-        /*
-         * Build the application's callback URL.
-         */
-
-        const callbackUrl =
-            new URL(redirectUri);
-
-
-        callbackUrl.searchParams.set(
-            "code",
-            authorizationCode
-        );
-
-
-        if (state) {
-
-            callbackUrl.searchParams.set(
-                "state",
-                state
-            );
-        }
-
-
-        /*
-         * Authorization succeeded.
-         */
-
-        console.log(
-            "[Authorize] Authorization successful:",
-            clientId
-        );
-
-
-        window.location.href =
-            callbackUrl.toString();
-
-    } catch (error) {
-
-        console.error(
-            "[Authorize] Authorization error:",
-            error
-        );
-
-        showError(
-            "Something went wrong while authorizing this application."
-        );
-
-    } finally {
-
-        allowButton.disabled =
-            false;
-
-        denyButton.disabled =
-            false;
-
-        allowButton.textContent =
-            "Allow";
-    }
-}
-
-
-/*
- * ---------------------------------------------------------
- * Deny authorization
- * ---------------------------------------------------------
- */
-
-function denyAuthorization() {
-
-    if (denyButton.disabled) {
-
-        return;
+        loadingElement.hidden = true;
+        contentElement.hidden = false;
     }
 
-    redirectWithError(
-        "access_denied"
-    );
-}
+    async function authorizeApplication() {
+        if (busy) return;
 
+        busy = true;
+        allowButton.disabled = true;
+        denyButton.disabled = true;
+        allowButton.textContent = "Authorizing...";
 
-/*
- * ---------------------------------------------------------
- * Button events
- * ---------------------------------------------------------
- */
+        try {
+            const session = await window.getSession();
 
-allowButton.addEventListener(
-    "click",
-    authorizeApplication
-);
+            if (!session) {
+                const returnTo = window.location.pathname + window.location.search;
+                window.location.assign(
+                    "/login/?redirect=" + encodeURIComponent(returnTo)
+                );
+                return;
+            }
 
-denyButton.addEventListener(
-    "click",
-    denyAuthorization
-);
+            // Apply the existing account restrictions before granting access.
+            if (typeof window.enforceBans === "function") {
+                await window.enforceBans(session);
+            }
 
+            if (typeof window.checkAccountBan === "function") {
+                await window.checkAccountBan(session);
+            }
 
-/*
- * ---------------------------------------------------------
- * Initialization
- * ---------------------------------------------------------
- */
+            // Ensure the session still exists after restriction checks.
+            const currentSession = await window.getSession();
 
-async function initializeAuthorization() {
+            if (!currentSession) {
+                showError("Your session has expired. Please log in again.");
+                return;
+            }
+
+            const authorizationCode = generateAuthorizationCode();
+            const codeHash = await sha256(authorizationCode);
+
+            const { data, error } = await window.supabaseClient.rpc(
+                "create_oauth_authorization_code",
+                {
+                    requested_client_id: clientId,
+                    requested_redirect_uri: redirectUri,
+                    requested_scopes: currentScopes,
+                    requested_code_hash: codeHash
+                }
+            );
+
+            if (error) {
+                console.error("[Authorize] Code creation failed:", error);
+                showError(
+                    error.message ||
+                    "Could not authorize this application. Check the database function and permissions."
+                );
+                return;
+            }
+
+            if (data !== true) {
+                console.error(
+                    "[Authorize] Unexpected authorization response:",
+                    data
+                );
+                showError(
+                    "The authorization server returned an unexpected response."
+                );
+                return;
+            }
+
+            const callbackUrl = new URL(redirectUri);
+            callbackUrl.searchParams.set("code", authorizationCode);
+
+            if (state) {
+                callbackUrl.searchParams.set("state", state);
+            }
+
+            window.location.assign(callbackUrl.toString());
+        } catch (error) {
+            console.error("[Authorize] Authorization error:", error);
+            showError(
+                "Something went wrong while authorizing this application. Check the browser console."
+            );
+        } finally {
+            busy = false;
+            allowButton.disabled = false;
+            denyButton.disabled = false;
+            allowButton.textContent = "Allow";
+        }
+    }
+
+    function denyAuthorization() {
+        if (busy) return;
+        redirectWithError("access_denied");
+    }
+
+    allowButton.addEventListener("click", authorizeApplication);
+    denyButton.addEventListener("click", denyAuthorization);
 
     try {
+        const app = await loadApplication();
 
-        /*
-         * Load and validate application.
-         */
+        if (!app) return;
 
-        const app =
-            await loadApplication();
-
-
-        if (!app) {
-
-            return;
-        }
-
-
-        /*
-         * Make sure the user is
-         * authenticated.
-         */
-
-        const session =
-            await window.getSession();
-
+        const session = await window.getSession();
 
         if (!session) {
-
-            const currentUrl =
-                window.location.href;
-
-            window.location.href =
-                `/login/?redirect=${encodeURIComponent(currentUrl)}`;
-
+            const returnTo = window.location.pathname + window.location.search;
+            window.location.assign(
+                "/login/?redirect=" + encodeURIComponent(returnTo)
+            );
             return;
         }
 
+        // Existing ban checks also run when opening the authorization page.
+        if (typeof window.enforceBans === "function") {
+            await window.enforceBans(session);
+        }
 
-        /*
-         * Show authorization screen.
-         */
+        if (typeof window.checkAccountBan === "function") {
+            await window.checkAccountBan(session);
+        }
+
+        if (!await window.getSession()) {
+            window.location.assign("/login/");
+            return;
+        }
 
         displayApplication(app);
-
     } catch (error) {
-
-        console.error(
-            "[Authorize] Initialization error:",
-            error
-        );
-
+        console.error("[Authorize] Initialization error:", error);
         showError(
-            "Something went wrong while loading the authorization request."
+            "Something went wrong while loading the authorization request. Check the browser console."
         );
     }
-}
-
-
-initializeAuthorization();
+})();
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/global.js"></script>
 </body>
 </html>
